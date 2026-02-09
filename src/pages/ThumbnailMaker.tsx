@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import Konva from 'konva';
 import { Panel, Group, Separator } from 'react-resizable-panels';
 import { ThumbnailCanvas } from '../components/thumbnail/ThumbnailCanvas';
 import { Toolbar } from '../components/thumbnail/Toolbar';
@@ -14,7 +15,7 @@ import { Input } from '../components/ui/inputs/Input';
 import { Slider } from '../components/ui/inputs/Slider';
 import { ZoomIn, ZoomOut, RotateCcw, ArrowUpToLine, ArrowDownToLine, ChevronUp, ChevronDown } from 'lucide-react';
 import { LayersPanel } from '../components/thumbnail/LayersPanel';
-import { cn } from '../lib/utils';
+import { cn, downloadFile } from '../lib/utils';
 import { useUIStore } from '../store/uiStore';
 
 export function ThumbnailMaker() {
@@ -27,6 +28,7 @@ export function ThumbnailMaker() {
     const [leftTab, setLeftTab] = useState<'templates' | 'layers'>('templates');
     const [zoom, setZoom] = useState(1);
     const { isNavVisible } = useUIStore();
+    const stageRef = useRef<Konva.Stage>(null);
 
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -122,7 +124,20 @@ export function ThumbnailMaker() {
     };
 
     const handleExport = () => {
-        alert('Export functionality will be implemented in the next step!');
+        if (!stageRef.current) return;
+
+        // Deselect any selected element before export
+        setSelectedId(null);
+
+        // Wait for a tick for Transformer to disappear
+        setTimeout(() => {
+            const uri = stageRef.current?.toDataURL({
+                pixelRatio: 3, // High quality export
+            });
+            if (uri) {
+                downloadFile(uri, 'kenichi-thumbnail.png');
+            }
+        }, 50);
     };
 
     const selectedElement = elements.find((el) => el.id === selectedId) || null;
@@ -135,6 +150,7 @@ export function ThumbnailMaker() {
             )}>
                 <div className="flex-1 w-full overflow-hidden relative">
                     <ThumbnailCanvas
+                        ref={stageRef}
                         elements={elements}
                         selectedId={selectedId}
                         onSelect={setSelectedId}
@@ -382,6 +398,7 @@ export function ThumbnailMaker() {
                 <Panel defaultSize="60" minSize="40">
                     <div className="w-full h-full relative flex flex-col">
                         <ThumbnailCanvas
+                            ref={stageRef}
                             elements={elements}
                             selectedId={selectedId}
                             onSelect={setSelectedId}

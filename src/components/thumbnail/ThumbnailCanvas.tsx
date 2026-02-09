@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, forwardRef } from 'react';
 import { Stage, Layer, Rect, Circle, Text, Image as KonvaImage, Transformer } from 'react-konva';
 import useImage from 'use-image';
 import type { ThumbnailElement } from '../../types/thumbnail';
@@ -18,7 +18,7 @@ const URLImage = ({ src, ...props }: any) => {
     return <KonvaImage image={image} {...props} />;
 };
 
-export function ThumbnailCanvas({ elements, selectedId, onSelect, onChange, background, zoom }: ThumbnailCanvasProps) {
+export const ThumbnailCanvas = forwardRef<Konva.Stage, ThumbnailCanvasProps>(({ elements, selectedId, onSelect, onChange, background, zoom }, ref) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [scale, setScale] = useState(1);
 
@@ -73,6 +73,7 @@ export function ThumbnailCanvas({ elements, selectedId, onSelect, onChange, back
                 }}
             >
                 <Stage
+                    ref={ref}
                     width={1280 * scale}
                     height={720 * scale}
                     scaleX={scale}
@@ -150,7 +151,7 @@ export function ThumbnailCanvas({ elements, selectedId, onSelect, onChange, back
             </div>
         </div>
     );
-}
+});
 
 const TransformerComponent = ({ selectedId }: { selectedId: string | null }) => {
     const trRef = useRef<Konva.Transformer>(null);

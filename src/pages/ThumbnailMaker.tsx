@@ -12,7 +12,7 @@ import { ColorPicker } from '../components/ui/inputs/ColorPicker';
 import { Label } from '../components/ui/inputs/Label';
 import { Input } from '../components/ui/inputs/Input';
 import { Slider } from '../components/ui/inputs/Slider';
-import { ZoomIn, ZoomOut, RotateCcw, ArrowUpToLine, ArrowDownToLine, ChevronUp, ChevronDown, Layers as LayersIcon, LayoutGrid } from 'lucide-react';
+import { ZoomIn, ZoomOut, RotateCcw, ArrowUpToLine, ArrowDownToLine, ChevronUp, ChevronDown } from 'lucide-react';
 import { LayersPanel } from '../components/thumbnail/LayersPanel';
 import { cn } from '../lib/utils';
 
@@ -327,7 +327,7 @@ export function ThumbnailMaker() {
                                                 : "text-text-muted hover:text-text-main hover:bg-white/5"
                                         )}
                                     >
-                                        <LayoutGrid size={14} />
+                                        {/* <LayoutGrid size={14} /> */}
                                         Templates
                                     </button>
                                     <button
@@ -339,7 +339,7 @@ export function ThumbnailMaker() {
                                                 : "text-text-muted hover:text-text-main hover:bg-white/5"
                                         )}
                                     >
-                                        <LayersIcon size={14} />
+                                        {/* <LayersIcon size={14} /> */}
                                         Layers
                                     </button>
                                 </div>

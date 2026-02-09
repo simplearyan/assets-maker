@@ -1,9 +1,11 @@
 import { Outlet, useLocation } from 'react-router-dom';
 import { NavPill } from '../ui/NavPill';
 import { cn } from '../../lib/utils';
+import { useUIStore } from '../../store/uiStore';
 
 export function Layout() {
     const location = useLocation();
+    const { isNavVisible } = useUIStore();
     const isFullWidth = ['/thumbnail-maker', '/logo-studio', '/editor'].some(path => location.pathname.endsWith(path));
 
     return (
@@ -14,12 +16,13 @@ export function Layout() {
             <div className="bg-mesh" />
 
             {/* Navigation */}
-            <NavPill />
+            {isNavVisible && <NavPill />}
 
             {/* Main Content */}
             <main
                 className={cn(
-                    "relative z-10 pt-24 min-h-screen flex flex-col",
+                    "relative z-10 min-h-screen flex flex-col transition-all duration-300",
+                    isNavVisible ? "pt-24" : "pt-0",
                     isFullWidth ? "px-0 md:px-4" : "pb-12 px-4 md:px-8 max-w-7xl mx-auto"
                 )}
             >

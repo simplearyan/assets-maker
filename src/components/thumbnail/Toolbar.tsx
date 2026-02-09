@@ -1,6 +1,7 @@
-import { Type, Image as ImageIcon, Square, Circle as CircleIcon, LayoutTemplate, Download } from 'lucide-react';
+import { Type, Image as ImageIcon, Square, Circle as CircleIcon, LayoutTemplate, Download, Maximize, Minimize } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { useRef } from 'react';
+import { useUIStore } from '../../store/uiStore';
 
 interface ToolbarProps {
     onAddText: () => void;
@@ -12,6 +13,7 @@ interface ToolbarProps {
 
 export function Toolbar({ onAddText, onAddShape, onUploadImage, onOpenTemplates, onExport }: ToolbarProps) {
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const { isNavVisible, toggleNavVisible } = useUIStore();
 
     return (
         <div className="h-16 bg-surface backdrop-blur-md border-t border-border rounded-lg flex items-center justify-center gap-4 px-4 z-50">
@@ -48,6 +50,11 @@ export function Toolbar({ onAddText, onAddShape, onUploadImage, onOpenTemplates,
             </Button>
 
             <div className="w-px h-8 bg-border mx-2" />
+
+            <Button variant="ghost" onClick={toggleNavVisible} title={isNavVisible ? "Focus Mode (Hide Nav)" : "Show Navigation"}>
+                {isNavVisible ? <Minimize size={20} /> : <Maximize size={20} />}
+                <span className="hidden xl:inline ml-2">{isNavVisible ? "Focus" : "Nav"}</span>
+            </Button>
 
             <Button variant="primary" onClick={onExport} title="Export">
                 <Download size={20} />

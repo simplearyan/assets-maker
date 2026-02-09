@@ -10,7 +10,7 @@ const Editor = () => <div className="text-2xl font-bold p-10">Image Editor (Comi
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/assets-maker">
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />

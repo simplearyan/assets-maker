@@ -62,12 +62,12 @@ export function ThumbnailCanvas({ elements, selectedId, onSelect, onChange, back
     };
 
     return (
-        <div ref={containerRef} className="w-full h-full flex items-center justify-center bg-zinc-900/50 overflow-hidden">
+        <div ref={containerRef} className="w-full h-full flex items-center justify-center bg-bg/50 overflow-hidden">
             <div
+                className="shadow-[0_0_30px_rgba(0,0,0,0.1)] dark:shadow-[0_0_50px_rgba(0,0,0,0.5)] transition-shadow duration-500"
                 style={{
                     width: 1280 * scale,
                     height: 720 * scale,
-                    boxShadow: '0 0 50px rgba(0,0,0,0.5)'
                 }}
             >
                 <Stage

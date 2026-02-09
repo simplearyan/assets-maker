@@ -258,18 +258,18 @@ export function ThumbnailMaker() {
         <div className="h-[calc(100vh-6rem)] w-full bg-bg font-sans text-text-main">
             <Group direction="horizontal">
                 {/* Left Sidebar */}
-                <Panel defaultSize="20" minSize="15" maxSize="30" className="bg-zinc-950 border-r border-white/5 hidden lg:block">
+                <Panel defaultSize="20" minSize="15" maxSize="30" className="bg-surface border-r border-border hidden lg:block">
                     <div className="p-4 h-full overflow-y-auto">
                         <h2 className="text-sm font-bold uppercase text-text-muted mb-4">Templates</h2>
                         <div className="grid grid-cols-2 gap-2">
                             {[1, 2, 3, 4, 5, 6].map((i) => (
-                                <div key={i} className="aspect-video bg-white/5 rounded hover:bg-white/10 cursor-pointer border border-white/5 hover:border-accent/50 transition-colors" />
+                                <div key={i} className="aspect-video bg-surface-card rounded hover:bg-border/50 cursor-pointer border border-border hover:border-accent/50 transition-colors" />
                             ))}
                         </div>
                     </div>
                 </Panel>
 
-                <Separator className="w-1 bg-white/5 hover:bg-accent/50 transition-colors cursor-col-resize" />
+                <Separator className="w-1 bg-border hover:bg-accent/50 transition-colors cursor-col-resize" />
 
                 {/* Center Canvas */}
                 <Panel defaultSize="60" minSize="40">
@@ -294,10 +294,10 @@ export function ThumbnailMaker() {
                     </div>
                 </Panel>
 
-                <Separator className="w-1 bg-white/5 hover:bg-accent/50 transition-colors cursor-col-resize" />
+                <Separator className="w-1 bg-border hover:bg-accent/50 transition-colors cursor-col-resize" />
 
                 {/* Right Properties Panel */}
-                <Panel defaultSize="20" minSize="20" maxSize="30" className="bg-zinc-950 border-l border-white/5">
+                <Panel defaultSize="20" minSize="20" maxSize="30" className="bg-surface border-l border-border">
                     <PropertiesPanel
                         element={selectedElement}
                         onChange={handleUpdateElement}

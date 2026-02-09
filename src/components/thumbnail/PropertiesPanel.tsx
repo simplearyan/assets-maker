@@ -34,7 +34,7 @@ export function PropertiesPanel({ element, onChange, onDelete, onDuplicate, onCl
     };
 
     return (
-        <div className="p-4 space-y-6 h-full overflow-y-auto bg-zinc-950 text-white">
+        <div className="p-4 space-y-6 h-full overflow-y-auto bg-surface text-text-main">
             <div className="flex items-center justify-between mb-2">
                 <h3 className="text-lg font-semibold capitalize">{element.type} Properties</h3>
                 {onClose && (
@@ -49,7 +49,7 @@ export function PropertiesPanel({ element, onChange, onDelete, onDuplicate, onCl
                 <Button variant="glass" size="sm" onClick={() => onDuplicate(element.id)}>
                     <Copy size={16} className="mr-2" /> Duplicate
                 </Button>
-                <Button variant="glass" size="sm" className="border-red-500/20 text-red-400 hover:text-red-300 hover:bg-red-500/10" onClick={() => onDelete(element.id)}>
+                <Button variant="glass" size="sm" className="border-red-500/20 text-red-500 hover:text-red-600 hover:bg-red-500/10" onClick={() => onDelete(element.id)}>
                     <Trash2 size={16} className="mr-2" /> Delete
                 </Button>
             </div>
@@ -67,7 +67,7 @@ export function PropertiesPanel({ element, onChange, onDelete, onDuplicate, onCl
                 </div>
             )}
 
-            <hr className="border-white/10" />
+            <hr className="border-border" />
 
             {/* Position & Size */}
             <div className="space-y-3">

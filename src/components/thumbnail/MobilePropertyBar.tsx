@@ -61,12 +61,12 @@ export function MobilePropertyBar({
     const allTools = [...specificTools, ...commonTools];
 
     return (
-        <div className="h-16 bg-surface backdrop-blur-xl border-t border-white/10 flex items-center px-2 z-[60] overflow-x-auto no-scrollbar gap-2" ref={scrollRef}>
-            <Button variant="ghost" size="icon" onClick={onClose} className="mr-2 text-white/50 shrink-0">
+        <div className="h-16 bg-surface backdrop-blur-xl border-t border-border flex items-center px-2 z-[60] overflow-x-auto no-scrollbar gap-2" ref={scrollRef}>
+            <Button variant="ghost" size="icon" onClick={onClose} className="mr-2 text-text-muted shrink-0">
                 <X size={20} />
             </Button>
 
-            <div className="w-px h-8 bg-white/10 shrink-0 mx-1" />
+            <div className="w-px h-8 bg-border shrink-0 mx-1" />
 
             {allTools.map((tool) => (
                 <button
@@ -74,7 +74,7 @@ export function MobilePropertyBar({
                     onClick={() => onTabChange(activeTab === tool.id ? null : (tool.id as PropertyTab))}
                     className={cn(
                         "flex flex-col items-center justify-center w-16 h-full gap-1 rounded-lg transition-colors shrink-0",
-                        activeTab === tool.id ? "text-accent bg-white/5" : "text-text-muted hover:text-white hover:bg-white/5"
+                        activeTab === tool.id ? "text-accent bg-accent/10" : "text-text-muted hover:text-text-main hover:bg-text-main/5"
                     )}
                 >
                     <tool.icon size={20} />
@@ -82,11 +82,11 @@ export function MobilePropertyBar({
                 </button>
             ))}
 
-            <div className="w-px h-8 bg-white/10 shrink-0 mx-1" />
+            <div className="w-px h-8 bg-border shrink-0 mx-1" />
 
             <button
                 onClick={onDuplicate}
-                className="flex flex-col items-center justify-center w-14 h-full gap-1 rounded-lg text-text-muted hover:text-white shrink-0"
+                className="flex flex-col items-center justify-center w-14 h-full gap-1 rounded-lg text-text-muted hover:text-text-main shrink-0"
             >
                 <Copy size={18} />
                 <span className="text-[10px]">Copy</span>
@@ -94,7 +94,7 @@ export function MobilePropertyBar({
 
             <button
                 onClick={onDelete}
-                className="flex flex-col items-center justify-center w-14 h-full gap-1 rounded-lg text-red-400 hover:text-red-300 shrink-0"
+                className="flex flex-col items-center justify-center w-14 h-full gap-1 rounded-lg text-red-400 hover:text-red-500 hover:bg-red-500/10 shrink-0"
             >
                 <Trash2 size={18} />
                 <span className="text-[10px]">Del</span>

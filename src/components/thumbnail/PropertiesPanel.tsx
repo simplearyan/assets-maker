@@ -93,8 +93,8 @@ export function PropertiesPanel({ element, onChange, onDelete, onDuplicate, onCl
                     <div>
                         <Label>Font Size ({element.fontSize}px)</Label>
                         <Slider
-                            min="12"
-                            max="200"
+                            min={12}
+                            max={200}
                             value={element.fontSize || 24}
                             onChange={(e) => handleChange('fontSize', Number(e.target.value))}
                         />
@@ -129,8 +129,8 @@ export function PropertiesPanel({ element, onChange, onDelete, onDuplicate, onCl
                     <div>
                         <Label>Stroke Width ({element.strokeWidth || 0}px)</Label>
                         <Slider
-                            min="0"
-                            max="20"
+                            min={0}
+                            max={20}
                             value={element.strokeWidth || 0}
                             onChange={(e) => handleChange('strokeWidth', Number(e.target.value))}
                         />
@@ -142,9 +142,9 @@ export function PropertiesPanel({ element, onChange, onDelete, onDuplicate, onCl
             <div>
                 <Label>Opacity ({Math.round((element.opacity || 1) * 100)}%)</Label>
                 <Slider
-                    min="0"
-                    max="1"
-                    step="0.01"
+                    min={0}
+                    max={1}
+                    step={0.01}
                     value={element.opacity !== undefined ? element.opacity : 1}
                     onChange={(e) => handleChange('opacity', Number(e.target.value))}
                 />

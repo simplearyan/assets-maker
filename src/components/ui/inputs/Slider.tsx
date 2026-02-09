@@ -1,29 +1,46 @@
-import { InputHTMLAttributes, forwardRef } from 'react';
+import { forwardRef } from 'react';
+import * as SliderPrimitive from '@radix-ui/react-slider';
 import { cn } from '../../../lib/utils';
 
-interface SliderProps extends InputHTMLAttributes<HTMLInputElement> {
-    label?: string;
-    valueDisplay?: string | number;
+interface SliderProps {
+    value: number;
+    min?: number;
+    max?: number;
+    step?: number;
+    onChange: (event: { target: { value: number } }) => void;
+    className?: string;
 }
 
-export const Slider = forwardRef<HTMLInputElement, SliderProps>(
-    ({ className, label, valueDisplay, ...props }, ref) => {
+export const Slider = forwardRef<HTMLSpanElement, SliderProps>(
+    ({ className, min = 0, max = 100, step = 1, value, onChange, ...props }, ref) => {
+        const handleValueChange = (values: number[]) => {
+            onChange({ target: { value: values[0] } });
+        };
+
         return (
-            <div className="relative flex items-center w-full">
-                <input
-                    type="range"
-                    className={cn(
-                        "w-full h-1.5 bg-white/10 rounded-full appearance-none cursor-pointer focus:outline-none focus:ring-1 focus:ring-accent/50",
-                        "[&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-accent [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:transition-transform [&::-webkit-slider-thumb]:hover:scale-110",
-                        "[&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:bg-accent [&::-moz-range-thumb]:shadow-lg [&::-moz-range-thumb]:transition-transform [&::-moz-range-thumb]:hover:scale-110",
-                        className
-                    )}
-                    ref={ref}
-                    {...props}
+            <SliderPrimitive.Root
+                ref={ref}
+                className={cn(
+                    "relative flex items-center select-none touch-none w-full h-5 cursor-pointer group",
+                    className
+                )}
+                min={min}
+                max={max}
+                step={step}
+                value={[value]}
+                onValueChange={handleValueChange}
+                {...props}
+            >
+                <SliderPrimitive.Track className="relative bg-white/10 grow rounded-full h-1.5 overflow-hidden group-hover:bg-white/20 transition-colors">
+                    <SliderPrimitive.Range className="absolute bg-accent h-full" />
+                </SliderPrimitive.Track>
+                <SliderPrimitive.Thumb
+                    className="block w-4 h-4 bg-white rounded-full shadow-lg ring-offset-background transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 group-hover:scale-110 bg-accent text-accent"
+                    aria-label="Slider"
                 />
-            </div>
+            </SliderPrimitive.Root>
         );
     }
 );
 
-Slider.displayName = "Slider";
+Slider.displayName = SliderPrimitive.Root.displayName;

@@ -12,7 +12,9 @@ import { ColorPicker } from '../components/ui/inputs/ColorPicker';
 import { Label } from '../components/ui/inputs/Label';
 import { Input } from '../components/ui/inputs/Input';
 import { Slider } from '../components/ui/inputs/Slider';
-import { ZoomIn, ZoomOut, RotateCcw, ArrowUpToLine, ArrowDownToLine, ChevronUp, ChevronDown } from 'lucide-react';
+import { ZoomIn, ZoomOut, RotateCcw, ArrowUpToLine, ArrowDownToLine, ChevronUp, ChevronDown, Layers as LayersIcon, LayoutGrid } from 'lucide-react';
+import { LayersPanel } from '../components/thumbnail/LayersPanel';
+import { cn } from '../lib/utils';
 
 export function ThumbnailMaker() {
     const [elements, setElements] = useState<ThumbnailElement[]>([]);
@@ -21,6 +23,7 @@ export function ThumbnailMaker() {
     const [isMobile, setIsMobile] = useState(false);
     const [activeTab, setActiveTab] = useState<PropertyTab>(null);
     const [showTemplates, setShowTemplates] = useState(true);
+    const [leftTab, setLeftTab] = useState<'templates' | 'layers'>('templates');
     const [zoom, setZoom] = useState(1);
 
     useEffect(() => {
@@ -112,7 +115,6 @@ export function ThumbnailMaker() {
         const file = e.target.files?.[0];
         if (file) {
             const url = URL.createObjectURL(file);
-            // In a real app, you'd upload this to a server or convert to base64
             handleAddElement('image', url);
         }
     };
@@ -125,8 +127,8 @@ export function ThumbnailMaker() {
 
     if (isMobile) {
         return (
-            <div className="h-[calc(100vh-6rem)] w-full flex flex-col relative bg-bg">
-                <div className="flex-1 relative overflow-hidden">
+            <div className="h-[calc(100vh-6rem)] w-full bg-bg font-sans text-text-main flex flex-col relative overflow-hidden">
+                <div className="flex-1 w-full overflow-hidden relative">
                     <ThumbnailCanvas
                         elements={elements}
                         selectedId={selectedId}
@@ -135,17 +137,30 @@ export function ThumbnailMaker() {
                         background={background}
                         zoom={zoom}
                     />
+
+                    {/* Mobile Zoom Controls */}
+                    <div className="absolute bottom-4 left-4 flex items-center gap-2 bg-surface/90 backdrop-blur-md border border-border p-1 rounded-lg shadow-lg z-20 scale-75 origin-bottom-left">
+                        <Button variant="ghost" size="sm" onClick={() => setZoom(Math.max(0.1, zoom - 0.1))} className="h-8 w-8 p-0">
+                            <ZoomOut size={16} />
+                        </Button>
+                        <span className="text-xs font-mono w-10 text-center">{Math.round(zoom * 100)}%</span>
+                        <Button variant="ghost" size="sm" onClick={() => setZoom(Math.min(3, zoom + 0.1))} className="h-8 w-8 p-0">
+                            <ZoomIn size={16} />
+                        </Button>
+                    </div>
+
+                    <div className="absolute bottom-8 left-1/2 -translate-x-1/2 shadow-2xl rounded-full scale-90">
+                        <Toolbar
+                            onAddText={() => handleAddElement('text')}
+                            onAddShape={(type) => type === 'rect' ? handleAddElement('rect') : handleAddElement('circle')}
+                            onUploadImage={handleUploadImage}
+                            onOpenTemplates={() => setShowTemplates(!showTemplates)}
+                            onExport={handleExport}
+                        />
+                    </div>
                 </div>
 
-                {!selectedElement ? (
-                    <Toolbar
-                        onAddText={() => handleAddElement('text')}
-                        onAddShape={(type) => type === 'rect' ? handleAddElement('rect') : handleAddElement('circle')}
-                        onUploadImage={handleUploadImage}
-                        onOpenTemplates={() => { }}
-                        onExport={handleExport}
-                    />
-                ) : (
+                {selectedElement && (
                     <MobilePropertyBar
                         element={selectedElement}
                         activeTab={activeTab}
@@ -156,7 +171,6 @@ export function ThumbnailMaker() {
                     />
                 )}
 
-                {/* Mobile Property Decks */}
                 {selectedElement && (
                     <MobilePropertyDeck
                         isOpen={!!activeTab}
@@ -266,6 +280,7 @@ export function ThumbnailMaker() {
                                 </div>
                             </div>
                         )}
+
                         {activeTab === 'layers' && (
                             <div className="grid grid-cols-4 gap-2 py-4">
                                 <Button variant="glass" className="flex flex-col gap-2 h-20" onClick={() => handleReorderElement(selectedElement.id, 'front')}>
@@ -300,12 +315,54 @@ export function ThumbnailMaker() {
                 {showTemplates && (
                     <>
                         <Panel defaultSize="20" minSize="15" maxSize="30" className="bg-surface border-r border-border rounded-l-lg hidden lg:block overflow-hidden shadow-sm z-10">
-                            <div className="p-4 h-full overflow-y-auto">
-                                <h2 className="text-sm font-bold uppercase text-text-muted mb-4">Templates</h2>
-                                <div className="grid grid-cols-2 gap-2">
-                                    {[1, 2, 3, 4, 5, 6].map((i) => (
-                                        <div key={i} className="aspect-video bg-surface-card rounded hover:bg-border/50 cursor-pointer border border-border hover:border-accent/50 transition-colors" />
-                                    ))}
+                            <div className="flex flex-col h-full">
+                                {/* Sidebar Tabs */}
+                                <div className="flex items-center p-1 bg-surface-card/50 border-b border-border gap-1">
+                                    <button
+                                        onClick={() => setLeftTab('templates')}
+                                        className={cn(
+                                            "flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-[11px] font-bold uppercase transition-all",
+                                            leftTab === 'templates'
+                                                ? "bg-surface text-accent shadow-sm"
+                                                : "text-text-muted hover:text-text-main hover:bg-white/5"
+                                        )}
+                                    >
+                                        <LayoutGrid size={14} />
+                                        Templates
+                                    </button>
+                                    <button
+                                        onClick={() => setLeftTab('layers')}
+                                        className={cn(
+                                            "flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-[11px] font-bold uppercase transition-all",
+                                            leftTab === 'layers'
+                                                ? "bg-surface text-accent shadow-sm"
+                                                : "text-text-muted hover:text-text-main hover:bg-white/5"
+                                        )}
+                                    >
+                                        <LayersIcon size={14} />
+                                        Layers
+                                    </button>
+                                </div>
+
+                                <div className="flex-1 overflow-y-auto">
+                                    {leftTab === 'templates' ? (
+                                        <div className="p-4">
+                                            <h2 className="text-sm font-bold uppercase text-text-muted mb-4 sr-only">Templates</h2>
+                                            <div className="grid grid-cols-2 gap-2">
+                                                {[1, 2, 3, 4, 5, 6].map((i) => (
+                                                    <div key={i} className="aspect-video bg-surface-card rounded hover:bg-border/50 cursor-pointer border border-border hover:border-accent/50 transition-colors" />
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <LayersPanel
+                                            elements={elements}
+                                            selectedId={selectedId}
+                                            onSelect={setSelectedId}
+                                            onReorder={handleReorderElement}
+                                            onDelete={handleDeleteElement}
+                                        />
+                                    )}
                                 </div>
                             </div>
                         </Panel>

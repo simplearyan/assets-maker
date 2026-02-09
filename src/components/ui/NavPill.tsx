@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { Home, Palette, Wand2, RefreshCcw, Image, Sun, Moon } from 'lucide-react';
+import { Home, Palette, Wand2, RefreshCcw, Image, Sun, Moon, Layout } from 'lucide-react';
 import { useTheme } from '../../hooks/useTheme';
 import { cn } from '../../lib/utils';
 import { motion } from 'framer-motion';
@@ -13,6 +13,7 @@ export function NavPill() {
         { to: '/vectorizer', icon: Wand2, label: 'Vectorizer' },
         { to: '/converter', icon: RefreshCcw, label: 'Converter' },
         { to: '/editor', icon: Image, label: 'Editor' },
+        { to: '/thumbnail-maker', icon: Layout, label: 'Thumbnail' },
     ];
 
     return (

@@ -99,6 +99,7 @@ export function ThumbnailCanvas({ elements, selectedId, onSelect, onChange, back
                                 height: el.height,
                                 scaleX: el.scaleX,
                                 scaleY: el.scaleY,
+                                opacity: el.opacity,
                                 draggable: true,
                                 onClick: () => onSelect(el.id),
                                 onTap: () => onSelect(el.id),

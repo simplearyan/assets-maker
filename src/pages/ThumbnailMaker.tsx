@@ -128,7 +128,7 @@ export function ThumbnailMaker() {
         <div className="h-[calc(100vh-6rem)] w-full bg-bg font-sans text-text-main">
             <Group direction="horizontal">
                 {/* Left Sidebar */}
-                <Panel defaultSize="20" minSize="15" maxSize="30" className="bg-surface-card border-r border-white/10 hidden lg:block">
+                <Panel defaultSize="20" minSize="15" maxSize="30" className="bg-zinc-950 border-r border-white/5 hidden lg:block">
                     <div className="p-4 h-full overflow-y-auto">
                         <h2 className="text-sm font-bold uppercase text-text-muted mb-4">Templates</h2>
                         <div className="grid grid-cols-2 gap-2">
@@ -167,7 +167,7 @@ export function ThumbnailMaker() {
                 <Separator className="w-1 bg-white/5 hover:bg-accent/50 transition-colors cursor-col-resize" />
 
                 {/* Right Properties Panel */}
-                <Panel defaultSize="20" minSize="20" maxSize="30" className="bg-surface-card border-l border-white/10">
+                <Panel defaultSize="20" minSize="20" maxSize="30" className="bg-zinc-950 border-l border-white/5">
                     <PropertiesPanel
                         element={selectedElement}
                         onChange={handleUpdateElement}

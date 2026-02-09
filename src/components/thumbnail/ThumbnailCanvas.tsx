@@ -90,7 +90,6 @@ export function ThumbnailCanvas({ elements, selectedId, onSelect, onChange, back
 
                         {elements.map((el, i) => {
                             const commonProps = {
-                                key: el.id,
                                 id: el.id,
                                 x: el.x,
                                 y: el.y,
@@ -122,12 +121,13 @@ export function ThumbnailCanvas({ elements, selectedId, onSelect, onChange, back
                             };
 
                             if (el.type === 'rect') {
-                                return <Rect {...commonProps} fill={el.fill} stroke={el.stroke} strokeWidth={el.strokeWidth} />;
+                                return <Rect key={el.id} {...commonProps} fill={el.fill} stroke={el.stroke} strokeWidth={el.strokeWidth} />;
                             } else if (el.type === 'circle') {
-                                return <Circle {...commonProps} fill={el.fill} stroke={el.stroke} strokeWidth={el.strokeWidth} radius={(el.width || 50) / 2} />;
+                                return <Circle key={el.id} {...commonProps} fill={el.fill} stroke={el.stroke} strokeWidth={el.strokeWidth} radius={(el.width || 50) / 2} />;
                             } else if (el.type === 'text') {
                                 return (
                                     <Text
+                                        key={el.id}
                                         {...commonProps}
                                         text={el.text}
                                         fontSize={el.fontSize}
@@ -137,7 +137,7 @@ export function ThumbnailCanvas({ elements, selectedId, onSelect, onChange, back
                                     />
                                 );
                             } else if (el.type === 'image' && el.src) {
-                                return <URLImage {...commonProps} src={el.src} />;
+                                return <URLImage key={el.id} {...commonProps} src={el.src} />;
                             }
                             return null;
                         })}

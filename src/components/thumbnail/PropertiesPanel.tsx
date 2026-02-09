@@ -54,6 +54,19 @@ export function PropertiesPanel({ element, onChange, onDelete, onDuplicate, onCl
                 </Button>
             </div>
 
+            {/* Text Properties - Content First */}
+            {element.type === 'text' && (
+                <div className="space-y-2">
+                    <Label>Content</Label>
+                    <Textarea
+                        value={element.text || ''}
+                        onChange={(e) => handleChange('text', e.target.value)}
+                        className="h-24 font-medium text-lg"
+                        autoFocus
+                    />
+                </div>
+            )}
+
             <hr className="border-white/10" />
 
             {/* Position & Size */}
@@ -79,17 +92,9 @@ export function PropertiesPanel({ element, onChange, onDelete, onDuplicate, onCl
                 </div>
             </div>
 
-            {/* Text Properties */}
+            {/* Other Text Properties */}
             {element.type === 'text' && (
                 <div className="space-y-4">
-                    <div>
-                        <Label>Content</Label>
-                        <Textarea
-                            value={element.text || ''}
-                            onChange={(e) => handleChange('text', e.target.value)}
-                            className="h-24 font-medium"
-                        />
-                    </div>
                     <div>
                         <Label>Font Size ({element.fontSize}px)</Label>
                         <Slider

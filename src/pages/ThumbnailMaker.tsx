@@ -3,15 +3,22 @@ import { Panel, Group, Separator } from 'react-resizable-panels';
 import { ThumbnailCanvas } from '../components/thumbnail/ThumbnailCanvas';
 import { Toolbar } from '../components/thumbnail/Toolbar';
 import { PropertiesPanel } from '../components/thumbnail/PropertiesPanel';
-import { PropertiesDrawer } from '../components/thumbnail/PropertiesDrawer';
+import { MobilePropertyBar, type PropertyTab } from '../components/thumbnail/MobilePropertyBar';
+import { MobilePropertyDeck } from '../components/thumbnail/MobilePropertyDeck';
 import type { ThumbnailElement, ToolType } from '../types/thumbnail';
 import { Button } from '../components/ui/Button';
+import { Textarea } from '../components/ui/inputs/Textarea';
+import { ColorPicker } from '../components/ui/inputs/ColorPicker';
+import { Label } from '../components/ui/inputs/Label';
+import { Input } from '../components/ui/inputs/Input';
+import { Slider } from '../components/ui/inputs/Slider';
 
 export function ThumbnailMaker() {
     const [elements, setElements] = useState<ThumbnailElement[]>([]);
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [background] = useState('#ffffff');
     const [isMobile, setIsMobile] = useState(false);
+    const [activeTab, setActiveTab] = useState<PropertyTab>(null);
 
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -104,22 +111,145 @@ export function ThumbnailMaker() {
                     />
                 </div>
 
-                <Toolbar
-                    onAddText={() => handleAddElement('text')}
-                    onAddShape={(type) => type === 'rect' ? handleAddElement('rect') : handleAddElement('circle')}
-                    onUploadImage={handleUploadImage}
-                    onOpenTemplates={() => { }}
-                    onExport={handleExport}
-                />
+                {!selectedElement ? (
+                    <Toolbar
+                        onAddText={() => handleAddElement('text')}
+                        onAddShape={(type) => type === 'rect' ? handleAddElement('rect') : handleAddElement('circle')}
+                        onUploadImage={handleUploadImage}
+                        onOpenTemplates={() => { }}
+                        onExport={handleExport}
+                    />
+                ) : (
+                    <MobilePropertyBar
+                        element={selectedElement}
+                        activeTab={activeTab}
+                        onTabChange={(tab) => setActiveTab(tab)}
+                        onDelete={() => handleDeleteElement(selectedElement.id)}
+                        onDuplicate={() => handleDuplicateElement(selectedElement.id)}
+                        onClose={() => setSelectedId(null)}
+                    />
+                )}
 
-                <PropertiesDrawer
-                    element={selectedElement}
-                    isOpen={!!selectedId}
-                    onOpenChange={(open) => !open && setSelectedId(null)}
-                    onChange={handleUpdateElement}
-                    onDelete={handleDeleteElement}
-                    onDuplicate={handleDuplicateElement}
-                />
+                {/* Mobile Property Decks */}
+                {selectedElement && (
+                    <MobilePropertyDeck
+                        isOpen={!!activeTab}
+                        onClose={() => setActiveTab(null)}
+                        title={
+                            activeTab === 'text' ? 'Edit Text' :
+                                activeTab === 'color' ? 'Color' :
+                                    activeTab === 'position' ? 'Position' :
+                                        activeTab === 'size' ? (selectedElement.type === 'text' ? 'Font Size' : 'Size') :
+                                            activeTab === 'opacity' ? 'Opacity' :
+                                                activeTab === 'stroke' ? 'Stroke' : ''
+                        }
+                    >
+                        {activeTab === 'text' && (
+                            <Textarea
+                                value={selectedElement.text || ''}
+                                onChange={(e) => handleUpdateElement(selectedElement.id, { text: e.target.value })}
+                                className="h-32 text-lg"
+                                autoFocus
+                            />
+                        )}
+
+                        {activeTab === 'color' && (
+                            <ColorPicker
+                                value={selectedElement.fill || '#000000'}
+                                onChange={(value) => handleUpdateElement(selectedElement.id, { fill: value })}
+                            />
+                        )}
+
+                        {activeTab === 'position' && (
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <Label className="mb-2">X Coordinate</Label>
+                                    <Input
+                                        type="number"
+                                        value={Math.round(selectedElement.x)}
+                                        onChange={(e) => handleUpdateElement(selectedElement.id, { x: Number(e.target.value) })}
+                                    />
+                                </div>
+                                <div>
+                                    <Label className="mb-2">Y Coordinate</Label>
+                                    <Input
+                                        type="number"
+                                        value={Math.round(selectedElement.y)}
+                                        onChange={(e) => handleUpdateElement(selectedElement.id, { y: Number(e.target.value) })}
+                                    />
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === 'size' && (
+                            selectedElement.type === 'text' ? (
+                                <div className="space-y-4">
+                                    <div className="flex justify-between text-sm">
+                                        <span>Size</span>
+                                        <span>{selectedElement.fontSize}px</span>
+                                    </div>
+                                    <Slider
+                                        min={10}
+                                        max={200}
+                                        value={selectedElement.fontSize || 20}
+                                        onChange={(e) => handleUpdateElement(selectedElement.id, { fontSize: Number(e.target.value) })}
+                                    />
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    <div className="flex justify-between text-sm">
+                                        <span>Width</span>
+                                        <span>{Math.round(selectedElement.width || 0)}px</span>
+                                    </div>
+                                    <Slider
+                                        min={10}
+                                        max={800}
+                                        value={selectedElement.width || 100}
+                                        onChange={(e) => handleUpdateElement(selectedElement.id, { width: Number(e.target.value), height: Number(e.target.value) })}
+                                    />
+                                </div>
+                            )
+                        )}
+
+                        {activeTab === 'opacity' && (
+                            <div className="space-y-4">
+                                <div className="flex justify-between text-sm">
+                                    <span>Opacity</span>
+                                    <span>{Math.round((selectedElement.opacity || 1) * 100)}%</span>
+                                </div>
+                                <Slider
+                                    min={0}
+                                    max={1}
+                                    step={0.01}
+                                    value={selectedElement.opacity !== undefined ? selectedElement.opacity : 1}
+                                    onChange={(e) => handleUpdateElement(selectedElement.id, { opacity: Number(e.target.value) })}
+                                />
+                            </div>
+                        )}
+
+                        {activeTab === 'stroke' && (
+                            <div className="space-y-4">
+                                <Label>Stroke Color</Label>
+                                <ColorPicker
+                                    value={selectedElement.stroke || '#000000'}
+                                    onChange={(value) => handleUpdateElement(selectedElement.id, { stroke: value })}
+                                />
+                                <div className="pt-2">
+                                    <div className="flex justify-between text-sm mb-2">
+                                        <span>Stroke Width</span>
+                                        <span>{selectedElement.strokeWidth || 0}px</span>
+                                    </div>
+                                    <Slider
+                                        min={0}
+                                        max={20}
+                                        value={selectedElement.strokeWidth || 0}
+                                        onChange={(e) => handleUpdateElement(selectedElement.id, { strokeWidth: Number(e.target.value) })}
+                                    />
+                                </div>
+                            </div>
+                        )}
+                    </MobilePropertyDeck>
+                )}
             </div>
         );
     }

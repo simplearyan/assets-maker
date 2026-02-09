@@ -36,8 +36,13 @@ export default defineConfig({
           {
             src: '/assets/logos/png/logo-512.png',
             sizes: '512x512',
+            type: 'image/png'
+          },
+          {
+            src: '/assets/logos/png/maskable.png',
+            sizes: '512x512',
             type: 'image/png',
-            purpose: 'any maskable'
+            purpose: 'maskable'
           }
         ]
       }

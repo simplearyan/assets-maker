@@ -12,6 +12,7 @@ import { ColorPicker } from '../components/ui/inputs/ColorPicker';
 import { Label } from '../components/ui/inputs/Label';
 import { Input } from '../components/ui/inputs/Input';
 import { Slider } from '../components/ui/inputs/Slider';
+import { ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
 
 export function ThumbnailMaker() {
     const [elements, setElements] = useState<ThumbnailElement[]>([]);
@@ -20,6 +21,7 @@ export function ThumbnailMaker() {
     const [isMobile, setIsMobile] = useState(false);
     const [activeTab, setActiveTab] = useState<PropertyTab>(null);
     const [showTemplates, setShowTemplates] = useState(true);
+    const [zoom, setZoom] = useState(1);
 
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -284,7 +286,23 @@ export function ThumbnailMaker() {
                             onSelect={setSelectedId}
                             onChange={handleUpdateElement}
                             background={background}
+                            zoom={zoom}
                         />
+
+                        {/* Zoom Controls */}
+                        <div className="absolute bottom-4 left-4 flex items-center gap-2 bg-surface/90 backdrop-blur-md border border-border p-1 rounded-lg shadow-lg z-20">
+                            <Button variant="ghost" size="sm" onClick={() => setZoom(Math.max(0.1, zoom - 0.1))} title="Zoom Out" className="h-8 w-8 p-0">
+                                <ZoomOut size={16} />
+                            </Button>
+                            <span className="text-xs font-mono w-12 text-center select-none">{Math.round(zoom * 100)}%</span>
+                            <Button variant="ghost" size="sm" onClick={() => setZoom(Math.min(3, zoom + 0.1))} title="Zoom In" className="h-8 w-8 p-0">
+                                <ZoomIn size={16} />
+                            </Button>
+                            <div className="w-px h-4 bg-border mx-1" />
+                            <Button variant="ghost" size="sm" onClick={() => setZoom(1)} title="Reset Zoom" className="h-8 w-8 p-0">
+                                <RotateCcw size={14} />
+                            </Button>
+                        </div>
 
                         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 shadow-2xl rounded-full">
                             <Toolbar

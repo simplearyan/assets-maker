@@ -10,6 +10,7 @@ interface ThumbnailCanvasProps {
     onSelect: (id: string | null) => void;
     onChange: (id: string, attrs: Partial<ThumbnailElement>) => void;
     background: string;
+    zoom: number;
 }
 
 const URLImage = ({ src, ...props }: any) => {
@@ -17,42 +18,44 @@ const URLImage = ({ src, ...props }: any) => {
     return <KonvaImage image={image} {...props} />;
 };
 
-export function ThumbnailCanvas({ elements, selectedId, onSelect, onChange, background }: ThumbnailCanvasProps) {
+export function ThumbnailCanvas({ elements, selectedId, onSelect, onChange, background, zoom }: ThumbnailCanvasProps) {
     const containerRef = useRef<HTMLDivElement>(null);
     const [scale, setScale] = useState(1);
     const [size, setSize] = useState({ width: 1280, height: 720 }); // Logical size
 
     // Responsive scaling logic
     useEffect(() => {
-        const resize = () => {
-            if (containerRef.current) {
-                const containerWidth = containerRef.current.offsetWidth;
-                const containerHeight = containerRef.current.offsetHeight;
+        if (!containerRef.current) return;
+
+        const resizeObserver = new ResizeObserver((entries) => {
+            const entry = entries[0];
+            if (entry) {
+                const { width: containerWidth, height: containerHeight } = entry.contentRect;
 
                 // Target aspect ratio 16:9 (1280x720)
                 const targetRatio = 1280 / 720;
                 const containerRatio = containerWidth / containerHeight;
 
-                let newScale = 1;
+                let autoScale = 1;
 
                 if (containerRatio < targetRatio) {
                     // Fit to width
-                    newScale = containerWidth / 1280;
+                    autoScale = containerWidth / 1280;
                 } else {
                     // Fit to height
-                    newScale = containerHeight / 720;
+                    autoScale = containerHeight / 720;
                 }
 
                 // Add some padding (e.g., 90% of available space)
-                setScale(newScale * 0.9);
+                // Apply user zoom
+                setScale(autoScale * 0.9 * zoom);
             }
-        };
+        });
 
-        window.addEventListener('resize', resize);
-        resize();
+        resizeObserver.observe(containerRef.current);
 
-        return () => window.removeEventListener('resize', resize);
-    }, []);
+        return () => resizeObserver.disconnect();
+    }, [zoom]);
 
     const checkDeselect = (e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => {
         const clickedOnEmpty = e.target === e.target.getStage();

@@ -18,19 +18,19 @@ export function Toolbar({ onAddText, onAddShape, onUploadImage, onOpenTemplates,
         <div className="h-16 bg-surface backdrop-blur-md border-t border-border flex items-center justify-center gap-4 px-4 z-50">
             <Button variant="ghost" onClick={onOpenTemplates} title="Templates">
                 <LayoutTemplate size={20} />
-                <span className="hidden md:inline ml-2">Templates</span>
+                <span className="hidden xl:inline ml-2">Templates</span>
             </Button>
 
             <div className="w-px h-8 bg-border mx-2" />
 
             <Button variant="ghost" onClick={onAddText} title="Add Text">
                 <Type size={20} />
-                <span className="hidden md:inline ml-2">Text</span>
+                <span className="hidden xl:inline ml-2">Text</span>
             </Button>
 
             <Button variant="ghost" onClick={() => fileInputRef.current?.click()} title="Upload Image">
                 <ImageIcon size={20} />
-                <span className="hidden md:inline ml-2">Image</span>
+                <span className="hidden lg:inline ml-2">Image</span>
             </Button>
             <input
                 type="file"
@@ -52,7 +52,7 @@ export function Toolbar({ onAddText, onAddShape, onUploadImage, onOpenTemplates,
 
             <Button variant="primary" onClick={onExport} title="Export">
                 <Download size={20} />
-                <span className="hidden md:inline ml-2">Export</span>
+                <span className="hidden lg:inline ml-2">Export</span>
             </Button>
         </div>
     );

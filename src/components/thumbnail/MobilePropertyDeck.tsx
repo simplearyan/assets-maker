@@ -1,30 +1,12 @@
 import { cn } from '../../lib/utils';
-import { X } from 'lucide-react';
-import { Button } from '../ui/Button';
-import { useEffect, useState } from 'react';
 
 interface MobilePropertyDeckProps {
     isOpen: boolean;
     onClose: () => void;
-    title: string;
     children: React.ReactNode;
 }
 
-export function MobilePropertyDeck({ isOpen, onClose, title, children }: MobilePropertyDeckProps) {
-    const [isVisible, setIsVisible] = useState(false);
-
-    useEffect(() => {
-        if (isOpen) {
-            setIsVisible(true);
-        } else {
-            // Delay unmounting or hiding if we were doing complex mounting logic, 
-            // but here we just toggle classes.
-            // We can use a timeout to remove from DOM if we wanted, but CSS toggle is fine for performance here.
-            const timer = setTimeout(() => setIsVisible(false), 300);
-            return () => clearTimeout(timer);
-        }
-    }, [isOpen]);
-
+export function MobilePropertyDeck({ isOpen, onClose, children }: MobilePropertyDeckProps) {
     return (
         <div
             className={cn(

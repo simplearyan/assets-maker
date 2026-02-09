@@ -34,6 +34,23 @@
     <meta name="apple-mobile-web-app-title" content="Assets Maker" />
   </head>
   <body>
+    <script>
+      (function() {
+        try {
+          const storage = localStorage.getItem('kenichi-theme-storage');
+          const themeHandler = JSON.parse(storage)?.state?.theme || 'system';
+          const root = document.documentElement;
+          
+          if (themeHandler === 'dark' || (themeHandler === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            root.classList.add('dark');
+          } else {
+            root.classList.remove('dark'); 
+            // Optional: add 'light' class if needed, but usually default is light
+            if (themeHandler === 'light') root.classList.add('light');
+          }
+        } catch (e) {}
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

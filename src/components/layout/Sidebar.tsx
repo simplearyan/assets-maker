@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Home, PenTool, Image, Layers, Scissors, X } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import { ThemeToggle } from '../ui/ThemeToggle';
 
 interface SidebarProps {
     isOpen: boolean;
@@ -40,7 +41,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                     </button>
                 </div>
 
-                <nav className="p-4 space-y-2">
+                <nav className="p-4 space-y-2 flex-grow">
                     {navItems.map((item) => {
                         const Icon = item.icon;
                         const isActive = location.pathname === item.path;
@@ -63,6 +64,10 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                         )
                     })}
                 </nav>
+
+                <div className="p-4 border-t border-border">
+                    <ThemeToggle />
+                </div>
             </aside>
         </>
     );

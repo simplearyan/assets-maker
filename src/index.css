@@ -31,12 +31,8 @@
 
 /* Glassmorphism Utilities */
 @layer components {
-  .glass {
-    @apply bg-surface backdrop-blur-xl border border-border;
-  }
-
   .glass-card {
-    @apply bg-surface-card backdrop-blur-md border border-border rounded-3xl transition-all duration-300;
+    @apply rounded-3xl transition-all duration-300;
   }
 
   .btn {

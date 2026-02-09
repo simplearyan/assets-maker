@@ -8,18 +8,15 @@ export default {
   theme: {
     extend: {
       colors: {
-        bg: '#09090b', // Zinc 950
-        surface: 'rgba(24, 24, 27, 0.6)', // Zinc 900 Glass
-        'surface-card': 'rgba(39, 39, 42, 0.4)', // Zinc 800 Glass
-        border: 'rgba(255, 255, 255, 0.08)',
-        'border-hover': 'rgba(255, 255, 255, 0.15)',
-        accent: '#3b82f6', // Blue 500
-        'accent-glow': 'rgba(59, 130, 246, 0.4)',
-        
-        // Light Theme overrides (handled via CSS variables usually, or custom classes)
-        // Here we define the base tokens. For dynamic theming, we might use CSS vars
-        // mapped to these names in index.css if we want full flexibility.
-        // But for now, we'll stick to direct colors and use 'dark:' modifiers.
+        bg: 'var(--bg)',
+        surface: 'var(--surface)',
+        'surface-card': 'var(--surface-card)',
+        border: 'var(--border)',
+        'border-hover': 'var(--border-hover)',
+        'text-main': 'var(--text-main)',
+        'text-muted': 'var(--text-muted)',
+        accent: 'var(--accent)',
+        'accent-glow': 'var(--accent-glow)',
       },
       fontFamily: {
         sans: ['Inter', 'sans-serif'],

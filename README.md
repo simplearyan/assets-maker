@@ -1,73 +1,73 @@
-# React + TypeScript + Vite
+# Kenichi Assets Maker
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> **Create Anything.**  
+> A robust suite of local-first creative tools for rapid asset generation. No uploads, no limits.
 
-Currently, two official plugins are available:
+![Kenichi Assets Maker](public/assets/logos/png/logo-512.png)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Overview
 
-## React Compiler
+**Kenichi Assets Maker** is a modern, browser-based creative suite designed for developers and designers who need quick, high-quality assets without the overhead of heavy software. Built with performance and privacy in mind, all processing happens locally on your device.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+The suite includes:
+- **Logo Studio**: Design SVG logos with parametric controls.
+- **Vector Pro**: Trace bitmaps to SVGs efficiently.
+- **Batch Converter**: Process thousands of images instantly.
+- **Thumbnail Lab**: Generate social media assets from presets.
+- **Image Editor**: Quick adjustments, crops, and filters.
 
-## Expanding the ESLint configuration
+## ✨ Key Features
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **Local-First Architecture**: Your files never leave your device.
+- **PWA (Progressive Web App)**: Installable on desktop and mobile for offline use.
+- **Responsive Design**: precise Glassmorphism UI that adapts to any screen.
+- **Dark Mode**: Native support for system preferences.
+- **High Performance**: Powered by Vite and React for instant interactions.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 🛠️ Tech Stack
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- **Framework**: React 18 + Vite
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS v3.4 (Custom Design System)
+- **Icons**: Lucide React
+- **Animations**: Framer Motion
+- **State Management**: Zustand
+- **Routing**: React Router DOM v6
+- **PWA**: vite-plugin-pwa
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## 📦 Installation
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+This project uses `npm`. To get started:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/simplearyan/assets-maker.git
+   cd kenichi-assets-maker
+   ```
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Start Development Server**
+   ```bash
+   npm run dev
+   ```
+
+4. **Build for Production**
+   ```bash
+   npm run build
+   ```
+
+## 🚢 Deployment
+
+The project is configured for automatic deployment to **GitHub Pages** via GitHub Actions.
+Any push to the `master` branch triggers the build and deploy workflow defined in `.github/workflows/deploy.yml`.
+
+## 📜 License
+
+MIT License.
+
+---
+Part of the **Kenichi Studio** ecosystem.

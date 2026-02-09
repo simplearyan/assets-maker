@@ -9,9 +9,10 @@ interface PropertiesDrawerProps {
     onChange: (id: string, attrs: Partial<ThumbnailElement>) => void;
     onDelete: (id: string) => void;
     onDuplicate: (id: string) => void;
+    onReorder: (id: string, type: 'front' | 'back' | 'forward' | 'backward') => void;
 }
 
-export function PropertiesDrawer({ element, isOpen, onOpenChange, onChange, onDelete, onDuplicate }: PropertiesDrawerProps) {
+export function PropertiesDrawer({ element, isOpen, onOpenChange, onChange, onDelete, onDuplicate, onReorder }: PropertiesDrawerProps) {
     return (
         <Drawer.Root open={isOpen} onOpenChange={onOpenChange}>
             <Drawer.Portal>
@@ -30,6 +31,7 @@ export function PropertiesDrawer({ element, isOpen, onOpenChange, onChange, onDe
                                 onDuplicate(id);
                                 onOpenChange(false);
                             }}
+                            onReorder={onReorder}
                             onClose={() => onOpenChange(false)}
                         />
                     </div>

@@ -12,7 +12,7 @@ import { ColorPicker } from '../components/ui/inputs/ColorPicker';
 import { Label } from '../components/ui/inputs/Label';
 import { Input } from '../components/ui/inputs/Input';
 import { Slider } from '../components/ui/inputs/Slider';
-import { ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
+import { ZoomIn, ZoomOut, RotateCcw, ArrowUpToLine, ArrowDownToLine, ChevronUp, ChevronDown } from 'lucide-react';
 
 export function ThumbnailMaker() {
     const [elements, setElements] = useState<ThumbnailElement[]>([]);
@@ -84,6 +84,28 @@ export function ThumbnailMaker() {
             setElements([...elements, newElement]);
             setSelectedId(newId);
         }
+    };
+
+    const handleReorderElement = (id: string, type: 'front' | 'back' | 'forward' | 'backward') => {
+        const index = elements.findIndex((el) => el.id === id);
+        if (index === -1) return;
+
+        const newElements = [...elements];
+        const element = newElements.splice(index, 1)[0];
+
+        if (type === 'front') {
+            newElements.push(element);
+        } else if (type === 'back') {
+            newElements.unshift(element);
+        } else if (type === 'forward') {
+            const newIndex = Math.min(index + 1, elements.length - 1);
+            newElements.splice(newIndex, 0, element);
+        } else if (type === 'backward') {
+            const newIndex = Math.max(index - 1, 0);
+            newElements.splice(newIndex, 0, element);
+        }
+
+        setElements(newElements);
     };
 
     const handleUploadImage = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -244,6 +266,26 @@ export function ThumbnailMaker() {
                                 </div>
                             </div>
                         )}
+                        {activeTab === 'layers' && (
+                            <div className="grid grid-cols-4 gap-2 py-4">
+                                <Button variant="glass" className="flex flex-col gap-2 h-20" onClick={() => handleReorderElement(selectedElement.id, 'front')}>
+                                    <ArrowUpToLine size={24} />
+                                    <span className="text-[10px] uppercase font-bold text-text-muted">Front</span>
+                                </Button>
+                                <Button variant="glass" className="flex flex-col gap-2 h-20" onClick={() => handleReorderElement(selectedElement.id, 'forward')}>
+                                    <ChevronUp size={24} />
+                                    <span className="text-[10px] uppercase font-bold text-text-muted">Forward</span>
+                                </Button>
+                                <Button variant="glass" className="flex flex-col gap-2 h-20" onClick={() => handleReorderElement(selectedElement.id, 'backward')}>
+                                    <ChevronDown size={24} />
+                                    <span className="text-[10px] uppercase font-bold text-text-muted">Back</span>
+                                </Button>
+                                <Button variant="glass" className="flex flex-col gap-2 h-20" onClick={() => handleReorderElement(selectedElement.id, 'back')}>
+                                    <ArrowDownToLine size={24} />
+                                    <span className="text-[10px] uppercase font-bold text-text-muted">Bottom</span>
+                                </Button>
+                            </div>
+                        )}
                     </MobilePropertyDeck>
                 )}
             </div>
@@ -319,6 +361,7 @@ export function ThumbnailMaker() {
                         onChange={handleUpdateElement}
                         onDelete={handleDeleteElement}
                         onDuplicate={handleDuplicateElement}
+                        onReorder={handleReorderElement}
                     />
                 </Panel>
             </Group>

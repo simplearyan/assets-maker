@@ -44,7 +44,8 @@ export function MobilePropertyBar({
 
     const commonTools = [
         { id: 'position', icon: Move, label: 'Position' },
-        { id: 'opacity', icon: Layers, label: 'Opacity' },
+        { id: 'layers', icon: Layers, label: 'Layers' },
+        { id: 'opacity', icon: Palette, label: 'Opacity' }, // Swapping back to Palette or similar if needed, but Layers is already used for Opacity. Wait.
     ];
 
     const specificTools = [];

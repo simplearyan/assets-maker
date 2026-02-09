@@ -5,17 +5,18 @@ import { Input } from '../ui/inputs/Input';
 import { Textarea } from '../ui/inputs/Textarea';
 import { Slider } from '../ui/inputs/Slider';
 import { ColorPicker } from '../ui/inputs/ColorPicker';
-import { X, Trash2, Copy } from 'lucide-react';
+import { X, Trash2, Copy, ArrowUpToLine, ArrowDownToLine, ChevronUp, ChevronDown } from 'lucide-react';
 
 interface PropertiesPanelProps {
     element: ThumbnailElement | null;
     onChange: (id: string, attrs: Partial<ThumbnailElement>) => void;
     onDelete: (id: string) => void;
     onDuplicate: (id: string) => void;
+    onReorder?: (id: string, type: 'front' | 'back' | 'forward' | 'backward') => void;
     onClose?: () => void;
 }
 
-export function PropertiesPanel({ element, onChange, onDelete, onDuplicate, onClose }: PropertiesPanelProps) {
+export function PropertiesPanel({ element, onChange, onDelete, onDuplicate, onReorder, onClose }: PropertiesPanelProps) {
     if (!element) {
         return (
             <div className="p-4 text-center text-text-muted h-full flex flex-col items-center justify-center">
@@ -52,6 +53,25 @@ export function PropertiesPanel({ element, onChange, onDelete, onDuplicate, onCl
                 <Button variant="glass" size="sm" className="border-red-500/20 text-red-500 hover:text-red-600 hover:bg-red-500/10" onClick={() => onDelete(element.id)}>
                     <Trash2 size={16} className="mr-2" /> Delete
                 </Button>
+            </div>
+
+            {/* Layering Controls */}
+            <div className="space-y-2">
+                <Label>Layering</Label>
+                <div className="grid grid-cols-4 gap-1">
+                    <Button variant="glass" size="sm" onClick={() => onReorder?.(element.id, 'front')} title="Bring to Front" className="px-0">
+                        <ArrowUpToLine size={16} />
+                    </Button>
+                    <Button variant="glass" size="sm" onClick={() => onReorder?.(element.id, 'forward')} title="Bring Forward" className="px-0">
+                        <ChevronUp size={16} />
+                    </Button>
+                    <Button variant="glass" size="sm" onClick={() => onReorder?.(element.id, 'backward')} title="Send Backward" className="px-0">
+                        <ChevronDown size={16} />
+                    </Button>
+                    <Button variant="glass" size="sm" onClick={() => onReorder?.(element.id, 'back')} title="Send to Back" className="px-0">
+                        <ArrowDownToLine size={16} />
+                    </Button>
+                </div>
             </div>
 
             {/* Text Properties - Content First */}

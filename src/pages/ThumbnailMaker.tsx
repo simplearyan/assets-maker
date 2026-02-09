@@ -15,6 +15,7 @@ import { Slider } from '../components/ui/inputs/Slider';
 import { ZoomIn, ZoomOut, RotateCcw, ArrowUpToLine, ArrowDownToLine, ChevronUp, ChevronDown } from 'lucide-react';
 import { LayersPanel } from '../components/thumbnail/LayersPanel';
 import { cn } from '../lib/utils';
+import { useUIStore } from '../store/uiStore';
 
 export function ThumbnailMaker() {
     const [elements, setElements] = useState<ThumbnailElement[]>([]);
@@ -25,6 +26,7 @@ export function ThumbnailMaker() {
     const [showTemplates, setShowTemplates] = useState(true);
     const [leftTab, setLeftTab] = useState<'templates' | 'layers'>('templates');
     const [zoom, setZoom] = useState(1);
+    const { isNavVisible } = useUIStore();
 
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -127,7 +129,10 @@ export function ThumbnailMaker() {
 
     if (isMobile) {
         return (
-            <div className="h-[calc(100vh-6rem)] w-full bg-bg font-sans text-text-main flex flex-col relative overflow-hidden">
+            <div className={cn(
+                "w-full bg-bg font-sans text-text-main flex flex-col relative overflow-hidden transition-all duration-300",
+                isNavVisible ? "h-[calc(100vh-6rem)]" : "h-screen"
+            )}>
                 <div className="flex-1 w-full overflow-hidden relative">
                     <ThumbnailCanvas
                         elements={elements}
@@ -308,7 +313,10 @@ export function ThumbnailMaker() {
     }
 
     return (
-        <div className="h-[calc(100vh-6rem)] w-full bg-bg font-sans text-text-main">
+        <div className={cn(
+            "w-full bg-bg font-sans text-text-main transition-all duration-300",
+            isNavVisible ? "h-[calc(100vh-6rem)]" : "h-screen"
+        )}>
             {/* @ts-expect-error - Group component type definition is missing direction prop in this version */}
             <Group direction="horizontal">
                 {/* Left Sidebar */}

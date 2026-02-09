@@ -111,6 +111,7 @@ export function ThumbnailMaker() {
                         onSelect={setSelectedId}
                         onChange={handleUpdateElement}
                         background={background}
+                        zoom={zoom}
                     />
                 </div>
 
@@ -138,14 +139,6 @@ export function ThumbnailMaker() {
                     <MobilePropertyDeck
                         isOpen={!!activeTab}
                         onClose={() => setActiveTab(null)}
-                        title={
-                            activeTab === 'text' ? 'Edit Text' :
-                                activeTab === 'color' ? 'Color' :
-                                    activeTab === 'position' ? 'Position' :
-                                        activeTab === 'size' ? (selectedElement.type === 'text' ? 'Font Size' : 'Size') :
-                                            activeTab === 'opacity' ? 'Opacity' :
-                                                activeTab === 'stroke' ? 'Stroke' : ''
-                        }
                     >
                         {activeTab === 'text' && (
                             <Textarea
@@ -259,11 +252,12 @@ export function ThumbnailMaker() {
 
     return (
         <div className="h-[calc(100vh-6rem)] w-full bg-bg font-sans text-text-main">
+            {/* @ts-expect-error - Group component type definition is missing direction prop in this version */}
             <Group direction="horizontal">
                 {/* Left Sidebar */}
                 {showTemplates && (
                     <>
-                        <Panel defaultSize="20" minSize="15" maxSize="30" className="bg-surface border-r border-border hidden lg:block overflow-hidden shadow-sm z-10">
+                        <Panel defaultSize="20" minSize="15" maxSize="30" className="bg-surface border-r border-border rounded-l-lg hidden lg:block overflow-hidden shadow-sm z-10">
                             <div className="p-4 h-full overflow-y-auto">
                                 <h2 className="text-sm font-bold uppercase text-text-muted mb-4">Templates</h2>
                                 <div className="grid grid-cols-2 gap-2">
@@ -319,7 +313,7 @@ export function ThumbnailMaker() {
                 <Separator className="w-1 bg-border hover:bg-accent/50 transition-colors cursor-col-resize" />
 
                 {/* Right Properties Panel */}
-                <Panel defaultSize="20" minSize="20" maxSize="30" className="bg-surface border-l border-border">
+                <Panel defaultSize="20" minSize="20" maxSize="30" className="bg-surface border-l border-border rounded-r-lg">
                     <PropertiesPanel
                         element={selectedElement}
                         onChange={handleUpdateElement}

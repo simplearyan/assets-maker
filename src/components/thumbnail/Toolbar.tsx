@@ -1,6 +1,5 @@
 import { Type, Image as ImageIcon, Square, Circle as CircleIcon, LayoutTemplate, Download } from 'lucide-react';
 import { Button } from '../ui/Button';
-import type { ToolType } from '../../types/thumbnail';
 import { useRef } from 'react';
 
 interface ToolbarProps {
@@ -15,7 +14,7 @@ export function Toolbar({ onAddText, onAddShape, onUploadImage, onOpenTemplates,
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     return (
-        <div className="h-16 bg-surface backdrop-blur-md border-t border-border flex items-center justify-center gap-4 px-4 z-50">
+        <div className="h-16 bg-surface backdrop-blur-md border-t border-border rounded-lg flex items-center justify-center gap-4 px-4 z-50">
             <Button variant="ghost" onClick={onOpenTemplates} title="Templates">
                 <LayoutTemplate size={20} />
                 <span className="hidden xl:inline ml-2">Templates</span>

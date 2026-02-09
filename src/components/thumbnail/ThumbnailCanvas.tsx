@@ -21,7 +21,6 @@ const URLImage = ({ src, ...props }: any) => {
 export function ThumbnailCanvas({ elements, selectedId, onSelect, onChange, background, zoom }: ThumbnailCanvasProps) {
     const containerRef = useRef<HTMLDivElement>(null);
     const [scale, setScale] = useState(1);
-    const [size, setSize] = useState({ width: 1280, height: 720 }); // Logical size
 
     // Responsive scaling logic
     useEffect(() => {
@@ -91,7 +90,7 @@ export function ThumbnailCanvas({ elements, selectedId, onSelect, onChange, back
                             fill={background}
                         />
 
-                        {elements.map((el, i) => {
+                        {elements.map((el) => {
                             const commonProps = {
                                 id: el.id,
                                 x: el.x,

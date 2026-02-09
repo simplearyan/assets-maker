@@ -19,6 +19,7 @@ export function ThumbnailMaker() {
     const [background] = useState('#ffffff');
     const [isMobile, setIsMobile] = useState(false);
     const [activeTab, setActiveTab] = useState<PropertyTab>(null);
+    const [showTemplates, setShowTemplates] = useState(true);
 
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -258,18 +259,21 @@ export function ThumbnailMaker() {
         <div className="h-[calc(100vh-6rem)] w-full bg-bg font-sans text-text-main">
             <Group direction="horizontal">
                 {/* Left Sidebar */}
-                <Panel defaultSize="20" minSize="15" maxSize="30" className="bg-surface border-r border-border hidden lg:block">
-                    <div className="p-4 h-full overflow-y-auto">
-                        <h2 className="text-sm font-bold uppercase text-text-muted mb-4">Templates</h2>
-                        <div className="grid grid-cols-2 gap-2">
-                            {[1, 2, 3, 4, 5, 6].map((i) => (
-                                <div key={i} className="aspect-video bg-surface-card rounded hover:bg-border/50 cursor-pointer border border-border hover:border-accent/50 transition-colors" />
-                            ))}
-                        </div>
-                    </div>
-                </Panel>
-
-                <Separator className="w-1 bg-border hover:bg-accent/50 transition-colors cursor-col-resize" />
+                {showTemplates && (
+                    <>
+                        <Panel defaultSize="20" minSize="15" maxSize="30" className="bg-surface border-r border-border hidden lg:block overflow-hidden shadow-sm z-10">
+                            <div className="p-4 h-full overflow-y-auto">
+                                <h2 className="text-sm font-bold uppercase text-text-muted mb-4">Templates</h2>
+                                <div className="grid grid-cols-2 gap-2">
+                                    {[1, 2, 3, 4, 5, 6].map((i) => (
+                                        <div key={i} className="aspect-video bg-surface-card rounded hover:bg-border/50 cursor-pointer border border-border hover:border-accent/50 transition-colors" />
+                                    ))}
+                                </div>
+                            </div>
+                        </Panel>
+                        <Separator className="w-1 bg-border hover:bg-accent/50 transition-colors cursor-col-resize" />
+                    </>
+                )}
 
                 {/* Center Canvas */}
                 <Panel defaultSize="60" minSize="40">
@@ -287,7 +291,7 @@ export function ThumbnailMaker() {
                                 onAddText={() => handleAddElement('text')}
                                 onAddShape={(type) => type === 'rect' ? handleAddElement('rect') : handleAddElement('circle')}
                                 onUploadImage={handleUploadImage}
-                                onOpenTemplates={() => { }}
+                                onOpenTemplates={() => setShowTemplates(!showTemplates)}
                                 onExport={handleExport}
                             />
                         </div>

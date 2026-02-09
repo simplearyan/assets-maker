@@ -1,5 +1,5 @@
-import { useRef, useEffect, useState, forwardRef } from 'react';
-import { Stage, Layer, Rect, Circle, Text, Image as KonvaImage, Transformer } from 'react-konva';
+import { useRef, useEffect, useState, forwardRef, useImperativeHandle } from 'react';
+import { Stage, Layer, Rect, Circle, Text, Image as KonvaImage, Transformer, Group } from 'react-konva';
 import useImage from 'use-image';
 import type { ThumbnailElement } from '../../types/thumbnail';
 import Konva from 'konva';
@@ -21,12 +21,18 @@ const URLImage = ({ src, ...props }: any) => {
     return <KonvaImage image={image} {...props} />;
 };
 
-export const ThumbnailCanvas = forwardRef<Konva.Stage, ThumbnailCanvasProps>(({
+export const ThumbnailCanvas = forwardRef<any, ThumbnailCanvasProps>(({
     elements, selectedId, onSelect, onChange, background, zoom,
     canvasWidth = 1280, canvasHeight = 720, isTransparent = false
 }, ref) => {
     const containerRef = useRef<HTMLDivElement>(null);
+    const stageInternalRef = useRef<Konva.Stage>(null);
     const [scale, setScale] = useState(1);
+    const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+
+    // Center Offset calculation
+    const offsetX = (dimensions.width - canvasWidth * scale) / 2;
+    const offsetY = (dimensions.height - canvasHeight * scale) / 2;
 
     // Responsive scaling logic
     useEffect(() => {
@@ -54,52 +60,104 @@ export const ThumbnailCanvas = forwardRef<Konva.Stage, ThumbnailCanvasProps>(({
                 // Add some padding (e.g., 90% of available space)
                 // Apply user zoom
                 setScale(autoScale * 0.9 * zoom);
+                setDimensions({ width: containerWidth, height: containerHeight });
             }
         });
 
         resizeObserver.observe(containerRef.current);
 
         return () => resizeObserver.disconnect();
-    }, [zoom]);
+    }, [zoom, canvasWidth, canvasHeight]);
+
+    useImperativeHandle(ref, () => ({
+        toDataURL: (config: any) => {
+            if (!stageInternalRef.current) return '';
+
+            return stageInternalRef.current.toDataURL({
+                ...config,
+                x: offsetX,
+                y: offsetY,
+                width: canvasWidth * scale,
+                height: canvasHeight * scale,
+            });
+        },
+        getStage: () => stageInternalRef.current
+    }));
 
     const checkDeselect = (e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => {
-        const clickedOnEmpty = e.target === e.target.getStage();
-        if (clickedOnEmpty) {
+        // The stage is the empty space, but we also want to deselect if we click the background rects
+        const target = e.target;
+        const isStage = target === target.getStage();
+        const isBackground = target.name() === 'canvas-background';
+
+        if (isStage || isBackground) {
             onSelect(null);
         }
     };
 
     return (
-        <div ref={containerRef} className="w-full h-full flex items-center justify-center bg-bg/50 overflow-hidden">
-            <div
-                className="shadow-[0_0_30px_rgba(0,0,0,0.1)] dark:shadow-[0_0_50_rgba(0,0,0,0.5)] transition-shadow duration-500 overflow-hidden"
-                style={{
-                    width: canvasWidth * scale,
-                    height: canvasHeight * scale,
-                    backgroundImage: isTransparent ? 'conic-gradient(#333 90deg, #444 90deg 180deg, #333 180deg 270deg, #444 270deg)' : 'none',
-                    backgroundSize: '20px 20px'
-                }}
+        <div ref={containerRef} className="w-full h-full bg-slate-100 dark:bg-zinc-950 flex items-center justify-center overflow-hidden">
+            <Stage
+                ref={stageInternalRef}
+                width={dimensions.width}
+                height={dimensions.height}
+                onMouseDown={checkDeselect}
+                onTouchStart={checkDeselect}
             >
-                <Stage
-                    ref={ref}
-                    width={canvasWidth * scale}
-                    height={canvasHeight * scale}
-                    scaleX={scale}
-                    scaleY={scale}
-                    onMouseDown={checkDeselect}
-                    onTouchStart={checkDeselect}
-                >
-                    <Layer>
-                        {/* Background */}
-                        {!isTransparent && (
-                            <Rect
-                                x={0}
-                                y={0}
-                                width={canvasWidth}
-                                height={canvasHeight}
-                                fill={background}
-                            />
-                        )}
+                <Layer>
+                    {/* Workspace background - helps visualize clipping area */}
+                    <Rect
+                        x={0}
+                        y={0}
+                        width={dimensions.width}
+                        height={dimensions.height}
+                        fill={isTransparent ? 'transparent' : 'rgba(0,0,0,0.05)'}
+                        listening={false}
+                    />
+
+                    {/* Centered Workspace Group */}
+                    <Group x={offsetX} y={offsetY} scaleX={scale} scaleY={scale}>
+                        {/* Canvas Shadow & Border */}
+                        <Rect
+                            x={-5 / scale}
+                            y={-5 / scale}
+                            width={canvasWidth + 10 / scale}
+                            height={canvasHeight + 10 / scale}
+                            fill="rgba(0,0,0,0.1)"
+                            cornerRadius={4 / scale}
+                        />
+
+                        {/* Exportable Area Background */}
+                        <Rect
+                            name="canvas-background"
+                            x={0}
+                            y={0}
+                            width={canvasWidth}
+                            height={canvasHeight}
+                            fill={isTransparent ? 'transparent' : background}
+                            shadowColor="black"
+                            shadowBlur={20}
+                            shadowOpacity={0.2}
+                            // Checkerboard for transparency
+                            {...(isTransparent ? {
+                                fillPriority: 'pattern',
+                                fillPatternImage: (() => {
+                                    const canvas = document.createElement('canvas');
+                                    canvas.width = 20;
+                                    canvas.height = 20;
+                                    const ctx = canvas.getContext('2d');
+                                    if (ctx) {
+                                        ctx.fillStyle = '#333';
+                                        ctx.fillRect(0, 0, 10, 10);
+                                        ctx.fillRect(10, 10, 10, 10);
+                                        ctx.fillStyle = '#444';
+                                        ctx.fillRect(10, 0, 10, 10);
+                                        ctx.fillRect(0, 10, 10, 10);
+                                    }
+                                    return canvas;
+                                })(),
+                            } as any : {})}
+                        />
 
                         {elements.map((el) => {
                             const commonProps = {
@@ -156,9 +214,9 @@ export const ThumbnailCanvas = forwardRef<Konva.Stage, ThumbnailCanvasProps>(({
                         })}
 
                         <TransformerComponent selectedId={selectedId} />
-                    </Layer>
-                </Stage>
-            </div>
+                    </Group>
+                </Layer>
+            </Stage>
         </div>
     );
 });

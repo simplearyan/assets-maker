@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react';
-import Konva from 'konva';
 import { Panel, Group, Separator } from 'react-resizable-panels';
 import { ThumbnailCanvas } from '../components/thumbnail/ThumbnailCanvas';
 import { Toolbar } from '../components/thumbnail/Toolbar';
@@ -31,7 +30,7 @@ export function ThumbnailMaker() {
     const [leftTab, setLeftTab] = useState<'templates' | 'layers'>('templates');
     const [zoom, setZoom] = useState(1);
     const { isNavVisible } = useUIStore();
-    const stageRef = useRef<Konva.Stage>(null);
+    const stageRef = useRef<any>(null);
 
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 768);

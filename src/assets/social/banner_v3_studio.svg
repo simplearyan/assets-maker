@@ -1,0 +1,13 @@
+<svg width="2560" height="1440" viewBox="0 0 2560 1440" fill="none" xmlns="http://www.w3.org/2000/svg">
+    
+            <rect width="2560" height="1440" fill="#09090b"/>
+            <defs>
+                <linearGradient id="text_grad" x1="0" y1="0" x2="0" y2="1">
+                    <stop stop-color="#fff" />
+                    <stop offset="1" stop-color="#94a3b8" />
+                </linearGradient>
+            </defs>
+            <text x="1280" y="720" text-anchor="middle" fill="url(#text_grad)" font-family="'Plus Jakarta Sans', 'Inter', sans-serif" font-weight="800" font-size="300" letter-spacing="-10">KENICHI</text>
+            <text x="1280" y="900" text-anchor="middle" fill="#3b82f6" font-family="'Plus Jakarta Sans', 'Inter', sans-serif" font-weight="600" font-size="60" letter-spacing="10">DESIGN SYSTEM</text>
+        
+</svg>

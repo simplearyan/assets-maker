@@ -1,0 +1,20 @@
+<svg width="1280" height="720" viewBox="0 0 1280 720" fill="none" xmlns="http://www.w3.org/2000/svg">
+    
+            <rect width="1280" height="720" fill="#09090b"/>
+            <!-- Code Background Pattern -->
+            <text x="40" y="60" fill="#18181b" font-family="monospace" font-size="24" opacity="0.5">
+                const update = () => { build(new_features); }
+            </text>
+             <text x="40" y="100" fill="#18181b" font-family="monospace" font-size="24" opacity="0.5">
+                // TODO: Refactor legacy systems
+            </text>
+            
+            <!-- Badge -->
+            <rect x="0" y="100" width="400" height="120" fill="#3b82f6" />
+            <text x="40" y="180" fill="white" font-family="'Plus Jakarta Sans', 'Inter', sans-serif" font-weight="bold" font-size="60">DEVLOG</text>
+            
+            <!-- Title -->
+            <text x="40" y="540" fill="white" font-family="'Plus Jakarta Sans', 'Inter', sans-serif" font-weight="800" font-size="90">Building the</text>
+            <text x="40" y="640" fill="#60A5FA" font-family="'Plus Jakarta Sans', 'Inter', sans-serif" font-weight="800" font-size="90">New Engine</text>
+        
+</svg>

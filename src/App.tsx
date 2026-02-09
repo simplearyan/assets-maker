@@ -1,13 +1,10 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Layout } from './components/layout/Layout';
 import { Home } from './pages/Home';
-import { Features } from './pages/Features';
-
-// Placeholder Pages
-const LogoStudio = () => <div className="text-2xl font-bold p-10">Logo Studio (Coming Soon)</div>;
-const Vectorizer = () => <div className="text-2xl font-bold p-10">Vector Pro (Coming Soon)</div>;
-const Converter = () => <div className="text-2xl font-bold p-10">Batch Converter (Coming Soon)</div>;
-const Editor = () => <div className="text-2xl font-bold p-10">Image Editor (Coming Soon)</div>;
+import { LogoStudio } from './pages/LogoStudio';
+import { Vectorizer } from './pages/Vectorizer';
+import { Converter } from './pages/Converter';
+import { Editor } from './pages/Editor';
 
 function App() {
   return (
@@ -15,7 +12,6 @@ function App() {
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
-          <Route path="features" element={<Features />} />
           <Route path="logo-studio" element={<LogoStudio />} />
           <Route path="vectorizer" element={<Vectorizer />} />
           <Route path="converter" element={<Converter />} />

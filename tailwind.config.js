@@ -20,23 +20,22 @@ export default {
       },
       fontFamily: {
         sans: ['Inter', 'sans-serif'],
-        heading: ['Plus Jakarta Sans', 'sans-serif'],
-      },
-      animation: {
-        'fade-in': 'fadeIn 0.5s ease-out',
-        'slide-up': 'slideUp 0.5s ease-out',
-        'pulse-slow': 'pulse 3s infinite',
+        brand: ['"Plus Jakarta Sans"', 'sans-serif'],
       },
       keyframes: {
-        fadeIn: {
-          '0%': { opacity: '0' },
-          '100%': { opacity: '1' },
+        heroFloat: {
+          '0%, 100%': { transform: 'translateY(0) rotate(0deg)' },
+          '50%': { transform: 'translateY(-20px) rotate(2deg)' },
         },
         slideUp: {
-          '0%': { transform: 'translateY(20px)', opacity: '0' },
-          '100%': { transform: 'translateY(0)', opacity: '1' },
-        }
-      }
+          'from': { opacity: '0', transform: 'translateY(40px)' },
+          'to': { opacity: '1', transform: 'translateY(0)' },
+        },
+      },
+      animation: {
+        heroFloat: 'heroFloat 8s ease-in-out infinite',
+        slideUp: 'slideUp 0.8s cubic-bezier(0.25, 0.4, 0.25, 1) forwards',
+      },
     },
   },
   plugins: [],

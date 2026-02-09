@@ -25,22 +25,22 @@ export default defineConfig({
         scope: './',
         icons: [
           {
-            src: '/assets/logos/png/logo-192.png',
+            src: 'assets/logos/png/logo-192.png',
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: '/assets/logos/png/logo-512.png',
+            src: 'assets/logos/png/logo-512.png',
             sizes: '512x512',
             type: 'image/png'
           },
           {
-            src: '/assets/logos/png/logo-512.png',
+            src: 'assets/logos/png/logo-512.png',
             sizes: '512x512',
             type: 'image/png'
           },
           {
-            src: '/assets/logos/png/maskable.png',
+            src: 'assets/logos/png/maskable.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable'

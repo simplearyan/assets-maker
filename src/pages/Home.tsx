@@ -47,6 +47,7 @@ export function Home() {
                     className="relative"
                 >
                     <div className="hero-mark absolute -top-20 left-1/2 -translate-x-1/2 w-32 h-32 bg-accent/20 blur-3xl rounded-full" />
+                    <div className="hero-mark-secondary absolute -bottom-10 right-1/4 w-40 h-40 bg-purple-500/10 dark:bg-purple-500/5 blur-3xl rounded-full -z-10 animate-pulse" />
                     <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 bg-gradient-to-br from-zinc-900 to-zinc-500 dark:from-white dark:to-white/50 bg-clip-text text-transparent">
                         Create Assets <br /> Like a Pro
                     </h1>

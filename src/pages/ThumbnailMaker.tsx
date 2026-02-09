@@ -215,7 +215,7 @@ export function ThumbnailMaker() {
                             <div className="space-y-4">
                                 <div className="flex justify-between text-sm">
                                     <span>Opacity</span>
-                                    <span>{Math.round((selectedElement.opacity || 1) * 100)}%</span>
+                                    <span>{Math.round((selectedElement.opacity !== undefined ? selectedElement.opacity : 1) * 100)}%</span>
                                 </div>
                                 <Slider
                                     min={0}

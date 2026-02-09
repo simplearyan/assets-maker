@@ -31,11 +31,11 @@ export const Slider = forwardRef<HTMLSpanElement, SliderProps>(
                 onValueChange={handleValueChange}
                 {...props}
             >
-                <SliderPrimitive.Track className="relative bg-white/10 grow rounded-full h-1.5 overflow-hidden group-hover:bg-white/20 transition-colors">
+                <SliderPrimitive.Track className="relative bg-zinc-200 dark:bg-white/10 grow rounded-full h-1.5 overflow-hidden group-hover:bg-zinc-300 dark:group-hover:bg-white/20 transition-colors">
                     <SliderPrimitive.Range className="absolute bg-accent h-full" />
                 </SliderPrimitive.Track>
                 <SliderPrimitive.Thumb
-                    className="block w-4 h-4 bg-white rounded-full shadow-lg ring-offset-background transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 group-hover:scale-110 bg-accent text-accent"
+                    className="block w-4 h-4 bg-white border border-black/10 dark:border-transparent rounded-full shadow-lg ring-offset-background transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 group-hover:scale-110"
                     aria-label="Slider"
                 />
             </SliderPrimitive.Root>

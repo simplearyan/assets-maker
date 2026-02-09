@@ -145,7 +145,7 @@ export function PropertiesPanel({ element, onChange, onDelete, onDuplicate, onCl
 
             {/* Opacity */}
             <div>
-                <Label>Opacity ({Math.round((element.opacity || 1) * 100)}%)</Label>
+                <Label>Opacity ({Math.round((element.opacity !== undefined ? element.opacity : 1) * 100)}%)</Label>
                 <Slider
                     min={0}
                     max={1}

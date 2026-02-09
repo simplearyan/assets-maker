@@ -43,7 +43,12 @@
   }
 
   body {
-    @apply bg-[var(--bg)] text-[var(--text-main)] font-sans antialiased transition-colors duration-300;
+    @apply bg-[var(--bg)] text-[var(--text-main)] antialiased transition-colors duration-300;
+  }
+
+  ::selection {
+    background-color: var(--accent-glow);
+    color: white;
   }
 
   h1,
@@ -56,18 +61,7 @@
   }
 }
 
-/* Glassmorphism Utilities */
 @layer components {
-  .glass-card {
-    @apply rounded-3xl transition-all duration-300 border border-[var(--border)] shadow-sm hover:shadow-md;
-    background: var(--surface-card);
-  }
-
-  /* Smooth toggle transition */
-  .theme-transition {
-    @apply transition-colors duration-300;
-  }
-
   .btn {
     @apply inline-flex items-center justify-center px-6 py-2 rounded-full font-semibold transition-all duration-300;
   }

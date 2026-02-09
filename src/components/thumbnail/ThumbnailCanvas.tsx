@@ -11,6 +11,9 @@ interface ThumbnailCanvasProps {
     onChange: (id: string, attrs: Partial<ThumbnailElement>) => void;
     background: string;
     zoom: number;
+    canvasWidth: number;
+    canvasHeight: number;
+    isTransparent: boolean;
 }
 
 const URLImage = ({ src, ...props }: any) => {
@@ -18,7 +21,10 @@ const URLImage = ({ src, ...props }: any) => {
     return <KonvaImage image={image} {...props} />;
 };
 
-export const ThumbnailCanvas = forwardRef<Konva.Stage, ThumbnailCanvasProps>(({ elements, selectedId, onSelect, onChange, background, zoom }, ref) => {
+export const ThumbnailCanvas = forwardRef<Konva.Stage, ThumbnailCanvasProps>(({
+    elements, selectedId, onSelect, onChange, background, zoom,
+    canvasWidth = 1280, canvasHeight = 720, isTransparent = false
+}, ref) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [scale, setScale] = useState(1);
 
@@ -31,18 +37,18 @@ export const ThumbnailCanvas = forwardRef<Konva.Stage, ThumbnailCanvasProps>(({ 
             if (entry) {
                 const { width: containerWidth, height: containerHeight } = entry.contentRect;
 
-                // Target aspect ratio 16:9 (1280x720)
-                const targetRatio = 1280 / 720;
+                // Target aspect ratio
+                const targetRatio = canvasWidth / canvasHeight;
                 const containerRatio = containerWidth / containerHeight;
 
                 let autoScale = 1;
 
                 if (containerRatio < targetRatio) {
                     // Fit to width
-                    autoScale = containerWidth / 1280;
+                    autoScale = containerWidth / canvasWidth;
                 } else {
                     // Fit to height
-                    autoScale = containerHeight / 720;
+                    autoScale = containerHeight / canvasHeight;
                 }
 
                 // Add some padding (e.g., 90% of available space)
@@ -66,16 +72,18 @@ export const ThumbnailCanvas = forwardRef<Konva.Stage, ThumbnailCanvasProps>(({ 
     return (
         <div ref={containerRef} className="w-full h-full flex items-center justify-center bg-bg/50 overflow-hidden">
             <div
-                className="shadow-[0_0_30px_rgba(0,0,0,0.1)] dark:shadow-[0_0_50px_rgba(0,0,0,0.5)] transition-shadow duration-500"
+                className="shadow-[0_0_30px_rgba(0,0,0,0.1)] dark:shadow-[0_0_50_rgba(0,0,0,0.5)] transition-shadow duration-500 overflow-hidden"
                 style={{
-                    width: 1280 * scale,
-                    height: 720 * scale,
+                    width: canvasWidth * scale,
+                    height: canvasHeight * scale,
+                    backgroundImage: isTransparent ? 'conic-gradient(#333 90deg, #444 90deg 180deg, #333 180deg 270deg, #444 270deg)' : 'none',
+                    backgroundSize: '20px 20px'
                 }}
             >
                 <Stage
                     ref={ref}
-                    width={1280 * scale}
-                    height={720 * scale}
+                    width={canvasWidth * scale}
+                    height={canvasHeight * scale}
                     scaleX={scale}
                     scaleY={scale}
                     onMouseDown={checkDeselect}
@@ -83,13 +91,15 @@ export const ThumbnailCanvas = forwardRef<Konva.Stage, ThumbnailCanvasProps>(({ 
                 >
                     <Layer>
                         {/* Background */}
-                        <Rect
-                            x={0}
-                            y={0}
-                            width={1280}
-                            height={720}
-                            fill={background}
-                        />
+                        {!isTransparent && (
+                            <Rect
+                                x={0}
+                                y={0}
+                                width={canvasWidth}
+                                height={canvasHeight}
+                                fill={background}
+                            />
+                        )}
 
                         {elements.map((el) => {
                             const commonProps = {

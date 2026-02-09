@@ -21,7 +21,10 @@ import { useUIStore } from '../store/uiStore';
 export function ThumbnailMaker() {
     const [elements, setElements] = useState<ThumbnailElement[]>([]);
     const [selectedId, setSelectedId] = useState<string | null>(null);
-    const [background] = useState('#ffffff');
+    const [background, setBackground] = useState('#ffffff');
+    const [canvasWidth, setCanvasWidth] = useState(1280);
+    const [canvasHeight, setCanvasHeight] = useState(720);
+    const [isTransparent, setIsTransparent] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
     const [activeTab, setActiveTab] = useState<PropertyTab>(null);
     const [showTemplates, setShowTemplates] = useState(true);
@@ -140,6 +143,13 @@ export function ThumbnailMaker() {
         }, 50);
     };
 
+    const handleUpdateCanvas = (settings: Partial<{ width: number; height: number; background: string; isTransparent: boolean }>) => {
+        if (settings.width !== undefined) setCanvasWidth(settings.width);
+        if (settings.height !== undefined) setCanvasHeight(settings.height);
+        if (settings.background !== undefined) setBackground(settings.background);
+        if (settings.isTransparent !== undefined) setIsTransparent(settings.isTransparent);
+    };
+
     const selectedElement = elements.find((el) => el.id === selectedId) || null;
 
     if (isMobile) {
@@ -157,6 +167,9 @@ export function ThumbnailMaker() {
                         onChange={handleUpdateElement}
                         background={background}
                         zoom={zoom}
+                        canvasWidth={canvasWidth}
+                        canvasHeight={canvasHeight}
+                        isTransparent={isTransparent}
                     />
 
                     {/* Mobile Zoom Controls */}
@@ -405,6 +418,9 @@ export function ThumbnailMaker() {
                             onChange={handleUpdateElement}
                             background={background}
                             zoom={zoom}
+                            canvasWidth={canvasWidth}
+                            canvasHeight={canvasHeight}
+                            isTransparent={isTransparent}
                         />
 
                         {/* Zoom Controls */}
@@ -444,6 +460,14 @@ export function ThumbnailMaker() {
                         onDelete={handleDeleteElement}
                         onDuplicate={handleDuplicateElement}
                         onReorder={handleReorderElement}
+                        onClose={() => setSelectedId(null)}
+                        canvasSettings={{
+                            width: canvasWidth,
+                            height: canvasHeight,
+                            background: background,
+                            isTransparent: isTransparent
+                        }}
+                        onUpdateCanvas={handleUpdateCanvas}
                     />
                 </Panel>
             </Group>

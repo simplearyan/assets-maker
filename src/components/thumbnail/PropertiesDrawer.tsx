@@ -10,9 +10,19 @@ interface PropertiesDrawerProps {
     onDelete: (id: string) => void;
     onDuplicate: (id: string) => void;
     onReorder: (id: string, type: 'front' | 'back' | 'forward' | 'backward') => void;
+    canvasSettings?: {
+        width: number;
+        height: number;
+        background: string;
+        isTransparent: boolean;
+    };
+    onUpdateCanvas?: (settings: Partial<{ width: number; height: number; background: string; isTransparent: boolean }>) => void;
 }
 
-export function PropertiesDrawer({ element, isOpen, onOpenChange, onChange, onDelete, onDuplicate, onReorder }: PropertiesDrawerProps) {
+export function PropertiesDrawer({
+    element, isOpen, onOpenChange, onChange, onDelete, onDuplicate, onReorder,
+    canvasSettings, onUpdateCanvas
+}: PropertiesDrawerProps) {
     return (
         <Drawer.Root open={isOpen} onOpenChange={onOpenChange}>
             <Drawer.Portal>
@@ -33,6 +43,8 @@ export function PropertiesDrawer({ element, isOpen, onOpenChange, onChange, onDe
                             }}
                             onReorder={onReorder}
                             onClose={() => onOpenChange(false)}
+                            canvasSettings={canvasSettings}
+                            onUpdateCanvas={onUpdateCanvas}
                         />
                     </div>
                 </Drawer.Content>

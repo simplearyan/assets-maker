@@ -10,6 +10,7 @@ interface SidebarProps {
 
 const navItems = [
     { name: 'Home', path: '/', icon: Home },
+    { name: 'Features', path: '/features', icon: Layers },
     { name: 'Logo Studio', path: '/logo-studio', icon: PenTool },
     { name: 'Vector Pro', path: '/vectorizer', icon: Image },
     { name: 'Batch Converter', path: '/converter', icon: Layers },

@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Layout } from './components/layout/Layout';
 import { Home } from './pages/Home';
+import { Features } from './pages/Features';
 
 // Placeholder Pages
 const LogoStudio = () => <div className="text-2xl font-bold p-10">Logo Studio (Coming Soon)</div>;
@@ -14,6 +15,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
+          <Route path="features" element={<Features />} />
           <Route path="logo-studio" element={<LogoStudio />} />
           <Route path="vectorizer" element={<Vectorizer />} />
           <Route path="converter" element={<Converter />} />

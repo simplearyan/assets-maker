@@ -4,15 +4,42 @@
 
 @layer base {
   :root {
-    --bg: #09090b;
-    --text-main: #ffffff;
-    --text-muted: #a1a1aa;
+    /* Light Mode Tokens - Refined */
+    --bg: #f8fafc;
+    /* Slate 50 - slightly off-white base */
+    --surface: #ffffff;
+    /* Pure white sidebar/headers */
+    --surface-card: #ffffff;
+    /* White cards */
+    --border: #e2e8f0;
+    /* Slate 200 */
+    --border-hover: #cbd5e1;
+    /* Slate 300 */
+    --text-main: #0f172a;
+    /* Slate 900 */
+    --text-muted: #64748b;
+    /* Slate 500 */
+    --accent: #3b82f6;
+    --accent-glow: rgba(59, 130, 246, 0.15);
   }
 
-  .light {
-    --bg: #FAFAFA;
-    --text-main: #09090b;
-    --text-muted: #52525b;
+  .dark {
+    /* Dark Mode Tokens - Deep & Rich */
+    --bg: #020617;
+    /* Slate 950 - Richer black/blue tint */
+    --surface: #0f172a;
+    /* Slate 900 - Solid surface for sidebar to prevent transparency clashes */
+    --surface-card: rgba(30, 41, 59, 0.4);
+    /* Slate 800 with opacity */
+    --border: rgba(255, 255, 255, 0.08);
+    /* Subtle white border */
+    --border-hover: rgba(255, 255, 255, 0.15);
+    --text-main: #f8fafc;
+    /* Slate 50 */
+    --text-muted: #94a3b8;
+    /* Slate 400 */
+    --accent: #3b82f6;
+    --accent-glow: rgba(59, 130, 246, 0.3);
   }
 
   body {
@@ -32,7 +59,13 @@
 /* Glassmorphism Utilities */
 @layer components {
   .glass-card {
-    @apply rounded-3xl transition-all duration-300;
+    @apply rounded-3xl transition-all duration-300 border border-[var(--border)] shadow-sm hover:shadow-md;
+    background: var(--surface-card);
+  }
+
+  /* Smooth toggle transition */
+  .theme-transition {
+    @apply transition-colors duration-300;
   }
 
   .btn {

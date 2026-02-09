@@ -15,12 +15,14 @@ export function ThemeToggle() {
     if (!mounted) return null;
 
     return (
-        <div className="flex items-center gap-1 p-1 bg-surface-card border border-border rounded-lg">
+        <div className="flex items-center gap-1 p-1.5 bg-bg/50 border border-border rounded-full w-full relative">
             <button
                 onClick={() => setTheme('light')}
                 className={cn(
-                    "p-2 rounded-md transition-all duration-200",
-                    theme === 'light' ? "bg-white text-black shadow-sm" : "text-text-muted hover:text-text-main"
+                    "flex-1 p-2 rounded-full transition-all duration-300 flex items-center justify-center relative z-10",
+                    theme === 'light'
+                        ? "text-black bg-white shadow-sm ring-1 ring-black/5"
+                        : "text-text-muted hover:text-text-main"
                 )}
                 title="Light Mode"
             >
@@ -29,8 +31,10 @@ export function ThemeToggle() {
             <button
                 onClick={() => setTheme('system')}
                 className={cn(
-                    "p-2 rounded-md transition-all duration-200",
-                    theme === 'system' ? "bg-accent/20 text-accent font-medium" : "text-text-muted hover:text-text-main"
+                    "flex-1 p-2 rounded-full transition-all duration-300 flex items-center justify-center relative z-10",
+                    theme === 'system'
+                        ? "text-accent bg-accent/10 font-medium"
+                        : "text-text-muted hover:text-text-main"
                 )}
                 title="System Preference"
             >
@@ -39,8 +43,10 @@ export function ThemeToggle() {
             <button
                 onClick={() => setTheme('dark')}
                 className={cn(
-                    "p-2 rounded-md transition-all duration-200",
-                    theme === 'dark' ? "bg-zinc-800 text-white shadow-sm" : "text-text-muted hover:text-text-main"
+                    "flex-1 p-2 rounded-full transition-all duration-300 flex items-center justify-center relative z-10",
+                    theme === 'dark'
+                        ? "text-white bg-slate-800 shadow-sm ring-1 ring-white/10"
+                        : "text-text-muted hover:text-text-main"
                 )}
                 title="Dark Mode"
             >

@@ -14,6 +14,7 @@ interface ThumbnailCanvasProps {
     canvasWidth: number;
     canvasHeight: number;
     isTransparent: boolean;
+    clipContent?: boolean;
 }
 
 const URLImage = ({ src, ...props }: any) => {
@@ -23,7 +24,7 @@ const URLImage = ({ src, ...props }: any) => {
 
 export const ThumbnailCanvas = forwardRef<any, ThumbnailCanvasProps>(({
     elements, selectedId, onSelect, onChange, background, zoom,
-    canvasWidth = 1280, canvasHeight = 720, isTransparent = false
+    canvasWidth = 1280, canvasHeight = 720, isTransparent = false, clipContent = false
 }, ref) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const stageInternalRef = useRef<Konva.Stage>(null);
@@ -127,91 +128,96 @@ export const ThumbnailCanvas = forwardRef<any, ThumbnailCanvasProps>(({
                             cornerRadius={4 / scale}
                         />
 
-                        {/* Exportable Area Background */}
-                        <Rect
-                            name="canvas-background"
-                            x={0}
-                            y={0}
-                            width={canvasWidth}
-                            height={canvasHeight}
-                            fill={isTransparent ? 'transparent' : background}
-                            shadowColor="black"
-                            shadowBlur={20}
-                            shadowOpacity={0.2}
-                            // Checkerboard for transparency
-                            {...(isTransparent ? {
-                                fillPriority: 'pattern',
-                                fillPatternImage: (() => {
-                                    const canvas = document.createElement('canvas');
-                                    canvas.width = 20;
-                                    canvas.height = 20;
-                                    const ctx = canvas.getContext('2d');
-                                    if (ctx) {
-                                        ctx.fillStyle = '#333';
-                                        ctx.fillRect(0, 0, 10, 10);
-                                        ctx.fillRect(10, 10, 10, 10);
-                                        ctx.fillStyle = '#444';
-                                        ctx.fillRect(10, 0, 10, 10);
-                                        ctx.fillRect(0, 10, 10, 10);
+                        {/* Content Group - Clipped if requested */}
+                        <Group clip={clipContent ? { x: 0, y: 0, width: canvasWidth, height: canvasHeight } : undefined}>
+
+                            {/* Exportable Area Background */}
+                            <Rect
+                                name="canvas-background"
+                                x={0}
+                                y={0}
+                                width={canvasWidth}
+                                height={canvasHeight}
+                                fill={isTransparent ? 'transparent' : background}
+                                shadowColor="black"
+                                shadowBlur={20}
+                                shadowOpacity={0.2}
+                                // Checkerboard for transparency
+                                {...(isTransparent ? {
+                                    fillPriority: 'pattern',
+                                    fillPatternImage: (() => {
+                                        const canvas = document.createElement('canvas');
+                                        canvas.width = 20;
+                                        canvas.height = 20;
+                                        const ctx = canvas.getContext('2d');
+                                        if (ctx) {
+                                            ctx.fillStyle = '#333';
+                                            ctx.fillRect(0, 0, 10, 10);
+                                            ctx.fillRect(10, 10, 10, 10);
+                                            ctx.fillStyle = '#444';
+                                            ctx.fillRect(10, 0, 10, 10);
+                                            ctx.fillRect(0, 10, 10, 10);
+                                        }
+                                        return canvas;
+                                    })(),
+                                } as any : {})}
+                            />
+
+                            {elements.map((el) => {
+                                const commonProps = {
+                                    id: el.id,
+                                    x: el.x,
+                                    y: el.y,
+                                    rotation: el.rotation,
+                                    width: el.width,
+                                    height: el.height,
+                                    scaleX: el.scaleX,
+                                    scaleY: el.scaleY,
+                                    opacity: el.opacity,
+                                    draggable: true,
+                                    onClick: () => onSelect(el.id),
+                                    onTap: () => onSelect(el.id),
+                                    onDragEnd: (e: Konva.KonvaEventObject<DragEvent>) => {
+                                        onChange(el.id, {
+                                            x: e.target.x(),
+                                            y: e.target.y(),
+                                        });
+                                    },
+                                    onTransformEnd: (e: Konva.KonvaEventObject<Event>) => {
+                                        const node = e.target;
+                                        onChange(el.id, {
+                                            x: node.x(),
+                                            y: node.y(),
+                                            rotation: node.rotation(),
+                                            scaleX: node.scaleX(),
+                                            scaleY: node.scaleY(),
+                                        });
                                     }
-                                    return canvas;
-                                })(),
-                            } as any : {})}
-                        />
+                                };
 
-                        {elements.map((el) => {
-                            const commonProps = {
-                                id: el.id,
-                                x: el.x,
-                                y: el.y,
-                                rotation: el.rotation,
-                                width: el.width,
-                                height: el.height,
-                                scaleX: el.scaleX,
-                                scaleY: el.scaleY,
-                                opacity: el.opacity,
-                                draggable: true,
-                                onClick: () => onSelect(el.id),
-                                onTap: () => onSelect(el.id),
-                                onDragEnd: (e: Konva.KonvaEventObject<DragEvent>) => {
-                                    onChange(el.id, {
-                                        x: e.target.x(),
-                                        y: e.target.y(),
-                                    });
-                                },
-                                onTransformEnd: (e: Konva.KonvaEventObject<Event>) => {
-                                    const node = e.target;
-                                    onChange(el.id, {
-                                        x: node.x(),
-                                        y: node.y(),
-                                        rotation: node.rotation(),
-                                        scaleX: node.scaleX(),
-                                        scaleY: node.scaleY(),
-                                    });
+                                if (el.type === 'rect') {
+                                    return <Rect key={el.id} {...commonProps} fill={el.fill} stroke={el.stroke} strokeWidth={el.strokeWidth} />;
+                                } else if (el.type === 'circle') {
+                                    return <Circle key={el.id} {...commonProps} fill={el.fill} stroke={el.stroke} strokeWidth={el.strokeWidth} radius={(el.width || 50) / 2} />;
+                                } else if (el.type === 'text') {
+                                    return (
+                                        <Text
+                                            key={el.id}
+                                            {...commonProps}
+                                            text={el.text}
+                                            fontSize={el.fontSize}
+                                            fill={el.fill}
+                                            fontFamily={el.fontFamily}
+                                            fontStyle={el.fontWeight}
+                                        />
+                                    );
+                                } else if (el.type === 'image' && el.src) {
+                                    return <URLImage key={el.id} {...commonProps} src={el.src} />;
                                 }
-                            };
-
-                            if (el.type === 'rect') {
-                                return <Rect key={el.id} {...commonProps} fill={el.fill} stroke={el.stroke} strokeWidth={el.strokeWidth} />;
-                            } else if (el.type === 'circle') {
-                                return <Circle key={el.id} {...commonProps} fill={el.fill} stroke={el.stroke} strokeWidth={el.strokeWidth} radius={(el.width || 50) / 2} />;
-                            } else if (el.type === 'text') {
-                                return (
-                                    <Text
-                                        key={el.id}
-                                        {...commonProps}
-                                        text={el.text}
-                                        fontSize={el.fontSize}
-                                        fill={el.fill}
-                                        fontFamily={el.fontFamily}
-                                        fontStyle={el.fontWeight}
-                                    />
-                                );
-                            } else if (el.type === 'image' && el.src) {
-                                return <URLImage key={el.id} {...commonProps} src={el.src} />;
-                            }
-                            return null;
-                        })}
+                                return null;
+                                return null;
+                            })}
+                        </Group>
 
                         <TransformerComponent selectedId={selectedId} />
                     </Group>

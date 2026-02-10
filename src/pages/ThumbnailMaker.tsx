@@ -24,6 +24,7 @@ export function ThumbnailMaker() {
     const [canvasWidth, setCanvasWidth] = useState(1280);
     const [canvasHeight, setCanvasHeight] = useState(720);
     const [isTransparent, setIsTransparent] = useState(false);
+    const [clipContent, setClipContent] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
     const [activeTab, setActiveTab] = useState<PropertyTab>(null);
     const [showTemplates, setShowTemplates] = useState(true);
@@ -142,11 +143,12 @@ export function ThumbnailMaker() {
         }, 50);
     };
 
-    const handleUpdateCanvas = (settings: Partial<{ width: number; height: number; background: string; isTransparent: boolean }>) => {
+    const handleUpdateCanvas = (settings: Partial<{ width: number; height: number; background: string; isTransparent: boolean; clipContent: boolean }>) => {
         if (settings.width !== undefined) setCanvasWidth(settings.width);
         if (settings.height !== undefined) setCanvasHeight(settings.height);
         if (settings.background !== undefined) setBackground(settings.background);
         if (settings.isTransparent !== undefined) setIsTransparent(settings.isTransparent);
+        if (settings.clipContent !== undefined) setClipContent(settings.clipContent);
     };
 
     const selectedElement = elements.find((el) => el.id === selectedId) || null;
@@ -169,6 +171,7 @@ export function ThumbnailMaker() {
                         canvasWidth={canvasWidth}
                         canvasHeight={canvasHeight}
                         isTransparent={isTransparent}
+                        clipContent={clipContent}
                     />
 
                     {/* Mobile Zoom Controls */}
@@ -420,6 +423,7 @@ export function ThumbnailMaker() {
                             canvasWidth={canvasWidth}
                             canvasHeight={canvasHeight}
                             isTransparent={isTransparent}
+                            clipContent={clipContent}
                         />
 
                         {/* Zoom Controls */}
@@ -464,7 +468,8 @@ export function ThumbnailMaker() {
                             width: canvasWidth,
                             height: canvasHeight,
                             background: background,
-                            isTransparent: isTransparent
+                            isTransparent: isTransparent,
+                            clipContent: clipContent
                         }}
                         onUpdateCanvas={handleUpdateCanvas}
                     />

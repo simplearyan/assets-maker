@@ -8,10 +8,11 @@ import { ColorPicker } from '../ui/inputs/ColorPicker';
 import { X, Trash2, Copy, ArrowUpToLine, ArrowDownToLine, ChevronUp, ChevronDown } from 'lucide-react';
 
 interface CanvasSettings {
-    width: number;
-    height: number;
-    background: string;
-    isTransparent: boolean;
+    width?: number;
+    height?: number;
+    background?: string;
+    isTransparent?: boolean;
+    clipContent?: boolean;
 }
 
 interface PropertiesPanelProps {
@@ -19,7 +20,7 @@ interface PropertiesPanelProps {
     onChange: (id: string, attrs: Partial<ThumbnailElement>) => void;
     onDelete: (id: string) => void;
     onDuplicate: (id: string) => void;
-    onReorder?: (id: string, type: 'front' | 'back' | 'forward' | 'backward') => void;
+    onReorder: (id: string, type: 'front' | 'back' | 'forward' | 'backward') => void;
     onClose?: () => void;
     // Canvas Settings
     canvasSettings?: CanvasSettings;
@@ -100,6 +101,17 @@ export function PropertiesPanel({
                             />
                         </div>
                     )}
+                </div>
+
+                {/* Clip Content Toggle */}
+                <div className="flex items-center justify-between">
+                    <Label>Clip Content</Label>
+                    <input
+                        type="checkbox"
+                        checked={canvasSettings?.clipContent}
+                        onChange={(e) => onUpdateCanvas?.({ clipContent: e.target.checked })}
+                        className="w-5 h-5 rounded border-border bg-surface-card text-accent focus:ring-accent"
+                    />
                 </div>
 
                 <div className="pt-8 text-center text-[11px] text-text-muted uppercase font-bold tracking-wider">

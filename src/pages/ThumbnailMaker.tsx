@@ -202,14 +202,15 @@ export function ThumbnailMaker() {
                     </div>
 
                     {/* Mobile Bottom Toolbar / Context Bar Switcher */}
-                    <AnimatePresence mode="wait">
+                    {/* Mobile Bottom Toolbar / Context Bar Switcher */}
+                    <AnimatePresence>
                         {!selectedElement ? (
                             <motion.div
                                 key="toolbar"
-                                initial={{ y: '100%' }}
-                                animate={{ y: 0 }}
-                                exit={{ y: '100%' }}
-                                transition={{ type: 'spring', damping: 28, stiffness: 320, mass: 0.8 }}
+                                initial={{ opacity: 0, scale: 0.95, filter: 'blur(4px)' }}
+                                animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+                                exit={{ opacity: 0, scale: 0.95, filter: 'blur(4px)' }}
+                                transition={{ duration: 0.2, ease: "easeInOut" }}
                                 className="fixed bottom-0 left-0 right-0 z-30"
                             >
                                 <MobileToolbar
@@ -223,10 +224,10 @@ export function ThumbnailMaker() {
                         ) : (
                             <motion.div
                                 key="context-bar"
-                                initial={{ y: '100%' }}
-                                animate={{ y: 0 }}
-                                exit={{ y: '100%' }}
-                                transition={{ type: 'spring', damping: 28, stiffness: 320, mass: 0.8 }}
+                                initial={{ opacity: 0, scale: 0.95, filter: 'blur(4px)' }}
+                                animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+                                exit={{ opacity: 0, scale: 0.95, filter: 'blur(4px)' }}
+                                transition={{ duration: 0.2, ease: "easeInOut" }}
                                 className="fixed bottom-0 left-0 right-0 z-30 pointer-events-none"
                             >
                                 <div className="pointer-events-auto">

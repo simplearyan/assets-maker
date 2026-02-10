@@ -417,6 +417,49 @@ export function PropertyPanel({
                 </div>
             )}
 
+            {/* SVG Component Colors (Group) */}
+            {selectedObject.type === 'group' && (
+                <div className="space-y-4 pt-4 border-t border-white/5">
+                    <label className="text-xs font-bold text-text-muted uppercase tracking-wider flex items-center gap-2 px-1">
+                        <FileCode size={14} className="text-accent" /> Component Colors
+                    </label>
+                    <div className="grid grid-cols-1 gap-2 max-h-60 overflow-y-auto custom-scrollbar pr-1">
+                        {(selectedObject as fabric.Group).getObjects().map((obj, idx) => {
+                            // Only show if it's a path or has fill
+                            if (!obj.fill || typeof obj.fill !== 'string') return null;
+
+                            return (
+                                <div
+                                    key={idx}
+                                    className="flex items-center gap-3 bg-white/5 p-2 rounded-lg border border-white/5 group transition-all hover:bg-white/10"
+                                    onMouseEnter={() => onUpdateProperty('highlightChild', { index: idx, active: true })}
+                                    onMouseLeave={() => onUpdateProperty('highlightChild', { index: idx, active: false })}
+                                >
+                                    <div className="flex-1 flex flex-col gap-0.5">
+                                        <span className="text-[10px] text-text-muted uppercase font-bold">Path {idx + 1}</span>
+                                        <div className="flex items-center gap-2">
+                                            <div
+                                                className="w-3 h-3 rounded-full border border-white/20"
+                                                style={{ backgroundColor: obj.fill }}
+                                            />
+                                            <span className="text-[10px] text-text-muted font-mono truncate">{obj.fill}</span>
+                                        </div>
+                                    </div>
+                                    <ColorPicker
+                                        value={obj.fill}
+                                        onChange={(val) => onUpdateProperty('childFill', { index: idx, color: val })}
+                                        className="!gap-1"
+                                    />
+                                </div>
+                            );
+                        })}
+                    </div>
+                    <p className="text-[10px] text-text-muted px-1 italic">
+                        Tip: Hover over a color to see the path on canvas.
+                    </p>
+                </div>
+            )}
+
             {/* Effects */}
             {selectedObject && (
                 <div className="space-y-4 pt-4 border-t border-white/5">

@@ -218,8 +218,36 @@ export const LogoCanvas = forwardRef<LogoCanvasRef, LogoCanvasProps>(({
             if (active) {
                 // Handle special cases
                 if (key === 'fill' && active.type === 'group') {
-                    // Recursive update for SVG groups:
+                    // Recursive update for SVG groups (Legacy/Global fill)
                     (active as fabric.Group).getObjects().forEach(obj => obj.set('fill', value));
+                } else if (key === 'childFill' && active.type === 'group') {
+                    // Update specific child of a group
+                    const { index, color } = value;
+                    const children = (active as fabric.Group).getObjects();
+                    if (children[index]) {
+                        children[index].set('fill', color);
+                    }
+                } else if (key === 'highlightChild' && active.type === 'group') {
+                    // Logic to highlight a specific child (visual aid)
+                    const { index, active: isHighlighting } = value;
+                    const children = (active as fabric.Group).getObjects();
+                    if (children[index]) {
+                        // Use a temporary stroke or opacity for highlighting
+                        if (isHighlighting) {
+                            // Backup original stroke
+                            (children[index] as any)._origStroke = children[index].stroke;
+                            (children[index] as any)._origStrokeWidth = children[index].strokeWidth;
+                            children[index].set({
+                                stroke: '#3b82f6',
+                                strokeWidth: 2 / (active.scaleX || 1) // compensate for scale
+                            });
+                        } else {
+                            children[index].set({
+                                stroke: (children[index] as any)._origStroke,
+                                strokeWidth: (children[index] as any)._origStrokeWidth
+                            });
+                        }
+                    }
                 } else if (key === 'shadow') {
                     active.set('shadow', (value ? new fabric.Shadow(value) : null) as any);
                 } else if (key === 'blur') {

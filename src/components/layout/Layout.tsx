@@ -6,6 +6,8 @@ import { useUIStore } from '../../store/uiStore';
 export function Layout() {
     const location = useLocation();
     const { isNavVisible } = useUIStore();
+    const isHomePage = location.pathname === '/' || location.pathname === '/assets-maker' || location.pathname === '/assets-maker/';
+    const shouldShowNav = isNavVisible || isHomePage;
     const isFullWidth = ['/thumbnail-maker', '/logo-studio', '/editor'].some(path => location.pathname.endsWith(path));
 
     return (
@@ -16,13 +18,13 @@ export function Layout() {
             <div className="bg-mesh" />
 
             {/* Navigation */}
-            {isNavVisible && <NavPill />}
+            {shouldShowNav && <NavPill />}
 
             {/* Main Content */}
             <main
                 className={cn(
                     "relative z-10 min-h-screen flex flex-col transition-all duration-300",
-                    isNavVisible ? "pt-24" : "pt-0",
+                    shouldShowNav ? "pt-24" : "pt-0",
                     isFullWidth ? "px-0 md:px-4" : "pb-12 px-4 md:px-8 max-w-7xl mx-auto"
                 )}
             >

@@ -12,10 +12,11 @@ import { ColorPicker } from '../components/ui/inputs/ColorPicker';
 import { Label } from '../components/ui/inputs/Label';
 import { Input } from '../components/ui/inputs/Input';
 import { Slider } from '../components/ui/inputs/Slider';
-import { ZoomIn, ZoomOut, RotateCcw, ArrowUpToLine, ArrowDownToLine, ChevronUp, ChevronDown } from 'lucide-react';
-import { LayersPanel } from '../components/thumbnail/LayersPanel';
+import { ZoomIn, ZoomOut, RotateCcw, ArrowUpToLine, ArrowDownToLine, ChevronUp, ChevronDown, LayoutGrid as LayoutGridIcon } from 'lucide-react';
 import { cn, downloadFile } from '../lib/utils';
 import { useUIStore } from '../store/uiStore';
+import { AnimatePresence, motion } from 'framer-motion';
+import { SidebarContent } from '../components/thumbnail/SidebarContent';
 
 export function ThumbnailMaker() {
     const [elements, setElements] = useState<ThumbnailElement[]>([]);
@@ -26,18 +27,32 @@ export function ThumbnailMaker() {
     const [isTransparent, setIsTransparent] = useState(false);
     const [clipContent, setClipContent] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
+    const [isCompact, setIsCompact] = useState(false);
+    const [showSidebarDrawer, setShowSidebarDrawer] = useState(false);
     const [activeTab, setActiveTab] = useState<PropertyTab>(null);
     const [showTemplates, setShowTemplates] = useState(true);
-    const [leftTab, setLeftTab] = useState<'templates' | 'layers'>('templates');
     const [zoom, setZoom] = useState(1);
     const { isNavVisible } = useUIStore();
     const stageRef = useRef<any>(null);
 
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 768);
+        const checkCompact = () => {
+            const compact = window.innerWidth < 1280;
+            setIsCompact(compact);
+            if (!compact) setShowSidebarDrawer(false);
+        };
+
         checkMobile();
+        checkCompact();
+
         window.addEventListener('resize', checkMobile);
-        return () => window.removeEventListener('resize', checkMobile);
+        window.addEventListener('resize', checkCompact);
+
+        return () => {
+            window.removeEventListener('resize', checkMobile);
+            window.removeEventListener('resize', checkCompact);
+        };
     }, []);
 
     const handleAddElement = (type: ToolType, src?: string) => {
@@ -190,11 +205,51 @@ export function ThumbnailMaker() {
                             onAddText={() => handleAddElement('text')}
                             onAddShape={(type) => type === 'rect' ? handleAddElement('rect') : handleAddElement('circle')}
                             onUploadImage={handleUploadImage}
-                            onOpenTemplates={() => setShowTemplates(!showTemplates)}
+                            onOpenTemplates={() => setShowSidebarDrawer(true)}
                             onExport={handleExport}
                         />
                     </div>
                 </div>
+
+                {/* Mobile Sidebar Content Drawer */}
+                <AnimatePresence>
+                    {showSidebarDrawer && (
+                        <>
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                onClick={() => setShowSidebarDrawer(false)}
+                                className="absolute inset-0 z-40 bg-black/50 backdrop-blur-sm"
+                            />
+                            <motion.div
+                                initial={{ y: '100%' }}
+                                animate={{ y: 0 }}
+                                exit={{ y: '100%' }}
+                                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                                className="absolute bottom-0 left-0 right-0 h-[80vh] z-50 bg-surface rounded-t-2xl shadow-2xl overflow-hidden"
+                            >
+                                <div className="h-full flex flex-col">
+                                    <div className="flex items-center justify-center p-2 border-b border-border">
+                                        <div className="w-12 h-1 bg-border rounded-full" />
+                                    </div>
+                                    <div className="flex-1 overflow-hidden">
+                                        <SidebarContent
+                                            elements={elements}
+                                            selectedId={selectedId}
+                                            onSelect={(id) => {
+                                                setSelectedId(id);
+                                                setShowSidebarDrawer(false);
+                                            }}
+                                            onReorder={handleReorderElement}
+                                            onDelete={handleDeleteElement}
+                                        />
+                                    </div>
+                                </div>
+                            </motion.div>
+                        </>
+                    )}
+                </AnimatePresence>
 
                 {selectedElement && (
                     <MobilePropertyBar
@@ -342,68 +397,71 @@ export function ThumbnailMaker() {
             </div>
         );
     }
-
     return (
         <div className={cn(
             "w-full bg-bg font-sans text-text-main transition-all duration-300",
             isNavVisible ? "h-[calc(100vh-6rem)]" : "h-screen"
         )}>
+            {/* Compact Mode Sidebar Toggle */}
+            {isCompact && (
+                <div className="absolute top-4 left-4 z-30">
+                    <Button
+                        variant="glass"
+                        size="sm"
+                        onClick={() => setShowSidebarDrawer(true)}
+                        className="bg-surface/80 backdrop-blur-md shadow-lg border-border"
+                    >
+                        <LayoutGridIcon size={20} className="mr-2" />
+                        Templates & Layers
+                    </Button>
+                </div>
+            )}
+
+            {/* Floating Sidebar Drawer (Compact Mode) */}
+            <AnimatePresence>
+                {isCompact && showSidebarDrawer && (
+                    <>
+                        {/* Backdrop */}
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setShowSidebarDrawer(false)}
+                            className="absolute inset-0 z-40 bg-black/50 backdrop-blur-sm"
+                        />
+                        {/* Drawer */}
+                        <motion.div
+                            initial={{ x: '-100%' }}
+                            animate={{ x: 0 }}
+                            exit={{ x: '-100%' }}
+                            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                            className="absolute top-0 left-0 bottom-0 w-80 z-50 bg-surface border-r border-border shadow-2xl"
+                        >
+                            <SidebarContent
+                                elements={elements}
+                                selectedId={selectedId}
+                                onSelect={setSelectedId}
+                                onReorder={handleReorderElement}
+                                onDelete={handleDeleteElement}
+                            />
+                        </motion.div>
+                    </>
+                )}
+            </AnimatePresence>
+
             {/* @ts-expect-error - Group component type definition is missing direction prop in this version */}
             <Group direction="horizontal">
-                {/* Left Sidebar */}
-                {showTemplates && (
+                {/* Desktop Left Sidebar */}
+                {!isCompact && showTemplates && (
                     <>
                         <Panel defaultSize="20" minSize="15" maxSize="30" className="bg-surface border-r border-border rounded-l-lg hidden lg:block overflow-hidden shadow-sm z-10">
-                            <div className="flex flex-col h-full">
-                                {/* Sidebar Tabs */}
-                                <div className="flex items-center p-1 bg-surface-card/50 border-b border-border gap-1">
-                                    <button
-                                        onClick={() => setLeftTab('templates')}
-                                        className={cn(
-                                            "flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-[11px] font-bold uppercase transition-all",
-                                            leftTab === 'templates'
-                                                ? "bg-surface text-accent shadow-sm"
-                                                : "text-text-muted hover:text-text-main hover:bg-white/5"
-                                        )}
-                                    >
-                                        {/* <LayoutGrid size={14} /> */}
-                                        Templates
-                                    </button>
-                                    <button
-                                        onClick={() => setLeftTab('layers')}
-                                        className={cn(
-                                            "flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-[11px] font-bold uppercase transition-all",
-                                            leftTab === 'layers'
-                                                ? "bg-surface text-accent shadow-sm"
-                                                : "text-text-muted hover:text-text-main hover:bg-white/5"
-                                        )}
-                                    >
-                                        {/* <LayersIcon size={14} /> */}
-                                        Layers
-                                    </button>
-                                </div>
-
-                                <div className="flex-1 overflow-y-auto">
-                                    {leftTab === 'templates' ? (
-                                        <div className="p-4">
-                                            <h2 className="text-sm font-bold uppercase text-text-muted mb-4 sr-only">Templates</h2>
-                                            <div className="grid grid-cols-2 gap-2">
-                                                {[1, 2, 3, 4, 5, 6].map((i) => (
-                                                    <div key={i} className="aspect-video bg-surface-card rounded hover:bg-border/50 cursor-pointer border border-border hover:border-accent/50 transition-colors" />
-                                                ))}
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <LayersPanel
-                                            elements={elements}
-                                            selectedId={selectedId}
-                                            onSelect={setSelectedId}
-                                            onReorder={handleReorderElement}
-                                            onDelete={handleDeleteElement}
-                                        />
-                                    )}
-                                </div>
-                            </div>
+                            <SidebarContent
+                                elements={elements}
+                                selectedId={selectedId}
+                                onSelect={setSelectedId}
+                                onReorder={handleReorderElement}
+                                onDelete={handleDeleteElement}
+                            />
                         </Panel>
                         <Separator className="w-1 bg-border hover:bg-accent/50 transition-colors cursor-col-resize" />
                     </>

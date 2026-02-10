@@ -3,7 +3,6 @@ import { Panel, Group, Separator } from 'react-resizable-panels';
 import { ThumbnailCanvas } from '../components/thumbnail/ThumbnailCanvas';
 import { Toolbar } from '../components/thumbnail/Toolbar';
 import { PropertiesPanel } from '../components/thumbnail/PropertiesPanel';
-import { MobilePropertyBar, type PropertyTab } from '../components/thumbnail/MobilePropertyBar';
 import { MobilePropertyDeck } from '../components/thumbnail/MobilePropertyDeck';
 import type { ThumbnailElement, ToolType } from '../types/thumbnail';
 import { Button } from '../components/ui/Button';
@@ -18,6 +17,7 @@ import { useUIStore } from '../store/uiStore';
 import { AnimatePresence, motion } from 'framer-motion';
 import { SidebarContent } from '../components/thumbnail/SidebarContent';
 import { MobileToolbar } from '../components/thumbnail/MobileToolbar';
+import { MobileContextBar, type PropertyTab } from '../components/thumbnail/MobileContextBar';
 
 export function ThumbnailMaker() {
     const [elements, setElements] = useState<ThumbnailElement[]>([]);
@@ -201,14 +201,47 @@ export function ThumbnailMaker() {
                         </Button>
                     </div>
 
-                    {/* Mobile Bottom Toolbar */}
-                    <MobileToolbar
-                        onAddText={() => handleAddElement('text')}
-                        onAddShape={(type) => type === 'rect' ? handleAddElement('rect') : handleAddElement('circle')}
-                        onUploadImage={handleUploadImage}
-                        onOpenTemplates={() => setShowSidebarDrawer(true)}
-                        onExport={handleExport}
-                    />
+                    {/* Mobile Bottom Toolbar / Context Bar Switcher */}
+                    <AnimatePresence mode="wait">
+                        {!selectedElement ? (
+                            <motion.div
+                                key="toolbar"
+                                initial={{ y: '100%' }}
+                                animate={{ y: 0 }}
+                                exit={{ y: '100%' }}
+                                transition={{ type: 'spring', damping: 28, stiffness: 320, mass: 0.8 }}
+                                className="fixed bottom-0 left-0 right-0 z-30"
+                            >
+                                <MobileToolbar
+                                    onAddText={() => handleAddElement('text')}
+                                    onAddShape={(type) => type === 'rect' ? handleAddElement('rect') : handleAddElement('circle')}
+                                    onUploadImage={handleUploadImage}
+                                    onOpenTemplates={() => setShowSidebarDrawer(true)}
+                                    onExport={handleExport}
+                                />
+                            </motion.div>
+                        ) : (
+                            <motion.div
+                                key="context-bar"
+                                initial={{ y: '100%' }}
+                                animate={{ y: 0 }}
+                                exit={{ y: '100%' }}
+                                transition={{ type: 'spring', damping: 28, stiffness: 320, mass: 0.8 }}
+                                className="fixed bottom-0 left-0 right-0 z-30 pointer-events-none"
+                            >
+                                <div className="pointer-events-auto">
+                                    <MobileContextBar
+                                        element={selectedElement}
+                                        activeTab={activeTab as PropertyTab}
+                                        onTabChange={(tab) => setActiveTab(tab)}
+                                        onDelete={() => handleDeleteElement(selectedElement.id)}
+                                        onDuplicate={() => handleDuplicateElement(selectedElement.id)}
+                                        onClose={() => setSelectedId(null)}
+                                    />
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
 
                 {/* Mobile Sidebar Content Drawer */}
@@ -250,17 +283,6 @@ export function ThumbnailMaker() {
                         </>
                     )}
                 </AnimatePresence>
-
-                {selectedElement && (
-                    <MobilePropertyBar
-                        element={selectedElement}
-                        activeTab={activeTab}
-                        onTabChange={(tab) => setActiveTab(tab)}
-                        onDelete={() => handleDeleteElement(selectedElement.id)}
-                        onDuplicate={() => handleDuplicateElement(selectedElement.id)}
-                        onClose={() => setSelectedId(null)}
-                    />
-                )}
 
                 {selectedElement && (
                     <MobilePropertyDeck

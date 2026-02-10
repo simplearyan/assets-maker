@@ -5,6 +5,8 @@ import { Square, Circle as CircleIcon, Type, MousePointer2, Download, Trash2, Up
 import { cn } from '../lib/utils';
 import { fabric } from 'fabric';
 
+import { useLocation } from 'react-router-dom';
+
 type Tool = 'select' | 'rect' | 'circle' | 'text';
 
 export function LogoStudio() {
@@ -12,6 +14,7 @@ export function LogoStudio() {
     const fabricCanvasRef = useRef<fabric.Canvas | null>(null);
     const [activeTool, setActiveTool] = useState<Tool>('select');
     const [selectedObject, setSelectedObject] = useState<fabric.Object | null>(null);
+    const location = useLocation();
 
     // Initialize Fabric Canvas
     useEffect(() => {
@@ -25,6 +28,18 @@ export function LogoStudio() {
         });
 
         fabricCanvasRef.current = canvas;
+
+        // Load imported SVG if available
+        const importedSVG = location.state?.importedSVG;
+        if (importedSVG) {
+            fabric.loadSVGFromString(importedSVG, (objects: fabric.Object[], options: fabric.IGroupOptions) => {
+                const obj = fabric.util.groupSVGElements(objects, options);
+                canvas.add(obj);
+                canvas.centerObject(obj);
+                canvas.renderAll();
+                canvas.setActiveObject(obj);
+            });
+        }
 
         // Event Listeners
         const updateSelection = () => {

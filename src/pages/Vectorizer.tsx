@@ -1,19 +1,25 @@
 import { useState } from 'react';
 import { GlassCard } from '../components/ui/GlassCard';
 import { Button } from '../components/ui/Button';
-import { Upload, ArrowRight, Download, Wand2, Image as ImageIcon } from 'lucide-react';
+import { Upload, ArrowRight, Download, Wand2, Image as ImageIcon, Edit } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import ImageTracer from 'imagetracerjs';
+import { useNavigate } from 'react-router-dom';
 
 export function Vectorizer() {
     const [image, setImage] = useState<string | null>(null);
+    const [svgResult, setSvgResult] = useState<string | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
     const [isDone, setIsDone] = useState(false);
+
+    const navigate = useNavigate();
 
     const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
             const url = URL.createObjectURL(file);
             setImage(url);
+            setSvgResult(null);
             setIsDone(false);
         }
     };
@@ -21,11 +27,50 @@ export function Vectorizer() {
     const handleConvert = () => {
         if (!image) return;
         setIsProcessing(true);
-        // Simulate processing
+
+        // Detailed configuration for high quality output
+        const options = {
+            ltres: 1,
+            qtres: 1,
+            pathomit: 8,
+            colorsampling: 2, // 0=disabled, 1=random, 2=deterministic
+            numberofcolors: 16,
+            mincolorratio: 0.02,
+            colorquantcycles: 3,
+            scale: 1,
+            simplify: 0,
+            roundcoords: 1,
+            lcpr: 0,
+            qcpr: 0,
+            desc: false,
+            viewbox: true,
+            blurradius: 0,
+            blurdelta: 20
+        };
+
+        // Defer processing to allow UI update
         setTimeout(() => {
-            setIsProcessing(false);
-            setIsDone(true);
-        }, 2000);
+            ImageTracer.imageToSVG(image, (svgstr) => {
+                setSvgResult(svgstr);
+                setIsProcessing(false);
+                setIsDone(true);
+            }, options);
+        }, 100);
+    };
+
+    const downloadSVG = () => {
+        if (!svgResult) return;
+        const blob = new Blob([svgResult], { type: 'image/svg+xml' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.download = 'vectorized-image.svg';
+        link.href = url;
+        link.click();
+    };
+
+    const editInStudio = () => {
+        if (!svgResult) return;
+        navigate('/logo-studio', { state: { importedSVG: svgResult } });
     };
 
     return (
@@ -43,7 +88,15 @@ export function Vectorizer() {
                 {/* Input Side */}
                 <GlassCard className="min-h-[400px] flex flex-col items-center justify-center border-dashed border-2 border-white/20 relative overflow-hidden group">
                     {image ? (
-                        <img src={image} alt="Original" className="max-w-full max-h-[350px] object-contain rounded-lg shadow-2xl" />
+                        <div className="relative w-full h-full flex items-center justify-center p-4">
+                            <img src={image} alt="Original" className="max-w-full max-h-[350px] object-contain rounded-lg shadow-2xl" />
+                            <button
+                                onClick={() => setImage(null)}
+                                className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors"
+                            >
+                                <Upload size={16} />
+                            </button>
+                        </div>
                     ) : (
                         <div className="text-center p-8">
                             <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
@@ -86,8 +139,10 @@ export function Vectorizer() {
                     <AnimatePresence mode="wait">
                         {!image ? (
                             <motion.div
+                                key="empty"
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
                                 className="text-center text-text-muted"
                             >
                                 <ImageIcon size={48} className="mx-auto mb-4 opacity-20" />
@@ -95,6 +150,7 @@ export function Vectorizer() {
                             </motion.div>
                         ) : isProcessing ? (
                             <motion.div
+                                key="processing"
                                 initial={{ opacity: 0, scale: 0.9 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 1.1 }}
@@ -103,28 +159,32 @@ export function Vectorizer() {
                                 <div className="w-16 h-16 border-4 border-purple-400 border-t-transparent rounded-full animate-spin" />
                                 <p className="text-purple-600 dark:text-purple-300 animate-pulse">Vectorizing...</p>
                             </motion.div>
-                        ) : isDone ? (
+                        ) : isDone && svgResult ? (
                             <motion.div
+                                key="done"
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 className="w-full h-full flex flex-col items-center text-center"
                             >
-                                <div className="flex-1 w-full flex items-center justify-center p-4">
-                                    {/* Mock Result - In reality this would be the SVG */}
-                                    <img src={image} alt="Vector Result" className="max-w-full max-h-[300px] object-contain rounded-lg shadow-2xl saturate-150 contrast-125" />
+                                <div className="flex-1 w-full flex items-center justify-center p-4 bg-[url('/grid-pattern.svg')] bg-repeat opacity-100">
+                                    <div
+                                        className="max-w-full max-h-[300px] object-contain shadow-2xl bg-transparent"
+                                        dangerouslySetInnerHTML={{ __html: svgResult }}
+                                    />
                                 </div>
-                                <div className="w-full p-4 bg-surface backdrop-blur-md rounded-b-3xl border-t border-black/5 dark:border-white/10 flex gap-4 justify-center">
-                                    <Button variant="primary" className="bg-purple-500 text-white hover:bg-purple-400">
-                                        <Download size={18} /> SVG
+                                <div className="w-full p-4 bg-surface backdrop-blur-md rounded-b-3xl border-t border-black/5 dark:border-white/10 flex gap-4 justify-center flex-wrap">
+                                    <Button variant="primary" className="bg-purple-500 text-white hover:bg-purple-400" onClick={downloadSVG}>
+                                        <Download size={18} className="mr-2" /> SVG
                                     </Button>
-                                    <Button variant="glass">
-                                        <Download size={18} /> PNG
+                                    <Button variant="glass" onClick={editInStudio}>
+                                        <Edit size={18} className="mr-2" /> Edit in Studio
                                     </Button>
                                 </div>
                             </motion.div>
                         ) : (
                             <div className="text-center text-text-muted opacity-50">
                                 <p>Ready to convert</p>
+                                <Button variant="ghost" className="mt-4" onClick={handleConvert}>Start Conversion</Button>
                             </div>
                         )}
                     </AnimatePresence>

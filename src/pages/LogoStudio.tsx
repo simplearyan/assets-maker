@@ -1,75 +1,161 @@
 import { useState, useRef, useEffect } from 'react';
-import { Stage, Layer, Rect, Circle, Text, Transformer } from 'react-konva';
 import { GlassCard } from '../components/ui/GlassCard';
 import { Button } from '../components/ui/Button';
-import { Square, Circle as CircleIcon, Type, MousePointer2, Download, Trash2, Undo2, Redo2, type LucideIcon } from 'lucide-react';
+import { Square, Circle as CircleIcon, Type, MousePointer2, Download, Trash2, Upload, type LucideIcon } from 'lucide-react';
 import { cn } from '../lib/utils';
-import Konva from 'konva';
+import { fabric } from 'fabric';
 
 type Tool = 'select' | 'rect' | 'circle' | 'text';
 
-interface LogoElement {
-    id: string;
-    type: Tool;
-    x: number;
-    y: number;
-    width?: number;
-    height?: number;
-    radius?: number;
-    fill: string;
-    text?: string;
-    fontSize?: number;
-}
-
 export function LogoStudio() {
-    const [elements, setElements] = useState<LogoElement[]>([]);
-    const [selectedId, setSelectedId] = useState<string | null>(null);
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const fabricCanvasRef = useRef<fabric.Canvas | null>(null);
     const [activeTool, setActiveTool] = useState<Tool>('select');
+    const [selectedObject, setSelectedObject] = useState<fabric.Object | null>(null);
 
-    const stageRef = useRef<Konva.Stage>(null);
+    // Initialize Fabric Canvas
+    useEffect(() => {
+        if (!canvasRef.current || fabricCanvasRef.current) return;
 
-    const addElement = (type: Tool) => {
-        const id = crypto.randomUUID();
-        const newElement: LogoElement = {
-            id,
-            type,
-            x: 150,
-            y: 150,
-            fill: type === 'text' ? '#000000' : '#3b82f6',
+        const canvas = new fabric.Canvas(canvasRef.current, {
+            width: 800,
+            height: 600,
+            backgroundColor: '#ffffff',
+            preserveObjectStacking: true,
+        });
+
+        fabricCanvasRef.current = canvas;
+
+        // Event Listeners
+        const updateSelection = () => {
+            const active = canvas.getActiveObject();
+            setSelectedObject(active);
         };
 
-        if (type === 'rect') {
-            newElement.width = 100;
-            newElement.height = 100;
-        } else if (type === 'circle') {
-            newElement.radius = 50;
-        } else if (type === 'text') {
-            newElement.text = 'Logo Text';
-            newElement.fontSize = 24;
-        }
+        canvas.on('selection:created', updateSelection);
+        canvas.on('selection:updated', updateSelection);
+        canvas.on('selection:cleared', updateSelection);
 
-        setElements([...elements, newElement]);
-        setSelectedId(id);
-        setActiveTool('select');
+        return () => {
+            canvas.dispose();
+            fabricCanvasRef.current = null;
+        };
+    }, []);
+
+    const addRectangle = () => {
+        if (!fabricCanvasRef.current) return;
+        const rect = new fabric.Rect({
+            left: 100,
+            top: 100,
+            fill: '#3b82f6',
+            width: 100,
+            height: 100,
+        });
+        fabricCanvasRef.current.add(rect);
+        fabricCanvasRef.current.setActiveObject(rect);
     };
 
-    const handleExport = () => {
-        const uri = stageRef.current?.toDataURL();
-        if (uri) {
-            const link = document.createElement('a');
-            link.download = 'logo.png';
-            link.href = uri;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+    const addCircle = () => {
+        if (!fabricCanvasRef.current) return;
+        const circle = new fabric.Circle({
+            left: 250,
+            top: 100,
+            fill: '#ef4444',
+            radius: 50,
+        });
+        fabricCanvasRef.current.add(circle);
+        fabricCanvasRef.current.setActiveObject(circle);
+    };
+
+    const addText = () => {
+        if (!fabricCanvasRef.current) return;
+        const text = new fabric.IText('Logo Text', {
+            left: 100,
+            top: 250,
+            fontFamily: 'Inter',
+            fill: '#000000',
+            fontSize: 40,
+        });
+        fabricCanvasRef.current.add(text);
+        fabricCanvasRef.current.setActiveObject(text);
+    };
+
+    const deleteSelected = () => {
+        if (!fabricCanvasRef.current) return;
+        const active = fabricCanvasRef.current.getActiveObject();
+        if (active) {
+            fabricCanvasRef.current.remove(active);
+            fabricCanvasRef.current.discardActiveObject();
+            fabricCanvasRef.current.requestRenderAll();
+            setSelectedObject(null);
         }
     };
 
-    const handleDelete = () => {
-        if (selectedId) {
-            setElements(elements.filter(el => el.id !== selectedId));
-            setSelectedId(null);
+    const updateProperty = (key: string, value: any) => {
+        if (!fabricCanvasRef.current) return;
+        const active = fabricCanvasRef.current.getActiveObject();
+        if (active) {
+            active.set(key as any, value);
+            fabricCanvasRef.current.requestRenderAll();
+            // Force update state to reflect changes if needed, though mostly visual
+            setSelectedObject({ ...active } as fabric.Object);
         }
+    };
+
+    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !fabricCanvasRef.current) return;
+
+        const reader = new FileReader();
+        reader.onload = (f) => {
+            const result = f.target?.result as string;
+            if (file.type === 'image/svg+xml') {
+                fabric.loadSVGFromString(result, (objects: fabric.Object[], options: fabric.IGroupOptions) => {
+                    const obj = fabric.util.groupSVGElements(objects, options);
+                    fabricCanvasRef.current?.add(obj);
+                    fabricCanvasRef.current?.renderAll();
+                });
+            } else if (file.type.startsWith('image/')) {
+                // Regular image
+                fabric.Image.fromURL(result, (img: fabric.Image) => {
+                    img.scaleToWidth(200);
+                    fabricCanvasRef.current?.add(img);
+                });
+            }
+        };
+        reader.readAsText(file); // For SVG
+        // Note: For regular images use readAsDataURL, but let's stick to SVG optimized workflow or handle both
+        if (file.type !== 'image/svg+xml') {
+            const urlReader = new FileReader();
+            urlReader.onload = (f) => {
+                fabric.Image.fromURL(f.target?.result as string, (img: fabric.Image) => {
+                    img.scaleToWidth(200);
+                    fabricCanvasRef.current?.add(img);
+                });
+            }
+            urlReader.readAsDataURL(file);
+            return;
+        }
+    };
+
+    const exportSVG = () => {
+        if (!fabricCanvasRef.current) return;
+        const svg = fabricCanvasRef.current.toSVG();
+        const blob = new Blob([svg], { type: 'image/svg+xml' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.download = 'logo.svg';
+        link.href = url;
+        link.click();
+    };
+
+    const exportPNG = () => {
+        if (!fabricCanvasRef.current) return;
+        const url = fabricCanvasRef.current.toDataURL({ format: 'png', multiplier: 2 });
+        const link = document.createElement('a');
+        link.download = 'logo.png';
+        link.href = url;
+        link.click();
     };
 
     return (
@@ -83,96 +169,74 @@ export function LogoStudio() {
                     label="Select"
                 />
                 <div className="w-full h-px bg-white/10" />
-                <ToolButton
-                    icon={Square}
-                    onClick={() => addElement('rect')}
-                    label="Rectangle"
-                />
-                <ToolButton
-                    icon={CircleIcon}
-                    onClick={() => addElement('circle')}
-                    label="Circle"
-                />
-                <ToolButton
-                    icon={Type}
-                    onClick={() => addElement('text')}
-                    label="Text"
-                />
-                <div className="mt-auto flex flex-col gap-4">
-                    <ToolButton icon={Undo2} onClick={() => { }} label="Undo" />
-                    <ToolButton icon={Redo2} onClick={() => { }} label="Redo" />
-                </div>
+                <ToolButton icon={Square} onClick={addRectangle} label="Rectangle" />
+                <ToolButton icon={CircleIcon} onClick={addCircle} label="Circle" />
+                <ToolButton icon={Type} onClick={addText} label="Text" />
+                <div className="w-full h-px bg-white/10" />
+                <label className="cursor-pointer p-3 rounded-xl text-text-muted hover:bg-white/5 hover:text-text-main transition-all relative group">
+                    <Upload size={20} />
+                    <input type="file" className="hidden" accept=".svg,image/*" onChange={handleFileUpload} />
+                    <span className="absolute left-full ml-4 px-2 py-1 bg-surface border border-border rounded-lg text-xs opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">
+                        Import
+                    </span>
+                </label>
             </GlassCard>
 
             {/* Canvas Area */}
             <div className="flex-1 bg-surface/30 rounded-3xl border border-border flex items-center justify-center overflow-hidden relative">
                 <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] opacity-10" />
-                <Stage
-                    width={800}
-                    height={600}
-                    className="bg-white shadow-2xl"
-                    onMouseDown={(e) => {
-                        const clickedOnEmpty = e.target === e.target.getStage();
-                        if (clickedOnEmpty) {
-                            setSelectedId(null);
-                        }
-                    }}
-                    ref={stageRef}
-                >
-                    <Layer>
-                        {elements.map((el) => (
-                            <CanvasElement
-                                key={el.id}
-                                element={el}
-                                isSelected={el.id === selectedId}
-                                onSelect={() => setSelectedId(el.id)}
-                                onChange={(newAttrs: Partial<LogoElement>) => {
-                                    const newElements = elements.slice();
-                                    const index = newElements.findIndex(e => e.id === el.id);
-                                    newElements[index] = { ...newElements[index], ...newAttrs };
-                                    setElements(newElements);
-                                }}
-                            />
-                        ))}
-                    </Layer>
-                </Stage>
+                <div className="shadow-2xl">
+                    <canvas ref={canvasRef} />
+                </div>
             </div>
 
             {/* Properties Panel */}
             <GlassCard className="w-72 flex flex-col gap-6">
                 <h3 className="font-bold text-lg">Properties</h3>
-                {selectedId ? (
+                {selectedObject ? (
                     <div className="space-y-4">
                         <div>
-                            <label className="text-xs text-text-muted">Color</label>
-                            <div className="flex gap-2 mt-2">
-                                {['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#ffffff', '#000000'].map(color => (
+                            <label className="text-xs text-text-muted">Fill Color</label>
+                            <div className="flex gap-2 mt-2 flex-wrap">
+                                {['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#ffffff', '#000000', 'transparent'].map(color => (
                                     <button
                                         key={color}
-                                        className="w-8 h-8 rounded-full border border-white/10 hover:scale-110 transition-transform"
-                                        style={{ backgroundColor: color }}
-                                        onClick={() => {
-                                            const newElements = elements.map(el =>
-                                                el.id === selectedId ? { ...el, fill: color } : el
-                                            );
-                                            setElements(newElements);
-                                        }}
-                                    />
+                                        className="w-8 h-8 rounded-full border border-white/10 hover:scale-110 transition-transform relative"
+                                        style={{ backgroundColor: color === 'transparent' ? 'transparent' : color }}
+                                        onClick={() => updateProperty('fill', color)}
+                                    >
+                                        {color === 'transparent' && <div className="absolute inset-0 border border-red-500 transform rotate-45" />}
+                                    </button>
                                 ))}
                             </div>
                         </div>
 
-                        <Button variant="ghost" className="w-full justify-start text-red-400 hover:text-red-300 hover:bg-red-900/20" onClick={handleDelete}>
-                            <Trash2 size={16} /> Delete Element
+                        {/* Simple Opacity Slider */}
+                        <div>
+                            <label className="text-xs text-text-muted">Opacity</label>
+                            <input
+                                type="range"
+                                min="0" max="1" step="0.1"
+                                value={selectedObject.opacity || 1}
+                                onChange={(e) => updateProperty('opacity', parseFloat(e.target.value))}
+                                className="w-full mt-2 accent-accent"
+                            />
+                        </div>
+
+                        <Button variant="ghost" className="w-full justify-start text-red-400 hover:text-red-300 hover:bg-red-900/20" onClick={deleteSelected}>
+                            <Trash2 size={16} className="mr-2" /> Delete Element
                         </Button>
                     </div>
                 ) : (
                     <p className="text-text-muted text-sm">Select an element to edit properties.</p>
                 )}
 
-                <div className="mt-auto">
-                    <Button className="w-full" onClick={handleExport}>
-                        <Download size={18} /> Export Logo
+                <div className="mt-auto space-y-2">
+                    <Button className="w-full" onClick={exportPNG}>
+                        <Download size={18} className="mr-2" /> Export PNG
+                    </Button>
+                    <Button variant="glass" className="w-full" onClick={exportSVG}>
+                        <Download size={18} className="mr-2" /> Export SVG
                     </Button>
                 </div>
             </GlassCard>
@@ -202,81 +266,3 @@ const ToolButton = ({ icon: Icon, active, onClick, label }: ToolButtonProps) => 
         </span>
     </button>
 );
-
-interface CanvasElementProps {
-    element: LogoElement;
-    isSelected: boolean;
-    onSelect: () => void;
-    onChange: (attrs: Partial<LogoElement>) => void;
-}
-
-const CanvasElement = ({ element, isSelected, onSelect, onChange }: CanvasElementProps) => {
-    const shapeRef = useRef<Konva.Shape>(null);
-    const trRef = useRef<Konva.Transformer>(null);
-
-    useEffect(() => {
-        if (isSelected && trRef.current && shapeRef.current) {
-            const nodes = [shapeRef.current];
-            trRef.current.nodes(nodes);
-            trRef.current.getLayer()?.batchDraw();
-        }
-    }, [isSelected]);
-
-    const props = {
-        onClick: onSelect,
-        onTap: onSelect,
-        ref: shapeRef as any,
-        ...element,
-        draggable: true,
-        onDragEnd: (e: Konva.KonvaEventObject<DragEvent>) => {
-            onChange({
-                x: e.target.x(),
-                y: e.target.y(),
-            });
-        },
-        onTransformEnd: () => {
-            const node = shapeRef.current;
-            if (node) {
-                const scaleX = node.scaleX();
-                const scaleY = node.scaleY();
-                node.scaleX(1);
-                node.scaleY(1);
-
-                const newAttrs: Partial<LogoElement> = {
-                    x: node.x(),
-                    y: node.y(),
-                    width: Math.max(5, node.width() * scaleX),
-                    height: Math.max(5, node.height() * scaleY),
-                };
-
-                // @ts-expect-error - Konva Node types don't have radius by default, but we know it does for Circle
-                if (node.radius) {
-                    // @ts-expect-error
-                    newAttrs.radius = Math.max(5, node.radius() * scaleX);
-                }
-
-                onChange(newAttrs);
-            }
-        }
-    };
-
-    return (
-        <>
-            {element.type === 'rect' && <Rect {...props} />}
-            {element.type === 'circle' && <Circle {...props} />}
-            {element.type === 'text' && <Text {...props} />}
-            {isSelected && (
-                <Transformer
-                    ref={trRef}
-                    flipEnabled={false}
-                    boundBoxFunc={(oldBox, newBox) => {
-                        if (Math.abs(newBox.width) < 5 || Math.abs(newBox.height) < 5) {
-                            return oldBox;
-                        }
-                        return newBox;
-                    }}
-                />
-            )}
-        </>
-    );
-};

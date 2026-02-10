@@ -14,8 +14,12 @@ export function Layout() {
         <div className="min-h-screen relative font-sans text-text-main selection:bg-accent/30 selection:text-zinc-900 dark:selection:text-white overflow-hidden">
             {/* Dynamic Background */}
             <div className="fixed inset-0 z-[-1] bg-bg transition-colors duration-500" />
-            <div className="bg-grid opacity-[0.4] dark:opacity-[0.2]" />
-            <div className="bg-mesh" />
+            {!isFullWidth && (
+                <>
+                    <div className="bg-grid opacity-[0.4] dark:opacity-[0.2]" />
+                    <div className="bg-mesh" />
+                </>
+            )}
 
             {/* Navigation */}
             {shouldShowNav && <NavPill />}

@@ -97,7 +97,7 @@ export const ThumbnailCanvas = forwardRef<any, ThumbnailCanvasProps>(({
     };
 
     return (
-        <div ref={containerRef} className="w-full h-full bg-slate-100 dark:bg-zinc-950 flex items-center justify-center overflow-hidden">
+        <div ref={containerRef} className="w-full h-full bg-zinc-50 dark:bg-zinc-900 flex items-center justify-center overflow-hidden">
             <Stage
                 ref={stageInternalRef}
                 width={dimensions.width}

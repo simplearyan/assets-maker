@@ -36,7 +36,7 @@ export function NavPill() {
         <motion.nav
             initial={{ y: -50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            className="fixed top-8 inset-x-0 mx-auto w-fit z-50 flex items-center gap-2 p-2 bg-surface/50 backdrop-blur-xl border border-black/5 dark:border-white/10 rounded-full dark:shadow-2xl"
+            className="fixed top-8 inset-x-0 mx-auto w-fit z-50 flex items-center gap-2 p-2 bg-surface/50 backdrop-blur-xl border border-black/5 dark:border-white/10 rounded-full "
         >
             <div className="flex items-center gap-1">
                 {/* Primary Links */}

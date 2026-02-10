@@ -17,6 +17,7 @@ import { cn, downloadFile } from '../lib/utils';
 import { useUIStore } from '../store/uiStore';
 import { AnimatePresence, motion } from 'framer-motion';
 import { SidebarContent } from '../components/thumbnail/SidebarContent';
+import { MobileToolbar } from '../components/thumbnail/MobileToolbar';
 
 export function ThumbnailMaker() {
     const [elements, setElements] = useState<ThumbnailElement[]>([]);
@@ -189,8 +190,8 @@ export function ThumbnailMaker() {
                         clipContent={clipContent}
                     />
 
-                    {/* Mobile Zoom Controls */}
-                    <div className="absolute bottom-4 left-4 flex items-center gap-2 bg-surface/90 backdrop-blur-md border border-border p-1 rounded-lg shadow-lg z-20 scale-75 origin-bottom-left">
+                    {/* Mobile Zoom Controls - Moved to Top Right */}
+                    <div className="absolute top-4 right-4 flex items-center gap-2 bg-surface/90 backdrop-blur-md border border-border p-1 rounded-lg shadow-lg z-20 scale-90 origin-top-right">
                         <Button variant="ghost" size="sm" onClick={() => setZoom(Math.max(0.1, zoom - 0.1))} className="h-8 w-8 p-0">
                             <ZoomOut size={16} />
                         </Button>
@@ -200,15 +201,14 @@ export function ThumbnailMaker() {
                         </Button>
                     </div>
 
-                    <div className="absolute bottom-8 left-1/2 -translate-x-1/2 shadow-2xl rounded-full scale-90">
-                        <Toolbar
-                            onAddText={() => handleAddElement('text')}
-                            onAddShape={(type) => type === 'rect' ? handleAddElement('rect') : handleAddElement('circle')}
-                            onUploadImage={handleUploadImage}
-                            onOpenTemplates={() => setShowSidebarDrawer(true)}
-                            onExport={handleExport}
-                        />
-                    </div>
+                    {/* Mobile Bottom Toolbar */}
+                    <MobileToolbar
+                        onAddText={() => handleAddElement('text')}
+                        onAddShape={(type) => type === 'rect' ? handleAddElement('rect') : handleAddElement('circle')}
+                        onUploadImage={handleUploadImage}
+                        onOpenTemplates={() => setShowSidebarDrawer(true)}
+                        onExport={handleExport}
+                    />
                 </div>
 
                 {/* Mobile Sidebar Content Drawer */}

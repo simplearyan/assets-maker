@@ -461,7 +461,7 @@ export function PropertyPanel({
                             if (!obj.fill) return null;
 
                             const isGradient = typeof obj.fill !== 'string';
-                            const fillColor = isGradient ? '#cccccc' : obj.fill;
+                            const fillColor = isGradient ? '#cccccc' : (obj.fill as string);
 
                             return (
                                 <div

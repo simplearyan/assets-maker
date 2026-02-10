@@ -1,5 +1,6 @@
 import { useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { fabric } from 'fabric';
+import { Settings } from 'lucide-react';
 
 interface LogoCanvasProps {
     onSelectionChange: (obj: fabric.Object | null) => void;
@@ -10,6 +11,7 @@ export interface LogoCanvasRef {
     addShape: (type: 'rect' | 'circle' | 'triangle' | 'polygon') => void;
     addText: (type: 'heading' | 'subheading' | 'body') => void;
     addIcon: (svgString: string) => void;
+    addImage: (url: string) => void;
     updateProperty: (key: string, value: any) => void;
     deleteSelected: () => void;
     duplicateSelected: () => void;
@@ -24,6 +26,12 @@ export interface LogoCanvasRef {
 export const LogoCanvas = forwardRef<LogoCanvasRef, LogoCanvasProps>(({ onSelectionChange, snapToGrid = true }, ref) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const fabricCanvasRef = useRef<fabric.Canvas | null>(null);
+    const snapToGridRef = useRef(snapToGrid);
+
+    // Update ref when prop changes to avoid re-running main effect
+    useEffect(() => {
+        snapToGridRef.current = snapToGrid;
+    }, [snapToGrid]);
 
     useImperativeHandle(ref, () => ({
         canvas: fabricCanvasRef.current,
@@ -93,6 +101,26 @@ export const LogoCanvas = forwardRef<LogoCanvasRef, LogoCanvasProps>(({ onSelect
                 fabricCanvasRef.current!.add(obj);
                 fabricCanvasRef.current!.setActiveObject(obj);
                 fabricCanvasRef.current!.renderAll();
+            });
+        },
+        addImage: (url: string) => {
+            if (!fabricCanvasRef.current) return;
+            fabric.Image.fromURL(url, (img) => {
+                if (!img) return;
+                img.set({
+                    left: fabricCanvasRef.current!.getWidth() / 2,
+                    top: fabricCanvasRef.current!.getHeight() / 2,
+                    originX: 'center',
+                    originY: 'center',
+                });
+                // Scale down if too big
+                if (img.width! > 400) {
+                    img.scaleToWidth(400);
+                }
+                fabricCanvasRef.current!.add(img);
+                fabricCanvasRef.current!.setActiveObject(img);
+                fabricCanvasRef.current!.renderAll();
+                onSelectionChange(img);
             });
         },
         updateProperty: (key, value) => {
@@ -211,10 +239,23 @@ export const LogoCanvas = forwardRef<LogoCanvasRef, LogoCanvasProps>(({ onSelect
                     parentPoly: poly
                 });
 
-                control.on('moving', (opt) => {
-                    const p = opt.target as fabric.Circle;
-                    // Placeholder for actual polygon point update logic
-                    console.log("Moving point", (p as any).pointIndex);
+                control.on('moving', () => {
+                    const p = control;
+                    const index = (p as any).pointIndex;
+                    const parent = (p as any).parentPoly as fabric.Polygon;
+
+                    // Convert absolute control position back to local polygon space
+                    const invertedMatrix = fabric.util.invertTransform(parent.calcTransformMatrix());
+                    const localPoint = fabric.util.transformPoint(new fabric.Point(p.left!, p.top!), invertedMatrix);
+
+                    // Factor in the pathOffset (which Fabric uses internally for polygons)
+                    parent.points![index] = new fabric.Point(
+                        localPoint.x + parent.pathOffset.x,
+                        localPoint.y + parent.pathOffset.y
+                    );
+
+                    parent.setCoords();
+                    canvas.requestRenderAll();
                 });
 
                 canvas.add(control);
@@ -369,8 +410,9 @@ export const LogoCanvas = forwardRef<LogoCanvasRef, LogoCanvasProps>(({ onSelect
 
             const snapDist = 10; // Distance to snap to center
 
-            // Snap to Grid (Conditional)
-            if (snapToGrid) {
+            // Checks ref current value
+            if (snapToGridRef.current) {
+                // Initial snap to grid
                 target.set({
                     left: Math.round(target.left! / gridSize) * gridSize,
                     top: Math.round(target.top! / gridSize) * gridSize
@@ -414,7 +456,7 @@ export const LogoCanvas = forwardRef<LogoCanvasRef, LogoCanvasProps>(({ onSelect
             canvas.dispose();
             fabricCanvasRef.current = null;
         };
-    }, [onSelectionChange, snapToGrid]); // Re-run effect when snapToGrid changes
+    }, []); // Empty deps to initialize once
 
     return (
         <div className="flex-1 bg-surface/30 rounded-3xl border border-border flex items-center justify-center overflow-hidden relative">
@@ -423,8 +465,23 @@ export const LogoCanvas = forwardRef<LogoCanvasRef, LogoCanvasProps>(({ onSelect
                 <canvas ref={canvasRef} />
             </div>
 
-            <div className="absolute bottom-4 right-4 bg-surface/80 backdrop-blur px-3 py-1 rounded-full text-xs font-mono border border-white/10 text-text-muted pointer-events-none">
-                800 x 600
+            <div className="absolute bottom-4 right-4 flex items-center gap-2 pointer-events-auto">
+                <div className="bg-surface/80 backdrop-blur px-3 py-1 rounded-full text-xs font-mono border border-white/10 text-text-muted select-none">
+                    800 x 600
+                </div>
+                <button
+                    onClick={() => {
+                        // Deselect all
+                        fabricCanvasRef.current?.discardActiveObject();
+                        fabricCanvasRef.current?.renderAll();
+                        // Notify parent
+                        onSelectionChange(null);
+                    }}
+                    className="p-1.5 bg-surface/80 backdrop-blur rounded-full border border-white/10 text-text-muted hover:text-text-main hover:bg-white/10 transition-colors"
+                    title="Canvas Settings"
+                >
+                    <Settings size={14} />
+                </button>
             </div>
         </div>
     );

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { GlassCard } from '../ui/GlassCard';
-import { Square, Circle, Triangle, Star, Shapes, Type, Image as ImageIcon } from 'lucide-react';
+import { Square, Circle, Triangle, Star, Shapes, Type } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import { createRoot } from 'react-dom/client';
 import { flushSync } from 'react-dom';
@@ -9,6 +9,7 @@ interface AssetPanelProps {
     onAddShape: (type: 'rect' | 'circle' | 'triangle' | 'polygon') => void;
     onAddText: (type: 'heading' | 'subheading' | 'body') => void;
     onAddIcon: (svgString: string) => void;
+    onAddImage?: (url: string) => void;
 }
 
 const SHAPES = [
@@ -26,8 +27,8 @@ const COMMON_ICONS = [
     'Clock', 'Bell', 'Mail', 'MessageCircle', 'Phone', 'ShoppingBag', 'CreditCard'
 ] as const;
 
-export function AssetPanel({ onAddShape, onAddText, onAddIcon }: AssetPanelProps) {
-    const [activeTab, setActiveTab] = useState<'shapes' | 'icons' | 'text'>('shapes');
+export function AssetPanel({ onAddShape, onAddText, onAddIcon, onAddImage }: AssetPanelProps) {
+    const [activeTab, setActiveTab] = useState<'shapes' | 'icons' | 'text' | 'uploads'>('shapes');
 
     const handleIconClick = (iconName: string) => {
         // @ts-ignore - Dynamic access to Lucide icons
@@ -52,30 +53,40 @@ export function AssetPanel({ onAddShape, onAddText, onAddIcon }: AssetPanelProps
     };
 
     return (
-        <GlassCard className="w-80 flex flex-col h-full border-r border-white/5 rounded-none rounded-r-3xl">
-            <div className="flex gap-1 p-1 bg-surface/50 rounded-xl mb-6">
-                <button
-                    onClick={() => setActiveTab('shapes')}
-                    className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'shapes' ? 'bg-accent text-white shadow-lg' : 'text-text-muted hover:text-text-main hover:bg-white/5'}`}
-                >
-                    <Shapes size={16} className="mx-auto mb-1" />
-                    Shapes
-                </button>
-                <button
-                    onClick={() => setActiveTab('icons')}
-                    className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'icons' ? 'bg-accent text-white shadow-lg' : 'text-text-muted hover:text-text-main hover:bg-white/5'}`}
-                >
-                    <ImageIcon size={16} className="mx-auto mb-1" />
-                    Icons
-                </button>
-                <button
-                    onClick={() => setActiveTab('text')}
-                    className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'text' ? 'bg-accent text-white shadow-lg' : 'text-text-muted hover:text-text-main hover:bg-white/5'}`}
-                >
-                    <Type size={16} className="mx-auto mb-1" />
-                    Text
-                </button>
+        <GlassCard className="w-80 flex flex-col h-full border-r border-white/5 rounded-none rounded-r-3xl bg-surface/30 backdrop-blur-xl">
+            <div className="p-4 pb-0">
+                <div className="flex p-1 bg-surface/50 rounded-xl mb-6 border border-white/5">
+                    <button
+                        onClick={() => setActiveTab('shapes')}
+                        className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'shapes' ? 'bg-accent/20 text-accent ring-1 ring-accent/50 shadow-[0_0_15px_rgba(var(--accent-rgb),0.2)]' : 'text-text-muted hover:text-text-main hover:bg-white/5'}`}
+                    >
+                        <Shapes size={16} className="mx-auto mb-1" />
+                        Shapes
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('icons')}
+                        className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'icons' ? 'bg-accent/20 text-accent ring-1 ring-accent/50 shadow-[0_0_15px_rgba(var(--accent-rgb),0.2)]' : 'text-text-muted hover:text-text-main hover:bg-white/5'}`}
+                    >
+                        <LucideIcons.Smile size={16} className="mx-auto mb-1" />
+                        Icons
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('text')}
+                        className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'text' ? 'bg-accent/20 text-accent ring-1 ring-accent/50 shadow-[0_0_15px_rgba(var(--accent-rgb),0.2)]' : 'text-text-muted hover:text-text-main hover:bg-white/5'}`}
+                    >
+                        <Type size={16} className="mx-auto mb-1" />
+                        Text
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('uploads')}
+                        className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'uploads' ? 'bg-accent/20 text-accent ring-1 ring-accent/50 shadow-[0_0_15px_rgba(var(--accent-rgb),0.2)]' : 'text-text-muted hover:text-text-main hover:bg-white/5'}`}
+                    >
+                        <LucideIcons.Upload size={16} className="mx-auto mb-1" />
+                        Upload
+                    </button>
+                </div>
             </div>
+
 
             <div className="flex-1 overflow-y-auto custom-scrollbar space-y-4 px-1">
                 {activeTab === 'shapes' && (
@@ -138,7 +149,51 @@ export function AssetPanel({ onAddShape, onAddText, onAddIcon }: AssetPanelProps
                         </button>
                     </div>
                 )}
+
+                {activeTab === 'uploads' && (
+                    <div className="space-y-4 p-2">
+                        <div
+                            className="border-2 border-dashed border-white/10 rounded-xl p-8 flex flex-col items-center justify-center gap-3 text-text-muted hover:border-accent/50 hover:bg-accent/5 transition-all cursor-pointer group"
+                            onClick={() => document.getElementById('image-upload')?.click()}
+                        >
+                            <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                <LucideIcons.Upload size={24} />
+                            </div>
+                            <p className="text-sm font-medium">Click to Upload</p>
+                            <p className="text-xs opacity-50">PNG, JPG, SVG</p>
+                        </div>
+                        <input
+                            id="image-upload"
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                    const isSVG = file.type === 'image/svg+xml' || file.name.endsWith('.svg');
+                                    const reader = new FileReader();
+
+                                    reader.onload = (f) => {
+                                        if (f.target?.result) {
+                                            if (isSVG) {
+                                                onAddIcon?.(f.target.result as string);
+                                            } else {
+                                                onAddImage?.(f.target.result as string);
+                                            }
+                                        }
+                                    };
+
+                                    if (isSVG) {
+                                        reader.readAsText(file);
+                                    } else {
+                                        reader.readAsDataURL(file);
+                                    }
+                                }
+                            }}
+                        />
+                    </div>
+                )}
             </div>
-        </GlassCard>
+        </GlassCard >
     );
 }

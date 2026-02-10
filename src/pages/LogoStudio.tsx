@@ -22,6 +22,11 @@ export function LogoStudio() {
     const [isTransparent, setIsTransparent] = useState(false);
     const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
     const location = useLocation();
+    const [isLoaded, setIsLoaded] = useState(false);
+
+    // Persistence Keys
+    const PROJECT_KEY = 'kenichi-studio-project';
+    const TIME_KEY = 'kenichi-studio-timestamp';
 
     // Dynamically load Google Fonts
     const loadFont = (fontFamily: string) => {
@@ -36,15 +41,66 @@ export function LogoStudio() {
         document.head.appendChild(link);
     };
 
+    // Auto-Save Effect
+    useEffect(() => {
+        if (!isLoaded || !canvasRef.current) return;
+
+        const saveProject = () => {
+            const data = canvasRef.current?.serialize();
+            if (data) {
+                localStorage.setItem(PROJECT_KEY, JSON.stringify(data));
+                localStorage.setItem(TIME_KEY, Date.now().toString());
+            }
+        };
+
+        const timeout = setTimeout(saveProject, 1000); // Debounce saves
+        return () => clearTimeout(timeout);
+    }, [version, canvasBg, isTransparent, dimensions, isLoaded]);
+
+    // Initial Load Logic
+    useEffect(() => {
+        const loadSaved = () => {
+            const savedData = localStorage.getItem(PROJECT_KEY);
+            const savedTime = localStorage.getItem(TIME_KEY);
+
+            if (savedData && savedTime) {
+                const now = Date.now();
+                const diff = now - parseInt(savedTime);
+                const oneDay = 24 * 60 * 60 * 1000;
+
+                if (diff < oneDay) {
+                    try {
+                        const parsed = JSON.parse(savedData);
+                        // Restore metadata states
+                        setCanvasBg(parsed.metadata.background);
+                        setIsTransparent(parsed.metadata.isTransparent);
+                        setDimensions({ width: parsed.metadata.width, height: parsed.metadata.height });
+
+                        // Load Canvas Objects after a short delay
+                        setTimeout(() => {
+                            canvasRef.current?.deserialize(parsed);
+                            setIsLoaded(true);
+                        }, 100);
+                        return;
+                    } catch (e) {
+                        console.error('Failed to parse saved project', e);
+                    }
+                }
+            }
+            setIsLoaded(true);
+        };
+
+        if (canvasRef.current) {
+            loadSaved();
+        }
+    }, []);
+
     // Handle Vectorizer Import
     useEffect(() => {
         if (location.state?.importedSVG && canvasRef.current) {
             // Short delay to ensure canvas is ready
             setTimeout(() => {
                 canvasRef.current?.addIcon(location.state.importedSVG);
-                // Clear state so it doesn't re-add on refresh? 
-                // React Router state persists on refresh usually, but clears on navigation.
-                // We'll leave it simple for now.
                 window.history.replaceState({}, '');
             }, 500);
         }
@@ -116,6 +172,20 @@ export function LogoStudio() {
                     }}
                     fonts={GOOGLE_FONTS}
                     onLoadFont={loadFont}
+                    onSaveProject={() => {
+                        const data = canvasRef.current?.serialize();
+                        if (data) {
+                            localStorage.setItem(PROJECT_KEY, JSON.stringify(data));
+                            localStorage.setItem(TIME_KEY, Date.now().toString());
+                        }
+                    }}
+                    onClearProject={() => {
+                        if (window.confirm('Clear all canvas objects and delete saved memory?')) {
+                            localStorage.removeItem(PROJECT_KEY);
+                            localStorage.removeItem(TIME_KEY);
+                            window.location.reload();
+                        }
+                    }}
                 />
             </div>
 

@@ -29,6 +29,7 @@ const COMMON_ICONS = [
 
 export function AssetPanel({ onAddShape, onAddText, onAddIcon, onAddImage }: AssetPanelProps) {
     const [activeTab, setActiveTab] = useState<'shapes' | 'icons' | 'text' | 'uploads'>('shapes');
+    const [uploadedAssets, setUploadedAssets] = useState<{ id: string, name: string, data: string, type: 'svg' | 'image' }[]>([]);
 
     const handleIconClick = (iconName: string) => {
         // @ts-ignore - Dynamic access to Lucide icons
@@ -151,46 +152,90 @@ export function AssetPanel({ onAddShape, onAddText, onAddIcon, onAddImage }: Ass
                 )}
 
                 {activeTab === 'uploads' && (
-                    <div className="space-y-4 p-2">
+                    <div className="space-y-6 p-2">
                         <div
                             className="border-2 border-dashed border-white/10 rounded-xl p-8 flex flex-col items-center justify-center gap-3 text-text-muted hover:border-accent/50 hover:bg-accent/5 transition-all cursor-pointer group"
                             onClick={() => document.getElementById('image-upload')?.click()}
                         >
                             <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                <LucideIcons.Upload size={24} />
+                                <LucideIcons.CloudUpload size={24} />
                             </div>
                             <p className="text-sm font-medium">Click to Upload</p>
                             <p className="text-xs opacity-50">PNG, JPG, SVG</p>
-                        </div>
-                        <input
-                            id="image-upload"
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (file) {
-                                    const isSVG = file.type === 'image/svg+xml' || file.name.endsWith('.svg');
-                                    const reader = new FileReader();
+                            <input
+                                id="image-upload"
+                                type="file"
+                                accept="image/*,.svg"
+                                multiple
+                                className="hidden"
+                                onChange={(e) => {
+                                    const files = Array.from(e.target.files || []);
+                                    files.forEach(file => {
+                                        const isSVG = file.type === 'image/svg+xml' || file.name.endsWith('.svg');
+                                        const reader = new FileReader();
 
-                                    reader.onload = (f) => {
-                                        if (f.target?.result) {
-                                            if (isSVG) {
-                                                onAddIcon?.(f.target.result as string);
-                                            } else {
-                                                onAddImage?.(f.target.result as string);
+                                        reader.onload = (f) => {
+                                            const result = f.target?.result as string;
+                                            if (result) {
+                                                const newAsset = {
+                                                    id: Math.random().toString(36).substr(2, 9),
+                                                    name: file.name,
+                                                    data: result,
+                                                    type: (isSVG ? 'svg' : 'image') as 'svg' | 'image'
+                                                };
+                                                setUploadedAssets(prev => [newAsset, ...prev]);
+                                                // Automatically add to canvas on first upload? 
+                                                // Better to just let user click if they want multiple.
                                             }
-                                        }
-                                    };
+                                        };
 
-                                    if (isSVG) {
-                                        reader.readAsText(file);
-                                    } else {
-                                        reader.readAsDataURL(file);
-                                    }
-                                }
-                            }}
-                        />
+                                        if (isSVG) reader.readAsText(file);
+                                        else reader.readAsDataURL(file);
+                                    });
+                                }}
+                            />
+                        </div>
+
+                        {uploadedAssets.length > 0 && (
+                            <div className="space-y-3">
+                                <label className="text-[10px] font-bold text-text-muted uppercase tracking-wider px-1">Library ({uploadedAssets.length})</label>
+                                <div className="grid grid-cols-2 gap-3">
+                                    {uploadedAssets.map((asset) => (
+                                        <div
+                                            key={asset.id}
+                                            className="group relative aspect-square bg-white/5 rounded-xl border border-white/5 overflow-hidden hover:border-accent/30 transition-all cursor-pointer"
+                                            onClick={() => {
+                                                if (asset.type === 'svg') onAddIcon(asset.data);
+                                                else onAddImage?.(asset.data);
+                                            }}
+                                        >
+                                            <div className="absolute inset-0 flex items-center justify-center p-2">
+                                                {asset.type === 'svg' ? (
+                                                    <div className="w-full h-full opacity-70 group-hover:opacity-100 transition-opacity flex items-center justify-center" dangerouslySetInnerHTML={{ __html: asset.data.includes('<svg') ? asset.data : '' }} />
+                                                ) : (
+                                                    <img src={asset.data} alt={asset.name} className="w-full h-full object-contain opacity-70 group-hover:opacity-100 transition-opacity" />
+                                                )}
+                                            </div>
+
+                                            {/* Delete Overlay */}
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setUploadedAssets(prev => prev.filter(a => a.id !== asset.id));
+                                                }}
+                                                className="absolute top-1 right-1 p-1.5 rounded-lg bg-black/60 text-red-400 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500/20"
+                                            >
+                                                <LucideIcons.Trash2 size={12} />
+                                            </button>
+
+                                            <div className="absolute bottom-0 inset-x-0 p-1 bg-black/40 backdrop-blur-sm transform translate-y-full group-hover:translate-y-0 transition-transform">
+                                                <p className="text-[9px] text-white truncate text-center">{asset.name}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>

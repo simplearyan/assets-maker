@@ -7,7 +7,7 @@ import {
     AlignLeft, AlignCenter, AlignRight, AlignStartVertical, AlignEndVertical,
     ArrowUp, ArrowDown, ArrowUpToLine, ArrowDownToLine, Trash2, Copy, Type,
     Bold, Italic, Underline, Edit3, Image, FileCode, Monitor,
-    Sparkles, Focus
+    Sparkles, Focus, Save
 } from 'lucide-react';
 import { fabric } from 'fabric';
 
@@ -33,6 +33,8 @@ interface PropertyPanelProps {
     onUpdateCanvasDimensions?: (w: number, h: number) => void;
     fonts?: string[];
     onLoadFont?: (font: string) => void;
+    onSaveProject?: () => void;
+    onClearProject?: () => void;
 }
 
 export function PropertyPanel({
@@ -56,6 +58,8 @@ export function PropertyPanel({
     onUpdateCanvasDimensions,
     fonts = [],
     onLoadFont,
+    onSaveProject,
+    onClearProject,
 }: PropertyPanelProps) {
     if (!selectedObject) {
         return (
@@ -140,6 +144,34 @@ export function PropertyPanel({
                                     className="w-full bg-white/5 border border-white/5 rounded-lg px-2 py-1.5 text-xs text-text-main focus:border-accent/50 outline-none transition-colors"
                                 />
                             </div>
+                        </div>
+                    </div>
+
+                    <div className="space-y-3 pt-2">
+                        <label className="text-xs font-bold text-text-muted uppercase tracking-wider px-1">Storage</label>
+                        <div className="grid grid-cols-1 gap-2">
+                            <Button
+                                variant="ghost"
+                                className="bg-white/5 hover:bg-green-500/10 border border-white/5 hover:border-green-500/30 justify-between group"
+                                onClick={onSaveProject}
+                            >
+                                <div className="flex items-center gap-2">
+                                    <Save size={16} className="text-green-400 group-hover:scale-110 transition-transform" />
+                                    <span className="text-xs font-medium">Save Project</span>
+                                </div>
+                                <span className="text-[10px] text-text-muted italic">Manual Sync</span>
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                className="bg-white/5 hover:bg-red-500/10 border border-white/5 hover:border-red-500/30 justify-between group"
+                                onClick={onClearProject}
+                            >
+                                <div className="flex items-center gap-2">
+                                    <Trash2 size={16} className="text-red-400 group-hover:scale-110 transition-transform" />
+                                    <span className="text-xs font-medium">Clear All</span>
+                                </div>
+                                <span className="text-[10px] text-text-muted italic">Reset Studio</span>
+                            </Button>
                         </div>
                     </div>
 

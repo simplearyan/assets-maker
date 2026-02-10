@@ -29,6 +29,8 @@ export interface LogoCanvasRef {
     setTransparency: (isTransparent: boolean) => void;
     setDimensions: (width: number, height: number) => void;
     canvas: fabric.Canvas | null;
+    serialize: () => any;
+    deserialize: (data: any) => void;
 }
 
 export const LogoCanvas = forwardRef<LogoCanvasRef, LogoCanvasProps>(({
@@ -461,16 +463,41 @@ export const LogoCanvas = forwardRef<LogoCanvasRef, LogoCanvasProps>(({
             link.click();
         },
         exportPNG: () => {
-            const url = fabricCanvasRef.current?.toDataURL({
+            const canvas = fabricCanvasRef.current;
+            if (!canvas) return;
+            const dataURL = canvas.toDataURL({
                 format: 'png',
-                multiplier: 4 // Standard hi-res
+                quality: 1
             });
-            if (url) {
-                const link = document.createElement('a');
-                link.download = `logo-${canvasWidth}x${canvasHeight}.png`;
-                link.href = url;
-                link.click();
-            }
+            const link = document.createElement('a');
+            link.download = `kenichi-${Date.now()}.png`;
+            link.href = dataURL;
+            link.click();
+        },
+        serialize: () => {
+            if (!fabricCanvasRef.current) return null;
+            return {
+                version: '1.0',
+                objects: fabricCanvasRef.current.toJSON([
+                    'id', 'selectable', 'evented', 'charSpacing', 'blur',
+                    'lockMovementX', 'lockMovementY', 'lockRotation',
+                    'lockScalingX', 'lockScalingY', 'hasControls', 'hasBorders'
+                ]),
+                metadata: {
+                    width: canvasWidth,
+                    height: canvasHeight,
+                    background: canvasBg,
+                    isTransparent: isTransparent
+                }
+            };
+        },
+        deserialize: (data: any) => {
+            if (!fabricCanvasRef.current || !data) return;
+            // Load objects
+            fabricCanvasRef.current.loadFromJSON(data.objects, () => {
+                fabricCanvasRef.current?.requestRenderAll();
+                onSelectionChange(null);
+            });
         }
     }));
 

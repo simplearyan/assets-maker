@@ -25,4 +25,13 @@ export interface ThumbnailElement {
     shadowOpacity?: number;
     shadowOffsetX?: number;
     shadowOffsetY?: number;
+    cornerRadius?: number;
+    originalWidth?: number;
+    originalHeight?: number;
+    crop?: {
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+    };
 }

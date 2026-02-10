@@ -229,31 +229,150 @@ export function PropertiesPanel({
             )}
 
             {/* Shape Properties */}
-            {(element.type === 'rect' || element.type === 'circle') && (
+            {(element.type === 'rect' || element.type === 'circle' || element.type === 'image') && (
                 <div className="space-y-4">
-                    <div>
-                        <Label>Fill Color</Label>
-                        <ColorPicker
-                            value={element.fill || '#3b82f6'}
-                            onChange={(value) => handleChange('fill', value)}
-                        />
-                    </div>
-                    <div>
-                        <Label>Stroke Color</Label>
-                        <ColorPicker
-                            value={element.stroke || '#000000'}
-                            onChange={(value) => handleChange('stroke', value)}
-                        />
-                    </div>
-                    <div>
-                        <Label>Stroke Width ({element.strokeWidth || 0}px)</Label>
-                        <Slider
-                            min={0}
-                            max={20}
-                            value={element.strokeWidth || 0}
-                            onChange={(e) => handleChange('strokeWidth', Number(e.target.value))}
-                        />
-                    </div>
+                    {element.type !== 'image' && (
+                        <div>
+                            <Label>Fill Color</Label>
+                            <ColorPicker
+                                value={element.fill || '#3b82f6'}
+                                onChange={(value) => handleChange('fill', value)}
+                            />
+                        </div>
+                    )}
+
+                    {element.type === 'rect' && (
+                        <div>
+                            <Label>Corner Radius ({element.cornerRadius || 0}px)</Label>
+                            <Slider
+                                min={0}
+                                max={100}
+                                value={element.cornerRadius || 0}
+                                onChange={(e) => handleChange('cornerRadius', Number(e.target.value))}
+                            />
+                        </div>
+                    )}
+
+                    {element.type === 'image' && (
+                        <>
+                            <div>
+                                <Label>Corner Radius ({element.cornerRadius || 0}px)</Label>
+                                <Slider
+                                    min={0}
+                                    max={100}
+                                    value={element.cornerRadius || 0}
+                                    onChange={(e) => handleChange('cornerRadius', Number(e.target.value))}
+                                />
+                            </div>
+                            {/* Placeholder for future Crop UI */}
+                            <div>
+                                <Label className="mb-2">Crop Image</Label>
+                                {element.originalWidth && element.originalHeight ? (
+                                    <div className="space-y-2">
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <div>
+                                                <Label className="text-[10px] mb-1">X</Label>
+                                                <Input
+                                                    type="number"
+                                                    value={element.crop?.x || 0}
+                                                    onChange={(e) => {
+                                                        const val = Number(e.target.value);
+                                                        handleChange('crop', {
+                                                            x: val,
+                                                            y: element.crop?.y || 0,
+                                                            width: element.crop?.width || element.originalWidth || 100,
+                                                            height: element.crop?.height || element.originalHeight || 100
+                                                        });
+                                                    }}
+                                                />
+                                            </div>
+                                            <div>
+                                                <Label className="text-[10px] mb-1">Y</Label>
+                                                <Input
+                                                    type="number"
+                                                    value={element.crop?.y || 0}
+                                                    onChange={(e) => {
+                                                        const val = Number(e.target.value);
+                                                        handleChange('crop', {
+                                                            x: element.crop?.x || 0,
+                                                            y: val,
+                                                            width: element.crop?.width || element.originalWidth || 100,
+                                                            height: element.crop?.height || element.originalHeight || 100
+                                                        });
+                                                    }}
+                                                />
+                                            </div>
+                                            <div>
+                                                <Label className="text-[10px] mb-1">Width</Label>
+                                                <Input
+                                                    type="number"
+                                                    value={element.crop?.width || element.originalWidth || 0}
+                                                    onChange={(e) => {
+                                                        const val = Number(e.target.value);
+                                                        handleChange('crop', {
+                                                            x: element.crop?.x || 0,
+                                                            y: element.crop?.y || 0,
+                                                            width: val,
+                                                            height: element.crop?.height || element.originalHeight || 100
+                                                        });
+                                                    }}
+                                                />
+                                            </div>
+                                            <div>
+                                                <Label className="text-[10px] mb-1">Height</Label>
+                                                <Input
+                                                    type="number"
+                                                    value={element.crop?.height || element.originalHeight || 0}
+                                                    onChange={(e) => {
+                                                        const val = Number(e.target.value);
+                                                        handleChange('crop', {
+                                                            x: element.crop?.x || 0,
+                                                            y: element.crop?.y || 0,
+                                                            width: element.crop?.width || element.originalWidth || 100,
+                                                            height: val
+                                                        });
+                                                    }}
+                                                />
+                                            </div>
+                                        </div>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="w-full text-xs"
+                                            onClick={() => handleChange('crop', undefined)}
+                                        >
+                                            Reset Crop
+                                        </Button>
+                                    </div>
+                                ) : (
+                                    <div className="text-xs text-text-muted italic">
+                                        Re-upload image to enable cropping (missing original dimensions)
+                                    </div>
+                                )}
+                            </div>
+                        </>
+                    )}
+
+                    {(element.type === 'rect' || element.type === 'circle') && (
+                        <>
+                            <div>
+                                <Label>Stroke Color</Label>
+                                <ColorPicker
+                                    value={element.stroke || '#000000'}
+                                    onChange={(value) => handleChange('stroke', value)}
+                                />
+                            </div>
+                            <div>
+                                <Label>Stroke Width ({element.strokeWidth || 0}px)</Label>
+                                <Slider
+                                    min={0}
+                                    max={20}
+                                    value={element.strokeWidth || 0}
+                                    onChange={(e) => handleChange('strokeWidth', Number(e.target.value))}
+                                />
+                            </div>
+                        </>
+                    )}
                 </div>
             )}
 

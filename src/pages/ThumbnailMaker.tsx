@@ -59,7 +59,7 @@ export function ThumbnailMaker() {
         };
     }, []);
 
-    const handleAddElement = (type: ToolType, src?: string) => {
+    const handleAddElement = (type: ToolType, src?: string, extraArgs: Partial<ThumbnailElement> = {}) => {
         const id = crypto.randomUUID();
         const newElement: ThumbnailElement = {
             id,
@@ -91,6 +91,8 @@ export function ThumbnailMaker() {
         } else if (type === 'image' && src) {
             newElement.src = src;
         }
+
+        Object.assign(newElement, extraArgs);
 
         setElements([...elements, newElement]);
         setSelectedId(id);
@@ -141,7 +143,16 @@ export function ThumbnailMaker() {
         const file = e.target.files?.[0];
         if (file) {
             const url = URL.createObjectURL(file);
-            handleAddElement('image', url);
+            const img = new Image();
+            img.onload = () => {
+                handleAddElement('image', url, {
+                    width: 200, // Default display width
+                    height: 200 * (img.height / img.width), // Maintain aspect ratio
+                    originalWidth: img.width,
+                    originalHeight: img.height
+                });
+            };
+            img.src = url;
         }
     };
 
@@ -430,6 +441,21 @@ export function ThumbnailMaker() {
                                             onChange={(e) => handleUpdateElement(selectedElement.id, { strokeWidth: Number(e.target.value) })}
                                         />
                                     </div>
+                                </div>
+                            )}
+
+                            {activeTab === 'radius' && (
+                                <div className="space-y-4">
+                                    <div className="flex justify-between text-sm">
+                                        <span>Corner Radius</span>
+                                        <span>{selectedElement.cornerRadius || 0}px</span>
+                                    </div>
+                                    <Slider
+                                        min={0}
+                                        max={100}
+                                        value={selectedElement.cornerRadius || 0}
+                                        onChange={(e) => handleUpdateElement(selectedElement.id, { cornerRadius: Number(e.target.value) })}
+                                    />
                                 </div>
                             )}
 

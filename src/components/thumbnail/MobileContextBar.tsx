@@ -13,7 +13,7 @@ import type { ThumbnailElement } from '../../types/thumbnail';
 import { cn } from '../../lib/utils';
 import { useRef } from 'react';
 
-export type PropertyTab = 'text' | 'color' | 'stroke' | 'position' | 'size' | 'opacity' | 'layers' | null;
+export type PropertyTab = 'text' | 'color' | 'stroke' | 'position' | 'size' | 'opacity' | 'layers' | 'radius' | null;
 
 interface MobileContextBarProps {
     element: ThumbnailElement;
@@ -49,6 +49,9 @@ export function MobileContextBar({
     } else if (element.type === 'rect' || element.type === 'circle') {
         specificTools.push({ id: 'color', icon: Palette, label: 'Fill' });
         specificTools.push({ id: 'stroke', icon: Maximize, label: 'Stroke' });
+        specificTools.push({ id: 'radius', icon: Maximize, label: 'Radius' }); // using Maximize for now
+    } else if (element.type === 'image') {
+        specificTools.push({ id: 'radius', icon: Maximize, label: 'Radius' });
     }
 
     const allTools = [...specificTools, ...commonTools];

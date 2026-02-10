@@ -196,7 +196,7 @@ export const ThumbnailCanvas = forwardRef<any, ThumbnailCanvasProps>(({
                                 };
 
                                 if (el.type === 'rect') {
-                                    return <Rect key={el.id} {...commonProps} fill={el.fill} stroke={el.stroke} strokeWidth={el.strokeWidth} />;
+                                    return <Rect key={el.id} {...commonProps} fill={el.fill} stroke={el.stroke} strokeWidth={el.strokeWidth} cornerRadius={el.cornerRadius} />;
                                 } else if (el.type === 'circle') {
                                     return <Circle key={el.id} {...commonProps} fill={el.fill} stroke={el.stroke} strokeWidth={el.strokeWidth} radius={(el.width || 50) / 2} />;
                                 } else if (el.type === 'text') {
@@ -212,7 +212,7 @@ export const ThumbnailCanvas = forwardRef<any, ThumbnailCanvasProps>(({
                                         />
                                     );
                                 } else if (el.type === 'image' && el.src) {
-                                    return <URLImage key={el.id} {...commonProps} src={el.src} />;
+                                    return <URLImage key={el.id} {...commonProps} src={el.src} cornerRadius={el.cornerRadius} crop={el.crop} />;
                                 }
                                 return null;
                                 return null;

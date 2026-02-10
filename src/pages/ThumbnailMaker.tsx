@@ -11,7 +11,7 @@ import { ColorPicker } from '../components/ui/inputs/ColorPicker';
 import { Label } from '../components/ui/inputs/Label';
 import { Input } from '../components/ui/inputs/Input';
 import { Slider } from '../components/ui/inputs/Slider';
-import { ZoomIn, ZoomOut, RotateCcw, ArrowUpToLine, ArrowDownToLine, ChevronUp, ChevronDown, LayoutGrid as LayoutGridIcon } from 'lucide-react';
+import { ZoomIn, ZoomOut, RotateCcw, ArrowUpToLine, ArrowDownToLine, ChevronUp, ChevronDown, LayoutGrid as LayoutGridIcon, Maximize, Minimize } from 'lucide-react';
 import { cn, downloadFile } from '../lib/utils';
 import { useUIStore } from '../store/uiStore';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -36,7 +36,7 @@ export function ThumbnailMaker() {
     const [isEditingCanvas, setIsEditingCanvas] = useState(false);
     const [activeCanvasTab, setActiveCanvasTab] = useState<CanvasTab>(null);
     const [zoom, setZoom] = useState(1);
-    const { isNavVisible } = useUIStore();
+    const { isNavVisible, toggleNavVisible } = useUIStore();
     const stageRef = useRef<any>(null);
 
     useEffect(() => {
@@ -194,13 +194,17 @@ export function ThumbnailMaker() {
                     />
 
                     {/* Mobile Zoom Controls - Moved to Top Right */}
-                    <div className="absolute top-4 right-4 flex items-center gap-2 bg-surface/90 backdrop-blur-md border border-border p-1 rounded-lg shadow-lg z-20 scale-90 origin-top-right">
+                    <div className="absolute top-4 right-4 flex items-center gap-2 bg-surface/60 backdrop-blur-xl backdrop-saturate-150 border border-border p-1 rounded-2xl shadow-lg z-20 scale-90 origin-top-right">
                         <Button variant="ghost" size="sm" onClick={() => setZoom(Math.max(0.1, zoom - 0.1))} className="h-8 w-8 p-0">
                             <ZoomOut size={16} />
                         </Button>
                         <span className="text-xs font-mono w-10 text-center">{Math.round(zoom * 100)}%</span>
                         <Button variant="ghost" size="sm" onClick={() => setZoom(Math.min(3, zoom + 0.1))} className="h-8 w-8 p-0">
                             <ZoomIn size={16} />
+                        </Button>
+                        <div className="w-px h-4 bg-border mx-1" />
+                        <Button variant="ghost" size="sm" onClick={toggleNavVisible} className="h-8 w-8 p-0">
+                            {isNavVisible ? <Maximize size={16} /> : <Minimize size={16} />}
                         </Button>
                     </div>
 
@@ -317,139 +321,141 @@ export function ThumbnailMaker() {
                     )}
                 </AnimatePresence>
 
-                {selectedElement && (
-                    <MobilePropertyDeck
-                        isOpen={!!activeTab}
-                        onClose={() => setActiveTab(null)}
-                    >
-                        {activeTab === 'text' && (
-                            <Textarea
-                                value={selectedElement.text || ''}
-                                onChange={(e) => handleUpdateElement(selectedElement.id, { text: e.target.value })}
-                                className="h-32 text-lg"
-                                autoFocus
-                            />
-                        )}
-
-                        {activeTab === 'color' && (
-                            <ColorPicker
-                                value={selectedElement.fill || '#000000'}
-                                onChange={(value) => handleUpdateElement(selectedElement.id, { fill: value })}
-                            />
-                        )}
-
-                        {activeTab === 'position' && (
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <Label className="mb-2">X Coordinate</Label>
-                                    <Input
-                                        type="number"
-                                        value={Math.round(selectedElement.x)}
-                                        onChange={(e) => handleUpdateElement(selectedElement.id, { x: Number(e.target.value) })}
-                                    />
-                                </div>
-                                <div>
-                                    <Label className="mb-2">Y Coordinate</Label>
-                                    <Input
-                                        type="number"
-                                        value={Math.round(selectedElement.y)}
-                                        onChange={(e) => handleUpdateElement(selectedElement.id, { y: Number(e.target.value) })}
-                                    />
-                                </div>
-                            </div>
-                        )}
-
-                        {activeTab === 'size' && (
-                            selectedElement.type === 'text' ? (
-                                <div className="space-y-4">
-                                    <div className="flex justify-between text-sm">
-                                        <span>Size</span>
-                                        <span>{selectedElement.fontSize}px</span>
-                                    </div>
-                                    <Slider
-                                        min={10}
-                                        max={200}
-                                        value={selectedElement.fontSize || 20}
-                                        onChange={(e) => handleUpdateElement(selectedElement.id, { fontSize: Number(e.target.value) })}
-                                    />
-                                </div>
-                            ) : (
-                                <div className="space-y-4">
-                                    <div className="flex justify-between text-sm">
-                                        <span>Width</span>
-                                        <span>{Math.round(selectedElement.width || 0)}px</span>
-                                    </div>
-                                    <Slider
-                                        min={10}
-                                        max={800}
-                                        value={selectedElement.width || 100}
-                                        onChange={(e) => handleUpdateElement(selectedElement.id, { width: Number(e.target.value), height: Number(e.target.value) })}
-                                    />
-                                </div>
-                            )
-                        )}
-
-                        {activeTab === 'opacity' && (
-                            <div className="space-y-4">
-                                <div className="flex justify-between text-sm">
-                                    <span>Opacity</span>
-                                    <span>{Math.round((selectedElement.opacity !== undefined ? selectedElement.opacity : 1) * 100)}%</span>
-                                </div>
-                                <Slider
-                                    min={0}
-                                    max={1}
-                                    step={0.01}
-                                    value={selectedElement.opacity !== undefined ? selectedElement.opacity : 1}
-                                    onChange={(e) => handleUpdateElement(selectedElement.id, { opacity: Number(e.target.value) })}
+                {
+                    selectedElement && (
+                        <MobilePropertyDeck
+                            isOpen={!!activeTab}
+                            onClose={() => setActiveTab(null)}
+                        >
+                            {activeTab === 'text' && (
+                                <Textarea
+                                    value={selectedElement.text || ''}
+                                    onChange={(e) => handleUpdateElement(selectedElement.id, { text: e.target.value })}
+                                    className="h-32 text-lg"
+                                    autoFocus
                                 />
-                            </div>
-                        )}
+                            )}
 
-                        {activeTab === 'stroke' && (
-                            <div className="space-y-4">
-                                <Label>Stroke Color</Label>
+                            {activeTab === 'color' && (
                                 <ColorPicker
-                                    value={selectedElement.stroke || '#000000'}
-                                    onChange={(value) => handleUpdateElement(selectedElement.id, { stroke: value })}
+                                    value={selectedElement.fill || '#000000'}
+                                    onChange={(value) => handleUpdateElement(selectedElement.id, { fill: value })}
                                 />
-                                <div className="pt-2">
-                                    <div className="flex justify-between text-sm mb-2">
-                                        <span>Stroke Width</span>
-                                        <span>{selectedElement.strokeWidth || 0}px</span>
+                            )}
+
+                            {activeTab === 'position' && (
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <Label className="mb-2">X Coordinate</Label>
+                                        <Input
+                                            type="number"
+                                            value={Math.round(selectedElement.x)}
+                                            onChange={(e) => handleUpdateElement(selectedElement.id, { x: Number(e.target.value) })}
+                                        />
+                                    </div>
+                                    <div>
+                                        <Label className="mb-2">Y Coordinate</Label>
+                                        <Input
+                                            type="number"
+                                            value={Math.round(selectedElement.y)}
+                                            onChange={(e) => handleUpdateElement(selectedElement.id, { y: Number(e.target.value) })}
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeTab === 'size' && (
+                                selectedElement.type === 'text' ? (
+                                    <div className="space-y-4">
+                                        <div className="flex justify-between text-sm">
+                                            <span>Size</span>
+                                            <span>{selectedElement.fontSize}px</span>
+                                        </div>
+                                        <Slider
+                                            min={10}
+                                            max={200}
+                                            value={selectedElement.fontSize || 20}
+                                            onChange={(e) => handleUpdateElement(selectedElement.id, { fontSize: Number(e.target.value) })}
+                                        />
+                                    </div>
+                                ) : (
+                                    <div className="space-y-4">
+                                        <div className="flex justify-between text-sm">
+                                            <span>Width</span>
+                                            <span>{Math.round(selectedElement.width || 0)}px</span>
+                                        </div>
+                                        <Slider
+                                            min={10}
+                                            max={800}
+                                            value={selectedElement.width || 100}
+                                            onChange={(e) => handleUpdateElement(selectedElement.id, { width: Number(e.target.value), height: Number(e.target.value) })}
+                                        />
+                                    </div>
+                                )
+                            )}
+
+                            {activeTab === 'opacity' && (
+                                <div className="space-y-4">
+                                    <div className="flex justify-between text-sm">
+                                        <span>Opacity</span>
+                                        <span>{Math.round((selectedElement.opacity !== undefined ? selectedElement.opacity : 1) * 100)}%</span>
                                     </div>
                                     <Slider
                                         min={0}
-                                        max={20}
-                                        value={selectedElement.strokeWidth || 0}
-                                        onChange={(e) => handleUpdateElement(selectedElement.id, { strokeWidth: Number(e.target.value) })}
+                                        max={1}
+                                        step={0.01}
+                                        value={selectedElement.opacity !== undefined ? selectedElement.opacity : 1}
+                                        onChange={(e) => handleUpdateElement(selectedElement.id, { opacity: Number(e.target.value) })}
                                     />
                                 </div>
-                            </div>
-                        )}
+                            )}
 
-                        {activeTab === 'layers' && (
-                            <div className="grid grid-cols-4 gap-2 py-4">
-                                <Button variant="glass" className="flex flex-col gap-2 h-20" onClick={() => handleReorderElement(selectedElement.id, 'front')}>
-                                    <ArrowUpToLine size={24} />
-                                    <span className="text-[10px] uppercase font-bold text-text-muted">Front</span>
-                                </Button>
-                                <Button variant="glass" className="flex flex-col gap-2 h-20" onClick={() => handleReorderElement(selectedElement.id, 'forward')}>
-                                    <ChevronUp size={24} />
-                                    <span className="text-[10px] uppercase font-bold text-text-muted">Forward</span>
-                                </Button>
-                                <Button variant="glass" className="flex flex-col gap-2 h-20" onClick={() => handleReorderElement(selectedElement.id, 'backward')}>
-                                    <ChevronDown size={24} />
-                                    <span className="text-[10px] uppercase font-bold text-text-muted">Back</span>
-                                </Button>
-                                <Button variant="glass" className="flex flex-col gap-2 h-20" onClick={() => handleReorderElement(selectedElement.id, 'back')}>
-                                    <ArrowDownToLine size={24} />
-                                    <span className="text-[10px] uppercase font-bold text-text-muted">Bottom</span>
-                                </Button>
-                            </div>
-                        )}
-                    </MobilePropertyDeck>
-                )}
-            </div>
+                            {activeTab === 'stroke' && (
+                                <div className="space-y-4">
+                                    <Label>Stroke Color</Label>
+                                    <ColorPicker
+                                        value={selectedElement.stroke || '#000000'}
+                                        onChange={(value) => handleUpdateElement(selectedElement.id, { stroke: value })}
+                                    />
+                                    <div className="pt-2">
+                                        <div className="flex justify-between text-sm mb-2">
+                                            <span>Stroke Width</span>
+                                            <span>{selectedElement.strokeWidth || 0}px</span>
+                                        </div>
+                                        <Slider
+                                            min={0}
+                                            max={20}
+                                            value={selectedElement.strokeWidth || 0}
+                                            onChange={(e) => handleUpdateElement(selectedElement.id, { strokeWidth: Number(e.target.value) })}
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            {activeTab === 'layers' && (
+                                <div className="grid grid-cols-4 gap-2 py-4">
+                                    <Button variant="glass" className="flex flex-col gap-2 h-20" onClick={() => handleReorderElement(selectedElement.id, 'front')}>
+                                        <ArrowUpToLine size={24} />
+                                        <span className="text-[10px] uppercase font-bold text-text-muted">Front</span>
+                                    </Button>
+                                    <Button variant="glass" className="flex flex-col gap-2 h-20" onClick={() => handleReorderElement(selectedElement.id, 'forward')}>
+                                        <ChevronUp size={24} />
+                                        <span className="text-[10px] uppercase font-bold text-text-muted">Forward</span>
+                                    </Button>
+                                    <Button variant="glass" className="flex flex-col gap-2 h-20" onClick={() => handleReorderElement(selectedElement.id, 'backward')}>
+                                        <ChevronDown size={24} />
+                                        <span className="text-[10px] uppercase font-bold text-text-muted">Back</span>
+                                    </Button>
+                                    <Button variant="glass" className="flex flex-col gap-2 h-20" onClick={() => handleReorderElement(selectedElement.id, 'back')}>
+                                        <ArrowDownToLine size={24} />
+                                        <span className="text-[10px] uppercase font-bold text-text-muted">Bottom</span>
+                                    </Button>
+                                </div>
+                            )}
+                        </MobilePropertyDeck>
+                    )
+                }
+            </div >
         );
     }
     return (

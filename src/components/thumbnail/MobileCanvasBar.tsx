@@ -40,11 +40,11 @@ export function MobileCanvasBar({
     ];
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 bg-surface backdrop-blur-md backdrop-saturate-150 shadow-2xl border-t border-border z-[60] flex flex-col pb-[env(safe-area-inset-bottom)]">
+        <div className="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-3xl backdrop-saturate-150 shadow-2xl z-[60] flex flex-col pb-[env(safe-area-inset-bottom)]">
 
             {/* Expanded Content Area (Size/Color Pickers) */}
             {activeTab && (
-                <div className="p-4 border-b border-border/50 animate-in slide-in-from-bottom-2 fade-in duration-200">
+                <div className="p-4 animate-in slide-in-from-bottom-2 fade-in duration-200">
                     {activeTab === 'size' && (
                         <div className="space-y-4">
                             <div className="space-y-3">
@@ -85,7 +85,7 @@ export function MobileCanvasBar({
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-2 pt-2 border-t border-border/50">
+                            <div className="flex items-center gap-2 pt-2 mt-2">
                                 <label className="flex items-center gap-2 text-xs cursor-pointer select-none text-text-muted hover:text-text-main transition-colors">
                                     <input
                                         type="checkbox"

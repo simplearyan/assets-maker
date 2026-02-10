@@ -425,8 +425,11 @@ export function PropertyPanel({
                     </label>
                     <div className="grid grid-cols-1 gap-2 max-h-60 overflow-y-auto custom-scrollbar pr-1">
                         {(selectedObject as fabric.Group).getObjects().map((obj, idx) => {
-                            // Only show if it's a path or has fill
-                            if (!obj.fill || typeof obj.fill !== 'string') return null;
+                            // Show all objects that have a fill, even if it's a gradient
+                            if (!obj.fill) return null;
+
+                            const isGradient = typeof obj.fill !== 'string';
+                            const fillColor = isGradient ? '#cccccc' : obj.fill;
 
                             return (
                                 <div
@@ -435,18 +438,20 @@ export function PropertyPanel({
                                     onMouseEnter={() => onUpdateProperty('highlightChild', { index: idx, active: true })}
                                     onMouseLeave={() => onUpdateProperty('highlightChild', { index: idx, active: false })}
                                 >
-                                    <div className="flex-1 flex flex-col gap-0.5">
+                                    <div className="flex-1 flex flex-col gap-0.5 overflow-hidden">
                                         <span className="text-[10px] text-text-muted uppercase font-bold">Path {idx + 1}</span>
                                         <div className="flex items-center gap-2">
                                             <div
-                                                className="w-3 h-3 rounded-full border border-white/20"
-                                                style={{ backgroundColor: obj.fill }}
+                                                className={`w-3 h-3 rounded-full border border-white/20 ${isGradient ? 'bg-gradient-to-tr from-gray-400 to-gray-600' : ''}`}
+                                                style={!isGradient ? { backgroundColor: fillColor } : {}}
                                             />
-                                            <span className="text-[10px] text-text-muted font-mono truncate">{obj.fill}</span>
+                                            <span className="text-[10px] text-text-muted font-mono truncate">
+                                                {isGradient ? 'Gradient' : fillColor}
+                                            </span>
                                         </div>
                                     </div>
                                     <ColorPicker
-                                        value={obj.fill}
+                                        value={fillColor}
                                         onChange={(val) => onUpdateProperty('childFill', { index: idx, color: val })}
                                         className="!gap-1"
                                     />

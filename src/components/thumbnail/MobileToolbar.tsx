@@ -1,4 +1,4 @@
-import { Type, Image as ImageIcon, Square, LayoutTemplate, Download } from 'lucide-react';
+import { Type, Image as ImageIcon, Square, LayoutTemplate, Download, Settings2 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { useRef } from 'react';
 
@@ -7,14 +7,15 @@ interface MobileToolbarProps {
     onAddShape: (type: 'rect' | 'circle') => void;
     onUploadImage: (e: React.ChangeEvent<HTMLInputElement>) => void;
     onOpenTemplates: () => void;
+    onEditCanvas: () => void;
     onExport: () => void;
 }
 
-export function MobileToolbar({ onAddText, onAddShape, onUploadImage, onOpenTemplates, onExport }: MobileToolbarProps) {
+export function MobileToolbar({ onAddText, onAddShape, onUploadImage, onOpenTemplates, onEditCanvas, onExport }: MobileToolbarProps) {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 bg-surface/90 backdrop-blur-xl border-t border-border z-30 pb-[env(safe-area-inset-bottom)]">
+        <div className="fixed bottom-0 left-0 right-0 bg-surface backdrop-blur-2xl backdrop-saturate-150 border-t border-border shadow-2xl z-30 pb-[env(safe-area-inset-bottom)]">
             <div className="flex items-center justify-between px-4 py-3">
                 <Button variant="ghost" size="sm" onClick={onOpenTemplates} className="flex flex-col items-center gap-1 h-auto py-1 px-2 text-text-muted hover:text-text-main">
                     <LayoutTemplate size={24} />
@@ -48,6 +49,11 @@ export function MobileToolbar({ onAddText, onAddShape, onUploadImage, onOpenTemp
                 <Button variant="ghost" size="sm" onClick={() => onAddShape('rect')} className="flex flex-col items-center gap-1 h-auto py-1 px-2 text-text-muted hover:text-text-main">
                     <Square size={24} />
                     <span className="text-[10px] font-medium">Shapes</span>
+                </Button>
+
+                <Button variant="ghost" size="sm" onClick={onEditCanvas} className="flex flex-col items-center gap-1 h-auto py-1 px-2 text-text-muted hover:text-text-main">
+                    <Settings2 size={24} />
+                    <span className="text-[10px] font-medium">Canvas</span>
                 </Button>
 
                 <Button variant="ghost" size="sm" onClick={onExport} className="flex flex-col items-center gap-1 h-auto py-1 px-2 text-text-muted hover:text-text-main">

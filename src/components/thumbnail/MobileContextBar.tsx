@@ -54,7 +54,7 @@ export function MobileContextBar({
     const allTools = [...specificTools, ...commonTools];
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 h-16 bg-surface/90 backdrop-blur-xl border-t border-border z-[60] flex items-center px-4 pb-[env(safe-area-inset-bottom)]">
+        <div className="fixed bottom-0 left-0 right-0 h-16 bg-surface backdrop-blur-2xl backdrop-saturate-150 shadow-2xl border-t border-border z-[60] flex items-center px-4 pb-[env(safe-area-inset-bottom)]">
 
             {/* Close Button */}
             <Button variant="ghost" size="sm" onClick={onClose} className="rounded-lg h-8 w-8 px-0 text-text-muted hover:text-text-main shrink-0">

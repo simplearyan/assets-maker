@@ -18,6 +18,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { SidebarContent } from '../components/thumbnail/SidebarContent';
 import { MobileToolbar } from '../components/thumbnail/MobileToolbar';
 import { MobileContextBar, type PropertyTab } from '../components/thumbnail/MobileContextBar';
+import { MobileCanvasBar, type CanvasTab } from '../components/thumbnail/MobileCanvasBar';
 
 export function ThumbnailMaker() {
     const [elements, setElements] = useState<ThumbnailElement[]>([]);
@@ -32,6 +33,8 @@ export function ThumbnailMaker() {
     const [showSidebarDrawer, setShowSidebarDrawer] = useState(false);
     const [activeTab, setActiveTab] = useState<PropertyTab>(null);
     const [showTemplates, setShowTemplates] = useState(true);
+    const [isEditingCanvas, setIsEditingCanvas] = useState(false);
+    const [activeCanvasTab, setActiveCanvasTab] = useState<CanvasTab>(null);
     const [zoom, setZoom] = useState(1);
     const { isNavVisible } = useUIStore();
     const stageRef = useRef<any>(null);
@@ -203,25 +206,9 @@ export function ThumbnailMaker() {
 
                     {/* Mobile Bottom Toolbar / Context Bar Switcher */}
                     {/* Mobile Bottom Toolbar / Context Bar Switcher */}
+                    {/* Mobile Bottom Toolbar / Context Bar Switcher */}
                     <AnimatePresence>
-                        {!selectedElement ? (
-                            <motion.div
-                                key="toolbar"
-                                initial={{ opacity: 0, scale: 0.95, filter: 'blur(4px)' }}
-                                animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-                                exit={{ opacity: 0, scale: 0.95, filter: 'blur(4px)' }}
-                                transition={{ duration: 0.2, ease: "easeInOut" }}
-                                className="fixed bottom-0 left-0 right-0 z-30"
-                            >
-                                <MobileToolbar
-                                    onAddText={() => handleAddElement('text')}
-                                    onAddShape={(type) => type === 'rect' ? handleAddElement('rect') : handleAddElement('circle')}
-                                    onUploadImage={handleUploadImage}
-                                    onOpenTemplates={() => setShowSidebarDrawer(true)}
-                                    onExport={handleExport}
-                                />
-                            </motion.div>
-                        ) : (
+                        {selectedElement ? (
                             <motion.div
                                 key="context-bar"
                                 initial={{ opacity: 0, scale: 0.95, filter: 'blur(4px)' }}
@@ -240,6 +227,51 @@ export function ThumbnailMaker() {
                                         onClose={() => setSelectedId(null)}
                                     />
                                 </div>
+                            </motion.div>
+                        ) : isEditingCanvas ? (
+                            <motion.div
+                                key="canvas-bar"
+                                initial={{ opacity: 0, scale: 0.95, filter: 'blur(4px)' }}
+                                animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+                                exit={{ opacity: 0, scale: 0.95, filter: 'blur(4px)' }}
+                                transition={{ duration: 0.2, ease: "easeInOut" }}
+                                className="fixed bottom-0 left-0 right-0 z-30 pointer-events-none"
+                            >
+                                <div className="pointer-events-auto">
+                                    <MobileCanvasBar
+                                        canvasSettings={{ width: canvasWidth, height: canvasHeight, background, isTransparent }}
+                                        activeTab={activeCanvasTab}
+                                        onTabChange={setActiveCanvasTab}
+                                        onClose={() => setIsEditingCanvas(false)}
+                                        onUpdateCanvas={(settings) => {
+                                            if (settings.width) setCanvasWidth(settings.width);
+                                            if (settings.height) setCanvasHeight(settings.height);
+                                            if (settings.background) setBackground(settings.background);
+                                            if (settings.isTransparent !== undefined) setIsTransparent(settings.isTransparent);
+                                        }}
+                                    />
+                                </div>
+                            </motion.div>
+                        ) : (
+                            <motion.div
+                                key="toolbar"
+                                initial={{ opacity: 0, scale: 0.95, filter: 'blur(4px)' }}
+                                animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+                                exit={{ opacity: 0, scale: 0.95, filter: 'blur(4px)' }}
+                                transition={{ duration: 0.2, ease: "easeInOut" }}
+                                className="fixed bottom-0 left-0 right-0 z-30"
+                            >
+                                <MobileToolbar
+                                    onAddText={() => handleAddElement('text')}
+                                    onAddShape={(type) => type === 'rect' ? handleAddElement('rect') : handleAddElement('circle')}
+                                    onUploadImage={handleUploadImage}
+                                    onOpenTemplates={() => setShowSidebarDrawer(true)}
+                                    onEditCanvas={() => {
+                                        setIsEditingCanvas(true);
+                                        setActiveCanvasTab('size');
+                                    }}
+                                    onExport={handleExport}
+                                />
                             </motion.div>
                         )}
                     </AnimatePresence>

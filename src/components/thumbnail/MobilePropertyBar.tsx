@@ -62,7 +62,7 @@ export function MobilePropertyBar({
     const allTools = [...specificTools, ...commonTools];
 
     return (
-        <div className="h-16 bg-surface backdrop-blur-xl border-t border-border flex items-center px-2 z-[60] overflow-x-auto no-scrollbar gap-2" ref={scrollRef}>
+        <div className="h-16 bg-surface backdrop-blur-2xl backdrop-saturate-150 border-t border-border shadow-2xl flex items-center px-2 z-[60] overflow-x-auto no-scrollbar gap-2" ref={scrollRef}>
             <Button variant="ghost" size="sm" onClick={onClose} className="text-text-muted shrink-0">
                 <X size={20} />
             </Button>

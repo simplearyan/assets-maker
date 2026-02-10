@@ -7,7 +7,7 @@ import {
     AlignLeft, AlignCenter, AlignRight, AlignStartVertical, AlignEndVertical,
     ArrowUp, ArrowDown, ArrowUpToLine, ArrowDownToLine, Trash2, Copy, Type,
     Bold, Italic, Underline, Edit3, Image, FileCode, Monitor,
-    Sparkles, Focus, Save
+    Sparkles, Focus, Save, Combine, Scissors, SplitSquareHorizontal, Layers
 } from 'lucide-react';
 import { fabric } from 'fabric';
 
@@ -35,6 +35,8 @@ interface PropertyPanelProps {
     onLoadFont?: (font: string) => void;
     onSaveProject?: () => void;
     onClearProject?: () => void;
+    onPerformBoolean?: (type: 'unite' | 'subtract' | 'intersect' | 'exclude') => void;
+    onFlattenText?: () => void;
 }
 
 export function PropertyPanel({
@@ -60,6 +62,8 @@ export function PropertyPanel({
     onLoadFont,
     onSaveProject,
     onClearProject,
+    onPerformBoolean,
+    onFlattenText,
 }: PropertyPanelProps) {
     if (!selectedObject) {
         return (
@@ -494,6 +498,70 @@ export function PropertyPanel({
                     <p className="text-[10px] text-text-muted px-1 italic">
                         Tip: Hover over a color to see the path on canvas.
                     </p>
+                </div>
+            )}
+
+            {/* Boolean Operations (Multi-Selection) */}
+            {selectedObject.type === 'activeSelection' && onPerformBoolean && (
+                <div className="space-y-3 pt-4 border-t border-white/5">
+                    <label className="text-xs font-bold text-text-muted uppercase tracking-wider px-1 flex items-center gap-2">
+                        <Combine size={14} className="text-accent" /> Path Operations
+                    </label>
+                    <div className="grid grid-cols-4 gap-2">
+                        <Button
+                            variant="ghost"
+                            className="bg-white/5 hover:bg-accent/10 border border-white/5 hover:border-accent/30 flex-col gap-1 h-16"
+                            onClick={() => onPerformBoolean('unite')}
+                            title="Unite"
+                        >
+                            <Combine size={18} />
+                            <span className="text-[9px]">Unite</span>
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            className="bg-white/5 hover:bg-accent/10 border border-white/5 hover:border-accent/30 flex-col gap-1 h-16"
+                            onClick={() => onPerformBoolean('subtract')}
+                            title="Subtract"
+                        >
+                            <Scissors size={18} />
+                            <span className="text-[9px]">Subtract</span>
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            className="bg-white/5 hover:bg-accent/10 border border-white/5 hover:border-accent/30 flex-col gap-1 h-16"
+                            onClick={() => onPerformBoolean('intersect')}
+                            title="Intersect"
+                        >
+                            <SplitSquareHorizontal size={18} />
+                            <span className="text-[9px]">Intersect</span>
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            className="bg-white/5 hover:bg-accent/10 border border-white/5 hover:border-accent/30 flex-col gap-1 h-16"
+                            onClick={() => onPerformBoolean('exclude')}
+                            title="Exclude"
+                        >
+                            <Layers size={18} />
+                            <span className="text-[9px]">Exclude</span>
+                        </Button>
+                    </div>
+                </div>
+            )}
+
+            {/* Text Flattening */}
+            {(selectedObject.type === 'text' || selectedObject.type === 'i-text') && onFlattenText && (
+                <div className="pt-2 border-t border-white/5">
+                    <Button
+                        variant="ghost"
+                        className="w-full bg-white/5 hover:bg-accent/10 border border-white/5 hover:border-accent/30 justify-between group"
+                        onClick={onFlattenText}
+                    >
+                        <div className="flex items-center gap-2">
+                            <Type size={16} className="text-text-muted group-hover:text-accent transition-colors" />
+                            <span className="text-xs font-medium">Flatten Text to Path</span>
+                        </div>
+                        <FileCode size={14} className="text-text-muted opacity-50" />
+                    </Button>
                 </div>
             )}
 

@@ -2,8 +2,10 @@ import { useState, useRef, useEffect } from 'react';
 import { AssetPanel } from '../components/logo/AssetPanel';
 import { PropertyPanel } from '../components/logo/PropertyPanel';
 import { LogoCanvas, type LogoCanvasRef } from '../components/logo/LogoCanvas';
+import { LayersPanel } from '../components/logo/LayersPanel';
 import { MobileDeck } from '../components/logo/MobileDeck';
 import { fabric } from 'fabric';
+import { Layers, Settings2 } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 
 const GOOGLE_FONTS = [
@@ -23,6 +25,7 @@ export function LogoStudio() {
     const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
     const location = useLocation();
     const [isLoaded, setIsLoaded] = useState(false);
+    const [rightPanelTab, setRightPanelTab] = useState<'properties' | 'layers'>('properties');
 
     // Persistence Keys
     const PROJECT_KEY = 'kenichi-studio-project';
@@ -116,6 +119,23 @@ export function LogoStudio() {
         setVersion(v => v + 1);
     };
 
+    const handleSaveProject = () => {
+        const data = canvasRef.current?.serialize();
+        if (data) {
+            localStorage.setItem(PROJECT_KEY, JSON.stringify(data));
+            localStorage.setItem(TIME_KEY, Date.now().toString());
+            // Optional: Show toast or feedback
+        }
+    };
+
+    const handleClearStorage = () => {
+        if (window.confirm('Clear all canvas objects and delete saved memory?')) {
+            localStorage.removeItem(PROJECT_KEY);
+            localStorage.removeItem(TIME_KEY);
+            window.location.reload();
+        }
+    };
+
     return (
         <div className="h-[calc(100vh-6rem)] w-full flex bg-bg overflow-hidden relative md:p-4 md:gap-4">
 
@@ -141,52 +161,79 @@ export function LogoStudio() {
             />
 
             {/* Right: Refiner (Desktop) */}
-            <div className="hidden md:block h-full z-10">
-                <PropertyPanel
-                    selectedObject={selectedObject}
-                    version={version}
-                    onUpdateProperty={handleUpdateProperty}
-                    onDelete={() => canvasRef.current?.deleteSelected()}
-                    onDuplicate={() => canvasRef.current?.duplicateSelected()}
-                    onReorder={(action) => canvasRef.current?.reorderSelected(action)}
-                    onAlign={(action) => canvasRef.current?.alignSelected(action)}
-                    snapToGrid={snapToGrid}
-                    onToggleGrid={() => setSnapToGrid(!snapToGrid)}
-                    onExportSVG={() => canvasRef.current?.exportSVG()}
-                    onExportPNG={() => canvasRef.current?.exportPNG()}
-                    canvasBg={canvasBg}
-                    isTransparent={isTransparent}
-                    canvasWidth={dimensions.width}
-                    canvasHeight={dimensions.height}
-                    onUpdateCanvasBg={(color) => {
-                        setCanvasBg(color);
-                        canvasRef.current?.setBackgroundColor(color);
-                    }}
-                    onUpdateCanvasTransparency={(transparent) => {
-                        setIsTransparent(transparent);
-                        canvasRef.current?.setTransparency(transparent);
-                    }}
-                    onUpdateCanvasDimensions={(w, h) => {
-                        setDimensions({ width: w, height: h });
-                        canvasRef.current?.setDimensions(w, h);
-                    }}
-                    fonts={GOOGLE_FONTS}
-                    onLoadFont={loadFont}
-                    onSaveProject={() => {
-                        const data = canvasRef.current?.serialize();
-                        if (data) {
-                            localStorage.setItem(PROJECT_KEY, JSON.stringify(data));
-                            localStorage.setItem(TIME_KEY, Date.now().toString());
-                        }
-                    }}
-                    onClearProject={() => {
-                        if (window.confirm('Clear all canvas objects and delete saved memory?')) {
-                            localStorage.removeItem(PROJECT_KEY);
-                            localStorage.removeItem(TIME_KEY);
-                            window.location.reload();
-                        }
-                    }}
-                />
+            <div className="hidden md:flex flex-col h-full z-10 w-80 gap-3 transition-all duration-300">
+                {/* Panel Tabs */}
+                <div className="flex p-1 bg-surface/30 backdrop-blur-xl rounded-2xl border border-white/5 shrink-0">
+                    <button
+                        onClick={() => setRightPanelTab('properties')}
+                        className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-medium transition-all ${rightPanelTab === 'properties' ? 'bg-accent text-white shadow-lg shadow-accent/20' : 'text-text-muted hover:text-text-main hover:bg-white/5'}`}
+                    >
+                        <Settings2 size={14} />
+                        Properties
+                    </button>
+                    <button
+                        onClick={() => setRightPanelTab('layers')}
+                        className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-medium transition-all ${rightPanelTab === 'layers' ? 'bg-accent text-white shadow-lg shadow-accent/20' : 'text-text-muted hover:text-text-main hover:bg-white/5'}`}
+                    >
+                        <Layers size={14} />
+                        Layers
+                    </button>
+                </div>
+
+                <div className="flex-1 overflow-hidden relative rounded-3xl bg-surface/30 backdrop-blur-xl border border-white/5">
+                    {/* Properties Panel */}
+                    <div className={`absolute inset-0 transition-opacity duration-300 overflow-y-auto custom-scrollbar ${rightPanelTab === 'properties' ? 'opacity-100 z-10 pointer-events-auto' : 'opacity-0 z-0 pointer-events-none'}`}>
+                        <PropertyPanel
+                            selectedObject={selectedObject}
+                            version={version}
+                            onUpdateProperty={handleUpdateProperty}
+                            onDelete={() => canvasRef.current?.deleteSelected()}
+                            onDuplicate={() => canvasRef.current?.duplicateSelected()}
+                            onReorder={(action) => canvasRef.current?.reorderSelected(action)}
+                            onAlign={(action) => canvasRef.current?.alignSelected(action)}
+                            snapToGrid={snapToGrid}
+                            onToggleGrid={() => setSnapToGrid(!snapToGrid)}
+                            onExportSVG={() => canvasRef.current?.exportSVG()}
+                            onExportPNG={() => canvasRef.current?.exportPNG()}
+                            canvasBg={canvasBg}
+                            isTransparent={isTransparent}
+                            canvasWidth={dimensions.width}
+                            canvasHeight={dimensions.height}
+                            onUpdateCanvasBg={(color) => {
+                                setCanvasBg(color);
+                                canvasRef.current?.setBackgroundColor(color);
+                            }}
+                            onUpdateCanvasTransparency={(transparent) => {
+                                setIsTransparent(transparent);
+                                canvasRef.current?.setTransparency(transparent);
+                            }}
+                            onUpdateCanvasDimensions={(w, h) => {
+                                setDimensions({ width: w, height: h });
+                                canvasRef.current?.setDimensions(w, h);
+                            }}
+                            fonts={GOOGLE_FONTS}
+                            onLoadFont={loadFont}
+                            onSaveProject={handleSaveProject}
+                            onClearProject={handleClearStorage}
+                            onPerformBoolean={(type) => canvasRef.current?.performBoolean(type)}
+                            onFlattenText={() => canvasRef.current?.flattenText()}
+                        />
+                    </div>
+
+                    {/* Layers Panel */}
+                    <div className={`absolute inset-0 transition-opacity duration-300 ${rightPanelTab === 'layers' ? 'opacity-100 z-10 pointer-events-auto' : 'opacity-0 z-0 pointer-events-none'}`}>
+                        <LayersPanel
+                            canvas={canvasRef.current?.canvas || null}
+                            selectedObject={selectedObject}
+                            onSelect={(obj) => {
+                                canvasRef.current?.canvas?.setActiveObject(obj);
+                                canvasRef.current?.canvas?.requestRenderAll();
+                                setSelectedObject(obj);
+                            }}
+                            onUpdate={() => setVersion(v => v + 1)} // Force re-render if needed
+                        />
+                    </div>
+                </div>
             </div>
 
             {/* Mobile Contextual Deck */}

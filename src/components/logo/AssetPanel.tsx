@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { GlassCard } from '../ui/GlassCard';
-import { Square, Circle, Triangle, Star, Shapes, Type } from 'lucide-react';
+
+import { Square, Circle, Triangle, Star, Shapes, Type, Upload, Plus, Trash2 } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import { createRoot } from 'react-dom/client';
 import { flushSync } from 'react-dom';
@@ -28,7 +28,7 @@ const COMMON_ICONS = [
 ] as const;
 
 export function AssetPanel({ onAddShape, onAddText, onAddIcon, onAddImage }: AssetPanelProps) {
-    const [activeTab, setActiveTab] = useState<'shapes' | 'icons' | 'text' | 'uploads'>('shapes');
+    const [activeTab, setActiveTab] = useState<'shapes' | 'icons' | 'text' | 'uploads' | 'emojis'>('shapes');
     const [uploadedAssets, setUploadedAssets] = useState<{ id: string, name: string, data: string, type: 'svg' | 'image' }[]>([]);
 
     const handleIconClick = (iconName: string) => {
@@ -53,115 +53,155 @@ export function AssetPanel({ onAddShape, onAddText, onAddIcon, onAddImage }: Ass
         }
     };
 
+    const EMOJIS = ['😀', '😎', '🎉', '🔥', '🚀', '💡', '🎨', '✨', '❤️', '👍', '🐱', '🐶', '🍕', '☕', '⚽', '🎮', '🚗', '✈️', '🌈', '☀️', '🌙', '⭐', '💎', '🔔'];
+
     return (
-        <GlassCard className="w-80 flex flex-col h-full bg-surface/30 backdrop-blur-xl rounded-3xl overflow-hidden border border-white/5">
-            <div className="p-4 pb-0">
-                <div className="flex p-1 bg-surface/50 rounded-xl mb-6 border border-white/5">
-                    <button
-                        onClick={() => setActiveTab('shapes')}
-                        className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'shapes' ? 'bg-accent/20 text-accent ring-1 ring-accent/50 shadow-[0_0_15px_rgba(var(--accent-rgb),0.2)]' : 'text-text-muted hover:text-text-main hover:bg-white/5'}`}
-                    >
-                        <Shapes size={16} className="mx-auto mb-1" />
-                        Shapes
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('icons')}
-                        className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'icons' ? 'bg-accent/20 text-accent ring-1 ring-accent/50 shadow-[0_0_15px_rgba(var(--accent-rgb),0.2)]' : 'text-text-muted hover:text-text-main hover:bg-white/5'}`}
-                    >
-                        <LucideIcons.Smile size={16} className="mx-auto mb-1" />
-                        Icons
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('text')}
-                        className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'text' ? 'bg-accent/20 text-accent ring-1 ring-accent/50 shadow-[0_0_15px_rgba(var(--accent-rgb),0.2)]' : 'text-text-muted hover:text-text-main hover:bg-white/5'}`}
-                    >
-                        <Type size={16} className="mx-auto mb-1" />
-                        Text
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('uploads')}
-                        className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'uploads' ? 'bg-accent/20 text-accent ring-1 ring-accent/50 shadow-[0_0_15px_rgba(var(--accent-rgb),0.2)]' : 'text-text-muted hover:text-text-main hover:bg-white/5'}`}
-                    >
-                        <LucideIcons.Upload size={16} className="mx-auto mb-1" />
-                        Upload
-                    </button>
-                </div>
+        <div className="w-80 flex flex-col h-full bg-surface/30 backdrop-blur-xl rounded-3xl overflow-hidden border border-white/5">
+            {/* Tabs */}
+            <div className="flex p-1 gap-1 border-b border-white/5 bg-black/20">
+                <button
+                    onClick={() => setActiveTab('shapes')}
+                    className={`flex-1 flex flex-col items-center justify-center py-2 rounded-xl transition-all ${activeTab === 'shapes' ? 'bg-accent text-white shadow-lg shadow-accent/20' : 'text-text-muted hover:bg-white/5 hover:text-text-main'}`}
+                >
+                    <Shapes size={18} />
+                    <span className="text-[10px] font-medium mt-1">Shapes</span>
+                </button>
+                <button
+                    onClick={() => setActiveTab('text')}
+                    className={`flex-1 flex flex-col items-center justify-center py-2 rounded-xl transition-all ${activeTab === 'text' ? 'bg-accent text-white shadow-lg shadow-accent/20' : 'text-text-muted hover:bg-white/5 hover:text-text-main'}`}
+                >
+                    <Type size={18} />
+                    <span className="text-[10px] font-medium mt-1">Text</span>
+                </button>
+                <button
+                    onClick={() => setActiveTab('icons')}
+                    className={`flex-1 flex flex-col items-center justify-center py-2 rounded-xl transition-all ${activeTab === 'icons' ? 'bg-accent text-white shadow-lg shadow-accent/20' : 'text-text-muted hover:bg-white/5 hover:text-text-main'}`}
+                >
+                    <Star size={18} />
+                    <span className="text-[10px] font-medium mt-1">Icons</span>
+                </button>
+                <button
+                    onClick={() => setActiveTab('emojis')}
+                    className={`flex-1 flex flex-col items-center justify-center py-2 rounded-xl transition-all ${activeTab === 'emojis' ? 'bg-accent text-white shadow-lg shadow-accent/20' : 'text-text-muted hover:bg-white/5 hover:text-text-main'}`}
+                >
+                    <span className="text-lg leading-none mb-0.5">😀</span>
+                    <span className="text-[10px] font-medium">Emojis</span>
+                </button>
+                <button
+                    onClick={() => setActiveTab('uploads')}
+                    className={`flex-1 flex flex-col items-center justify-center py-2 rounded-xl transition-all ${activeTab === 'uploads' ? 'bg-accent text-white shadow-lg shadow-accent/20' : 'text-text-muted hover:bg-white/5 hover:text-text-main'}`}
+                >
+                    <Upload size={18} />
+                    <span className="text-[10px] font-medium mt-1">Uploads</span>
+                </button>
             </div>
 
+            {/* Content Area */}
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-3">
 
-            <div className="flex-1 overflow-y-auto custom-scrollbar space-y-4 px-1">
+                {/* Shapes Tab */}
                 {activeTab === 'shapes' && (
                     <div className="grid grid-cols-2 gap-3">
                         {SHAPES.map((shape) => (
                             <button
                                 key={shape.type}
                                 onClick={() => onAddShape(shape.type as any)}
-                                className="aspect-square flex flex-col items-center justify-center gap-2 bg-surface border border-white/5 rounded-xl hover:border-accent/50 hover:bg-accent/10 transition-all group"
+                                className="aspect-square flex flex-col items-center justify-center gap-2 bg-white/5 rounded-xl border border-white/5 hover:bg-white/10 hover:border-accent/30 transition-all group"
                             >
-                                <shape.icon size={32} className="text-text-muted group-hover:text-accent transition-colors" />
-                                <span className="text-xs text-text-muted group-hover:text-text-main">{shape.label}</span>
+                                <div className="text-accent group-hover:scale-110 transition-transform">
+                                    <shape.icon size={32} />
+                                </div>
+                                <span className="text-xs text-text-muted font-medium">{shape.label}</span>
                             </button>
                         ))}
                     </div>
                 )}
 
+                {/* Text Tab */}
+                {activeTab === 'text' && (
+                    <div className="space-y-3">
+                        <button
+                            onClick={() => onAddText('heading')}
+                            className="w-full text-left p-4 bg-white/5 rounded-xl border border-white/5 hover:bg-white/10 hover:border-accent/30 transition-all group"
+                        >
+                            <h3 className="text-2xl font-bold text-text-main mb-1 group-hover:text-accent transition-colors">Add a Heading</h3>
+                            <span className="text-xs text-text-muted">Bold & Impactful</span>
+                        </button>
+                        <button
+                            onClick={() => onAddText('subheading')}
+                            className="w-full text-left p-4 bg-white/5 rounded-xl border border-white/5 hover:bg-white/10 hover:border-accent/30 transition-all group"
+                        >
+                            <h4 className="text-xl font-semibold text-text-main mb-1 group-hover:text-accent transition-colors">Add a Subheading</h4>
+                            <span className="text-xs text-text-muted">Clear & Concise</span>
+                        </button>
+                        <button
+                            onClick={() => onAddText('body')}
+                            className="w-full text-left p-4 bg-white/5 rounded-xl border border-white/5 hover:bg-white/10 hover:border-accent/30 transition-all group"
+                        >
+                            <p className="text-base text-text-main mb-1 group-hover:text-accent transition-colors">Add Body Text</p>
+                            <span className="text-xs text-text-muted">Detailed Description</span>
+                        </button>
+                    </div>
+                )}
+
+                {/* Icons Tab */}
                 {activeTab === 'icons' && (
-                    <div className="grid grid-cols-4 gap-2">
-                        {COMMON_ICONS.map((name) => {
+                    <div className="grid grid-cols-4 gap-3">
+                        {COMMON_ICONS.map((iconName) => {
                             // @ts-ignore
-                            const Icon = LucideIcons[name];
+                            const Icon = LucideIcons[iconName];
                             if (!Icon) return null;
                             return (
                                 <button
-                                    key={name}
-                                    onClick={() => handleIconClick(name)}
-                                    className="aspect-square flex items-center justify-center bg-surface border border-white/5 rounded-xl hover:border-accent/50 hover:bg-accent/10 transition-all text-text-muted hover:text-accent"
-                                    title={name}
+                                    key={iconName}
+                                    onClick={() => handleIconClick(iconName)}
+                                    className="aspect-square flex flex-col items-center justify-center bg-white/5 rounded-xl border border-white/5 hover:bg-white/10 hover:border-accent/30 transition-all group"
+                                    title={iconName}
                                 >
-                                    <Icon size={24} />
+                                    <Icon size={24} className="text-text-muted group-hover:text-accent transition-colors" />
                                 </button>
                             );
                         })}
                     </div>
                 )}
 
-                {activeTab === 'text' && (
-                    <div className="space-y-3">
-                        <button
-                            onClick={() => onAddText('heading')}
-                            className="w-full text-left p-4 bg-surface border border-white/5 rounded-xl hover:border-accent/50 hover:bg-accent/10 transition-all group"
-                        >
-                            <h1 className="text-2xl font-bold text-text-main mb-1">Add Heading</h1>
-                            <span className="text-xs text-text-muted">Inter Bold, 40px</span>
-                        </button>
-                        <button
-                            onClick={() => onAddText('subheading')}
-                            className="w-full text-left p-4 bg-surface border border-white/5 rounded-xl hover:border-accent/50 hover:bg-accent/10 transition-all group"
-                        >
-                            <h2 className="text-lg font-semibold text-text-main mb-1">Add Subheading</h2>
-                            <span className="text-xs text-text-muted">Inter Semibold, 24px</span>
-                        </button>
-                        <button
-                            onClick={() => onAddText('body')}
-                            className="w-full text-left p-4 bg-surface border border-white/5 rounded-xl hover:border-accent/50 hover:bg-accent/10 transition-all group"
-                        >
-                            <p className="text-sm text-text-main mb-1">Add Body Text</p>
-                            <span className="text-xs text-text-muted">Inter Regular, 16px</span>
-                        </button>
+                {/* Emojis Tab */}
+                {activeTab === 'emojis' && (
+                    <div className="grid grid-cols-4 gap-3">
+                        {EMOJIS.map((emoji) => (
+                            <button
+                                key={emoji}
+                                onClick={() => {
+                                    // Use Twemoji or simple text for now.
+                                    // To allow boolean ops, these MUST be SVGs.
+                                    // For now, let's load them as text, and user can 'Flatten' them using the new feature!
+                                    // Or better: load from Twemoji CDN as SVG.
+                                    const codePoint = emoji.codePointAt(0)?.toString(16);
+                                    if (codePoint) {
+                                        const url = `https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/svg/${codePoint}.svg`;
+                                        fetch(url)
+                                            .then(res => res.text())
+                                            .then(svg => onAddIcon(svg))
+                                            .catch(console.error);
+                                    }
+                                }}
+                                className="aspect-square flex items-center justify-center text-2xl bg-white/5 rounded-xl border border-white/5 hover:bg-white/10 hover:border-accent/30 transition-all hover:scale-110"
+                            >
+                                {emoji}
+                            </button>
+                        ))}
                     </div>
                 )}
 
+                {/* Uploads Tab */}
                 {activeTab === 'uploads' && (
-                    <div className="space-y-6 p-2">
-                        <div
-                            className="border-2 border-dashed border-white/10 rounded-xl p-8 flex flex-col items-center justify-center gap-3 text-text-muted hover:border-accent/50 hover:bg-accent/5 transition-all cursor-pointer group"
-                            onClick={() => document.getElementById('image-upload')?.click()}
-                        >
-                            <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                <LucideIcons.CloudUpload size={24} />
+                    <div className="space-y-4">
+                        <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-white/10 rounded-xl cursor-pointer hover:border-accent/50 hover:bg-accent/5 transition-all group">
+                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                <Upload size={32} className="text-text-muted mb-2 group-hover:text-accent transition-colors" />
+                                <p className="text-xs text-text-muted font-medium">Click to upload assets</p>
+                                <p className="text-[10px] text-text-muted opacity-50 mt-1">SVG, PNG, JPG supported</p>
                             </div>
-                            <p className="text-sm font-medium">Click to Upload</p>
-                            <p className="text-xs opacity-50">PNG, JPG, SVG</p>
                             <input
                                 id="image-upload"
                                 type="file"
@@ -184,8 +224,6 @@ export function AssetPanel({ onAddShape, onAddText, onAddIcon, onAddImage }: Ass
                                                     type: (isSVG ? 'svg' : 'image') as 'svg' | 'image'
                                                 };
                                                 setUploadedAssets(prev => [newAsset, ...prev]);
-                                                // Automatically add to canvas on first upload? 
-                                                // Better to just let user click if they want multiple.
                                             }
                                         };
 
@@ -194,51 +232,65 @@ export function AssetPanel({ onAddShape, onAddText, onAddIcon, onAddImage }: Ass
                                     });
                                 }}
                             />
-                        </div>
+                        </label>
 
                         {uploadedAssets.length > 0 && (
-                            <div className="space-y-3">
-                                <label className="text-[10px] font-bold text-text-muted uppercase tracking-wider px-1">Library ({uploadedAssets.length})</label>
-                                <div className="grid grid-cols-2 gap-3">
-                                    {uploadedAssets.map((asset) => (
-                                        <div
-                                            key={asset.id}
-                                            className="group relative aspect-square bg-white/5 rounded-xl border border-white/5 overflow-hidden hover:border-accent/30 transition-all cursor-pointer"
-                                            onClick={() => {
-                                                if (asset.type === 'svg') onAddIcon(asset.data);
-                                                else onAddImage?.(asset.data);
-                                            }}
-                                        >
-                                            <div className="absolute inset-0 flex items-center justify-center p-2">
-                                                {asset.type === 'svg' ? (
-                                                    <div className="w-full h-full opacity-70 group-hover:opacity-100 transition-opacity flex items-center justify-center" dangerouslySetInnerHTML={{ __html: asset.data.includes('<svg') ? asset.data : '' }} />
-                                                ) : (
-                                                    <img src={asset.data} alt={asset.name} className="w-full h-full object-contain opacity-70 group-hover:opacity-100 transition-opacity" />
-                                                )}
-                                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                                {uploadedAssets.map((asset) => (
+                                    <div
+                                        key={asset.id}
+                                        className="group relative aspect-square bg-white/5 rounded-xl border border-white/5 overflow-hidden hover:border-accent/30 transition-all cursor-pointer"
+                                        onClick={() => {
+                                            if (asset.type === 'svg') onAddIcon(asset.data);
+                                            else onAddImage?.(asset.data);
+                                        }}
+                                    >
+                                        {/* Asset Preview */}
+                                        <div className="absolute inset-0 p-2 flex items-center justify-center">
+                                            {asset.type === 'svg' ? (
+                                                <div
+                                                    className="w-full h-full flex items-center justify-center text-text-main [&>svg]:w-full [&>svg]:h-full"
+                                                    dangerouslySetInnerHTML={{ __html: asset.data }}
+                                                />
+                                            ) : (
+                                                <img
+                                                    src={asset.data}
+                                                    alt={asset.name}
+                                                    className="w-full h-full object-contain"
+                                                />
+                                            )}
+                                        </div>
 
-                                            {/* Delete Overlay */}
+                                        {/* Overlay Actions */}
+                                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                            <div className="p-2 bg-accent rounded-full text-white shadow-lg transform scale-0 group-hover:scale-100 transition-transform duration-200 delay-75">
+                                                <Plus size={16} />
+                                            </div>
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     setUploadedAssets(prev => prev.filter(a => a.id !== asset.id));
                                                 }}
-                                                className="absolute top-1 right-1 p-1.5 rounded-lg bg-black/60 text-red-400 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500/20"
+                                                className="p-2 bg-red-500 rounded-full text-white shadow-lg transform scale-0 group-hover:scale-100 transition-transform duration-200 delay-100 hover:bg-red-600"
+                                                title="Delete Asset"
                                             >
-                                                <LucideIcons.Trash2 size={12} />
+                                                <Trash2 size={16} />
                                             </button>
-
-                                            <div className="absolute bottom-0 inset-x-0 p-1 bg-black/40 backdrop-blur-sm transform translate-y-full group-hover:translate-y-0 transition-transform">
-                                                <p className="text-[9px] text-white truncate text-center">{asset.name}</p>
-                                            </div>
                                         </div>
-                                    ))}
-                                </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {uploadedAssets.length === 0 && (
+                            <div className="text-center py-8 text-text-muted/30 text-xs italic">
+                                Your library is empty
                             </div>
                         )}
                     </div>
                 )}
+
             </div>
-        </GlassCard >
+        </div>
     );
 }

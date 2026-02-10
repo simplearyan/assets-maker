@@ -1,6 +1,7 @@
 import { useRef, useEffect, forwardRef, useImperativeHandle, useState } from 'react';
 import { fabric } from 'fabric';
 import { Settings, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
+import { performBooleanOperation, flattenTextToPath } from '../../utils/PaperUtils';
 
 interface LogoCanvasProps {
     onSelectionChange: (obj: fabric.Object | null) => void;
@@ -31,6 +32,8 @@ export interface LogoCanvasRef {
     canvas: fabric.Canvas | null;
     serialize: () => any;
     deserialize: (data: any) => void;
+    performBoolean: (type: 'unite' | 'subtract' | 'intersect' | 'exclude') => void;
+    flattenText: () => void;
 }
 
 export const LogoCanvas = forwardRef<LogoCanvasRef, LogoCanvasProps>(({
@@ -498,6 +501,45 @@ export const LogoCanvas = forwardRef<LogoCanvasRef, LogoCanvasProps>(({
                 fabricCanvasRef.current?.requestRenderAll();
                 onSelectionChange(null);
             });
+        },
+        performBoolean: async (type) => {
+            const canvas = fabricCanvasRef.current;
+            if (!canvas) return;
+
+            const activeObjects = canvas.getActiveObjects();
+            if (activeObjects.length < 2) return;
+
+            const obj1 = activeObjects[0];
+            const obj2 = activeObjects[1];
+
+            const result = await performBooleanOperation(type, obj1, obj2);
+
+            if (result) {
+                canvas.remove(obj1);
+                canvas.remove(obj2);
+                canvas.discardActiveObject();
+                canvas.add(result);
+                canvas.setActiveObject(result);
+                canvas.requestRenderAll();
+                onSelectionChange(result);
+            }
+        },
+        flattenText: async () => {
+            const canvas = fabricCanvasRef.current;
+            if (!canvas) return;
+
+            const activeObject = canvas.getActiveObject();
+            if (!activeObject || !(activeObject.type === 'text' || activeObject.type === 'i-text')) return;
+
+            const path = await flattenTextToPath(activeObject as fabric.Text);
+            if (path) {
+                const originalIndex = canvas.getObjects().indexOf(activeObject);
+                canvas.remove(activeObject);
+                canvas.insertAt(path, originalIndex, false);
+                canvas.setActiveObject(path);
+                canvas.requestRenderAll();
+                onSelectionChange(path);
+            }
         }
     }));
 

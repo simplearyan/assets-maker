@@ -225,23 +225,100 @@ export const LogoCanvas = forwardRef<LogoCanvasRef, LogoCanvasProps>(({ onSelect
 
         fabricCanvasRef.current = canvas;
 
-        // Grid Lines (Visual)
-        // ... (Optional: Draw grid)
+        // Visual Grid
+        const gridSize = 20;
+        const gridColor = '#e5e7eb'; // light gray
+        // Create grid lines
+        const gridGroup = new fabric.Group([], {
+            selectable: false,
+            evented: false,
+            excludeFromExport: true
+        });
+
+        for (let i = 0; i < (canvas.width! / gridSize); i++) {
+            gridGroup.addWithUpdate(new fabric.Line([i * gridSize, 0, i * gridSize, canvas.height!], {
+                stroke: gridColor,
+                strokeWidth: 1,
+                selectable: false
+            }));
+        }
+        for (let i = 0; i < (canvas.height! / gridSize); i++) {
+            gridGroup.addWithUpdate(new fabric.Line([0, i * gridSize, canvas.width!, i * gridSize], {
+                stroke: gridColor,
+                strokeWidth: 1,
+                selectable: false
+            }));
+        }
+        canvas.add(gridGroup);
+        canvas.sendToBack(gridGroup);
+
+        // Smart Guides Lines
+        const verticalLine = new fabric.Line([canvas.width! / 2, 0, canvas.width! / 2, canvas.height!], {
+            stroke: '#f43f5e', // rose-500
+            strokeWidth: 1,
+            selectable: false,
+            evented: false,
+            opacity: 0,
+            strokeDashArray: [4, 4]
+        });
+        const horizontalLine = new fabric.Line([0, canvas.height! / 2, canvas.width!, canvas.height! / 2], {
+            stroke: '#f43f5e',
+            strokeWidth: 1,
+            selectable: false,
+            evented: false,
+            opacity: 0,
+            strokeDashArray: [4, 4]
+        });
+
+        canvas.add(verticalLine);
+        canvas.add(horizontalLine);
 
         // Event Listeners
         const updateSelection = () => {
             onSelectionChange(canvas.getActiveObject());
         };
 
-        // Snap to Grid Logic
-        const gridSize = 20;
+        // Snap to Grid & Smart Guides Logic
         canvas.on('object:moving', (options) => {
-            if (options.target) {
-                options.target.set({
-                    left: Math.round(options.target.left! / gridSize) * gridSize,
-                    top: Math.round(options.target.top! / gridSize) * gridSize
-                });
+            const target = options.target;
+            if (!target) return;
+
+            const centerX = canvas.width! / 2;
+            const centerY = canvas.height! / 2;
+            const targetCenterX = target.left! + (target.width! * target.scaleX! / 2);
+            const targetCenterY = target.top! + (target.height! * target.scaleY! / 2);
+
+            const snapDist = 10; // Distance to snap to center
+
+            // Initial snap to grid
+            target.set({
+                left: Math.round(target.left! / gridSize) * gridSize,
+                top: Math.round(target.top! / gridSize) * gridSize
+            });
+
+            // Smart Guide: Vertical Center
+            if (Math.abs(targetCenterX - centerX) < snapDist) {
+                target.set({ left: centerX - (target.width! * target.scaleX! / 2) });
+                verticalLine.set('opacity', 1);
+                verticalLine.bringToFront();
+            } else {
+                verticalLine.set('opacity', 0);
             }
+
+            // Smart Guide: Horizontal Center
+            if (Math.abs(targetCenterY - centerY) < snapDist) {
+                target.set({ top: centerY - (target.height! * target.scaleY! / 2) });
+                horizontalLine.set('opacity', 1);
+                horizontalLine.bringToFront();
+            } else {
+                horizontalLine.set('opacity', 0);
+            }
+        });
+
+        canvas.on('mouse:up', () => {
+            verticalLine.set('opacity', 0);
+            horizontalLine.set('opacity', 0);
+            canvas.requestRenderAll();
         });
 
         canvas.on('selection:created', updateSelection);

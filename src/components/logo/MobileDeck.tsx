@@ -3,7 +3,7 @@ import { GlassCard } from '../ui/GlassCard';
 import { Button } from '../ui/Button';
 import {
     Square, Circle, Triangle, Star, Type, Image as ImageIcon,
-    Palette, Layers, Type as TypeIcon, Trash2, X
+    Palette, Layers, Type as TypeIcon, Trash2, X, Edit3
 } from 'lucide-react';
 import { Slider } from '../ui/inputs/Slider';
 import { ColorPicker } from '../ui/inputs/ColorPicker';
@@ -84,7 +84,14 @@ export function MobileDeck({ selectedObject, canvasRef }: MobileDeckProps) {
                     onChange={(e) => canvasRef.current?.updateProperty('opacity', e.target.value)}
                 />
             </div>
-            <div className="flex justify-end pt-2">
+            <div className="flex justify-end pt-2 gap-2">
+                <Button
+                    variant="ghost"
+                    className="text-text-main"
+                    onClick={() => (canvasRef.current as any)?.toggleEdit?.()}
+                >
+                    <Edit3 size={16} className="mr-2" /> Edit Points
+                </Button>
                 <Button
                     variant="ghost"
                     className="text-red-400"

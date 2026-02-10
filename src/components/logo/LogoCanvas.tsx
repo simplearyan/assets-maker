@@ -14,6 +14,7 @@ export interface LogoCanvasRef {
     duplicateSelected: () => void;
     reorderSelected: (action: 'front' | 'back' | 'forward' | 'backward') => void;
     alignSelected: (action: 'left' | 'center' | 'right' | 'top' | 'middle' | 'bottom') => void;
+    toggleEdit: () => void;
     exportSVG: () => void;
     exportPNG: () => void;
     canvas: fabric.Canvas | null;
@@ -161,6 +162,71 @@ export const LogoCanvas = forwardRef<LogoCanvasRef, LogoCanvasProps>(({ onSelect
             }
             fabricCanvasRef.current?.requestRenderAll();
         },
+        toggleEdit: () => {
+            const canvas = fabricCanvasRef.current;
+            const active = canvas?.getActiveObject();
+            if (!canvas || !active) return;
+
+            // Only support Polygon for this POC
+            if (active.type !== 'polygon') {
+                alert("Point editing is currently only supported for Polygon shapes (Star, Triangle).");
+                return;
+            }
+
+            const poly = active as fabric.Polygon;
+            canvas.setActiveObject(poly);
+
+            // If already editing, finish
+            // @ts-ignore custom property
+            if (poly.__editing) {
+                // @ts-ignore
+                poly.__editing = false;
+                // Remove controls
+                const controls = canvas.getObjects().filter(o => (o as any).id === 'poly-control');
+                canvas.remove(...controls);
+                return;
+            }
+
+            // Start editing
+            // @ts-ignore
+            poly.__editing = true;
+            poly.selectable = false; // Disable moving the whole shape while editing points
+
+            const points = poly.points!;
+            // Calculate absolute positions
+            const matrix = poly.calcTransformMatrix();
+            const transformPoint = (p: { x: number, y: number }) => {
+                return fabric.util.transformPoint(new fabric.Point(p.x - poly.pathOffset.x, p.y - poly.pathOffset.y), matrix);
+            };
+
+            points.forEach((point, index) => {
+                const absPoint = transformPoint(point);
+                const control = new fabric.Circle({
+                    left: absPoint.x,
+                    top: absPoint.y,
+                    radius: 5,
+                    fill: '#f43f5e',
+                    originX: 'center',
+                    originY: 'center',
+                    hasControls: false,
+                    hasBorders: false,
+                    // @ts-ignore
+                    id: 'poly-control',
+                    pointIndex: index,
+                    // @ts-ignore
+                    parentPoly: poly
+                });
+
+                control.on('moving', (opt) => {
+                    const p = opt.target as fabric.Circle;
+                    // Placeholder for actual polygon point update logic
+                    console.log("Moving point", (p as any).pointIndex);
+                });
+
+                canvas.add(control);
+            });
+            canvas.requestRenderAll();
+        },
         alignSelected: (action) => {
             const active = fabricCanvasRef.current?.getActiveObject();
             if (!active || !fabricCanvasRef.current) return;
@@ -192,15 +258,34 @@ export const LogoCanvas = forwardRef<LogoCanvasRef, LogoCanvasProps>(({ onSelect
             fabricCanvasRef.current.requestRenderAll();
         },
         exportSVG: () => {
-            const svg = fabricCanvasRef.current?.toSVG();
-            if (svg) {
-                const blob = new Blob([svg], { type: 'image/svg+xml' });
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.download = 'logo-export.svg';
-                link.href = url;
-                link.click();
-            }
+            if (!fabricCanvasRef.current) return;
+            const canvas = fabricCanvasRef.current;
+
+            // Ensure viewport is reset for export to capture full canvas
+            const originalViewport = canvas.viewportTransform;
+            canvas.viewportTransform = [1, 0, 0, 1, 0, 0];
+
+            const svg = canvas.toSVG({
+                suppressPreamble: true,
+                width: 800,
+                height: 600,
+                viewBox: {
+                    x: 0,
+                    y: 0,
+                    width: 800,
+                    height: 600
+                } as any // fabric types might be slightly off here
+            });
+
+            // Restore viewport
+            canvas.viewportTransform = originalViewport!;
+
+            const blob = new Blob([svg], { type: 'image/svg+xml' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.download = 'logo-export.svg';
+            link.href = url;
+            link.click();
         },
         exportPNG: () => {
             const url = fabricCanvasRef.current?.toDataURL({ format: 'png', multiplier: 3 });

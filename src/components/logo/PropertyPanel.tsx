@@ -5,7 +5,7 @@ import { Slider } from '../ui/inputs/Slider';
 import {
     AlignLeft, AlignCenter, AlignRight, AlignStartVertical, AlignEndVertical,
     ArrowUp, ArrowDown, ArrowUpToLine, ArrowDownToLine, Trash2, Copy, Type,
-    Bold, Italic, Underline
+    Bold, Italic, Underline, Edit3
 } from 'lucide-react';
 import { fabric } from 'fabric';
 
@@ -43,6 +43,9 @@ export function PropertyPanel({
                 <div className="flex gap-1">
                     <Button variant="ghost" size="sm" onClick={onDuplicate} title="Duplicate">
                         <Copy size={16} />
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => (selectedObject?.canvas as any)?.toggleEdit?.()} title="Edit Points (Polygons)">
+                        <Edit3 size={16} />
                     </Button>
                     <Button variant="ghost" size="sm" onClick={onDelete} className="text-red-400 hover:text-red-500 hover:bg-red-500/10" title="Delete">
                         <Trash2 size={16} />

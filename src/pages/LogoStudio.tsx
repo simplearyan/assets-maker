@@ -11,6 +11,9 @@ export function LogoStudio() {
     const [selectedObject, setSelectedObject] = useState<fabric.Object | null>(null);
     const [version, setVersion] = useState(0);
     const [snapToGrid, setSnapToGrid] = useState(true);
+    const [canvasBg, setCanvasBg] = useState('#ffffff');
+    const [isTransparent, setIsTransparent] = useState(false);
+    const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
     const location = useLocation();
 
     // Handle Vectorizer Import
@@ -55,6 +58,10 @@ export function LogoStudio() {
                 ref={canvasRef}
                 onSelectionChange={handleSelectionChange}
                 snapToGrid={snapToGrid}
+                canvasBg={canvasBg}
+                isTransparent={isTransparent}
+                canvasWidth={dimensions.width}
+                canvasHeight={dimensions.height}
             />
 
             {/* Right: Refiner (Desktop) */}
@@ -71,6 +78,22 @@ export function LogoStudio() {
                     onToggleGrid={() => setSnapToGrid(!snapToGrid)}
                     onExportSVG={() => canvasRef.current?.exportSVG()}
                     onExportPNG={() => canvasRef.current?.exportPNG()}
+                    canvasBg={canvasBg}
+                    isTransparent={isTransparent}
+                    canvasWidth={dimensions.width}
+                    canvasHeight={dimensions.height}
+                    onUpdateCanvasBg={(color) => {
+                        setCanvasBg(color);
+                        canvasRef.current?.setBackgroundColor(color);
+                    }}
+                    onUpdateCanvasTransparency={(transparent) => {
+                        setIsTransparent(transparent);
+                        canvasRef.current?.setTransparency(transparent);
+                    }}
+                    onUpdateCanvasDimensions={(w, h) => {
+                        setDimensions({ width: w, height: h });
+                        canvasRef.current?.setDimensions(w, h);
+                    }}
                 />
             </div>
 

@@ -6,7 +6,7 @@ import { Slider } from '../ui/inputs/Slider';
 import {
     AlignLeft, AlignCenter, AlignRight, AlignStartVertical, AlignEndVertical,
     ArrowUp, ArrowDown, ArrowUpToLine, ArrowDownToLine, Trash2, Copy, Type,
-    Bold, Italic, Underline, Edit3, Image, FileCode
+    Bold, Italic, Underline, Edit3, Image, FileCode, Monitor
 } from 'lucide-react';
 import { fabric } from 'fabric';
 
@@ -22,6 +22,14 @@ interface PropertyPanelProps {
     onToggleGrid?: () => void;
     onExportSVG?: () => void;
     onExportPNG?: () => void;
+    // Canvas settings
+    canvasBg?: string;
+    isTransparent?: boolean;
+    canvasWidth?: number;
+    canvasHeight?: number;
+    onUpdateCanvasBg?: (color: string) => void;
+    onUpdateCanvasTransparency?: (transparent: boolean) => void;
+    onUpdateCanvasDimensions?: (w: number, h: number) => void;
 }
 
 export function PropertyPanel({
@@ -35,7 +43,14 @@ export function PropertyPanel({
     snapToGrid = true,
     onToggleGrid,
     onExportSVG,
-    onExportPNG
+    onExportPNG,
+    canvasBg = '#ffffff',
+    isTransparent = false,
+    canvasWidth = 800,
+    canvasHeight = 600,
+    onUpdateCanvasBg,
+    onUpdateCanvasTransparency,
+    onUpdateCanvasDimensions,
 }: PropertyPanelProps) {
     if (!selectedObject) {
         return (
@@ -53,6 +68,74 @@ export function PropertyPanel({
                         >
                             <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform ${snapToGrid ? 'translate-x-5' : ''}`} />
                         </button>
+                    </div>
+
+                    {/* Canvas Background */}
+                    <div className="space-y-3">
+                        <label className="text-xs font-bold text-text-muted uppercase tracking-wider px-1">Background</label>
+                        <div className="bg-white/5 p-3 rounded-xl border border-white/5 space-y-3">
+                            <div className="flex items-center justify-between">
+                                <span className="text-xs text-text-muted">Transparent</span>
+                                <button
+                                    onClick={() => onUpdateCanvasTransparency?.(!isTransparent)}
+                                    className={`w-9 h-5 rounded-full transition-all relative ${isTransparent ? 'bg-accent' : 'bg-white/10'}`}
+                                >
+                                    <div className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full shadow-sm transition-transform ${isTransparent ? 'translate-x-4' : ''}`} />
+                                </button>
+                            </div>
+                            {!isTransparent && (
+                                <ColorPicker
+                                    value={canvasBg}
+                                    onChange={(val) => onUpdateCanvasBg?.(val)}
+                                />
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Aspect Ratio */}
+                    <div className="space-y-3">
+                        <label className="text-xs font-bold text-text-muted uppercase tracking-wider px-1">Aspect Ratio</label>
+                        <div className="grid grid-cols-2 gap-2">
+                            {[
+                                { label: '1:1', w: 800, h: 800 },
+                                { label: '4:3', w: 1024, h: 768 },
+                                { label: '16:9', w: 1280, h: 720 },
+                                { label: '9:16', w: 720, h: 1280 },
+                            ].map((ratio) => (
+                                <Button
+                                    key={ratio.label}
+                                    variant="ghost"
+                                    size="sm"
+                                    className={`text-[10px] h-9 border border-white/5 ${canvasWidth === ratio.w && canvasHeight === ratio.h ? 'bg-accent/20 text-accent border-accent/30' : 'bg-white/5'}`}
+                                    onClick={() => onUpdateCanvasDimensions?.(ratio.w, ratio.h)}
+                                >
+                                    <Monitor size={12} className="mr-1 opacity-50" />
+                                    {ratio.label}
+                                </Button>
+                            ))}
+                        </div>
+
+                        {/* Custom Dimensions */}
+                        <div className="grid grid-cols-2 gap-3 pt-1">
+                            <div className="space-y-1">
+                                <span className="text-[10px] text-text-muted ml-1">Width</span>
+                                <input
+                                    type="number"
+                                    value={canvasWidth}
+                                    onChange={(e) => onUpdateCanvasDimensions?.(parseInt(e.target.value) || 0, canvasHeight)}
+                                    className="w-full bg-white/5 border border-white/5 rounded-lg px-2 py-1.5 text-xs text-text-main focus:border-accent/50 outline-none transition-colors"
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <span className="text-[10px] text-text-muted ml-1">Height</span>
+                                <input
+                                    type="number"
+                                    value={canvasHeight}
+                                    onChange={(e) => onUpdateCanvasDimensions?.(canvasWidth, parseInt(e.target.value) || 0)}
+                                    className="w-full bg-white/5 border border-white/5 rounded-lg px-2 py-1.5 text-xs text-text-main focus:border-accent/50 outline-none transition-colors"
+                                />
+                            </div>
+                        </div>
                     </div>
 
                     <div className="space-y-3 pt-2">

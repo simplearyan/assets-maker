@@ -190,7 +190,7 @@ export function Converter() {
                                 max={1.0}
                                 step={0.05}
                                 value={quality}
-                                onChange={(e) => setQuality(parseFloat(e.target.value))}
+                                onChange={(e) => setQuality(e.target.value)}
                             />
                         </div>
                     )}

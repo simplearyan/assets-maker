@@ -20,6 +20,7 @@ import { MobileToolbar } from '../components/thumbnail/MobileToolbar';
 import { MobileContextBar, type PropertyTab } from '../components/thumbnail/MobileContextBar';
 import { MobileCanvasBar, type CanvasTab } from '../components/thumbnail/MobileCanvasBar';
 import { type Template } from '../data/templates';
+import { AlertModal } from '../components/ui/AlertModal';
 
 export function ThumbnailMaker() {
     const [elements, setElements] = useState<ThumbnailElement[]>([]);
@@ -37,16 +38,21 @@ export function ThumbnailMaker() {
     const [isEditingCanvas, setIsEditingCanvas] = useState(false);
     const [activeCanvasTab, setActiveCanvasTab] = useState<CanvasTab>(null);
     const [zoom, setZoom] = useState(1);
+    const [showTemplateWarning, setShowTemplateWarning] = useState(false);
+    const [pendingTemplate, setPendingTemplate] = useState<Template | null>(null);
     const { isNavVisible, toggleNavVisible } = useUIStore();
     const stageRef = useRef<any>(null);
 
     const handleApplyTemplate = (template: Template) => {
         if (elements.length > 0) {
-            if (!window.confirm('Applying a template will replace your current design. Continue?')) {
-                return;
-            }
+            setPendingTemplate(template);
+            setShowTemplateWarning(true);
+        } else {
+            confirmApplyTemplate(template);
         }
+    };
 
+    const confirmApplyTemplate = (template: Template) => {
         // Deep copy elements to avoid reference issues and assign new IDs
         const newElements = template.elements.map(el => ({
             ...el,
@@ -58,6 +64,8 @@ export function ThumbnailMaker() {
         if (template.background) {
             setBackground(template.background);
         }
+        setShowTemplateWarning(false);
+        setPendingTemplate(null);
     };
 
     useEffect(() => {
@@ -648,6 +656,20 @@ export function ThumbnailMaker() {
                     />
                 </Panel>
             </Group>
+
+            <AlertModal
+                isOpen={showTemplateWarning}
+                title="Replace Current Design?"
+                description="Applying this template will discard your current work. This action cannot be undone."
+                confirmText="Replace"
+                cancelText="Cancel"
+                variant="warning"
+                onConfirm={() => pendingTemplate && confirmApplyTemplate(pendingTemplate)}
+                onCancel={() => {
+                    setShowTemplateWarning(false);
+                    setPendingTemplate(null);
+                }}
+            />
         </div>
     );
 }

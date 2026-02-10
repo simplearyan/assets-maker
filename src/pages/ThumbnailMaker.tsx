@@ -19,6 +19,7 @@ import { SidebarContent } from '../components/thumbnail/SidebarContent';
 import { MobileToolbar } from '../components/thumbnail/MobileToolbar';
 import { MobileContextBar, type PropertyTab } from '../components/thumbnail/MobileContextBar';
 import { MobileCanvasBar, type CanvasTab } from '../components/thumbnail/MobileCanvasBar';
+import { type Template } from '../data/templates';
 
 export function ThumbnailMaker() {
     const [elements, setElements] = useState<ThumbnailElement[]>([]);
@@ -38,6 +39,26 @@ export function ThumbnailMaker() {
     const [zoom, setZoom] = useState(1);
     const { isNavVisible, toggleNavVisible } = useUIStore();
     const stageRef = useRef<any>(null);
+
+    const handleApplyTemplate = (template: Template) => {
+        if (elements.length > 0) {
+            if (!window.confirm('Applying a template will replace your current design. Continue?')) {
+                return;
+            }
+        }
+
+        // Deep copy elements to avoid reference issues and assign new IDs
+        const newElements = template.elements.map(el => ({
+            ...el,
+            id: crypto.randomUUID()
+        }));
+
+        setElements(newElements);
+        setSelectedId(null);
+        if (template.background) {
+            setBackground(template.background);
+        }
+    };
 
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -219,9 +240,6 @@ export function ThumbnailMaker() {
                         </Button>
                     </div>
 
-                    {/* Mobile Bottom Toolbar / Context Bar Switcher */}
-                    {/* Mobile Bottom Toolbar / Context Bar Switcher */}
-                    {/* Mobile Bottom Toolbar / Context Bar Switcher */}
                     <AnimatePresence>
                         {selectedElement ? (
                             <motion.div
@@ -325,6 +343,10 @@ export function ThumbnailMaker() {
                                             }}
                                             onReorder={handleReorderElement}
                                             onDelete={handleDeleteElement}
+                                            onAddTemplate={(t) => {
+                                                handleApplyTemplate(t);
+                                                setShowSidebarDrawer(false);
+                                            }}
                                         />
                                     </div>
                                 </div>
@@ -531,6 +553,10 @@ export function ThumbnailMaker() {
                                 onSelect={setSelectedId}
                                 onReorder={handleReorderElement}
                                 onDelete={handleDeleteElement}
+                                onAddTemplate={(t) => {
+                                    handleApplyTemplate(t);
+                                    setShowSidebarDrawer(false);
+                                }}
                             />
                         </motion.div>
                     </>
@@ -549,6 +575,7 @@ export function ThumbnailMaker() {
                                 onSelect={setSelectedId}
                                 onReorder={handleReorderElement}
                                 onDelete={handleDeleteElement}
+                                onAddTemplate={handleApplyTemplate}
                             />
                         </Panel>
                         <Separator className="w-1 bg-border hover:bg-accent/50 transition-colors cursor-col-resize" />

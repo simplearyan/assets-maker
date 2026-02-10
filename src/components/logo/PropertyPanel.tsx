@@ -1,0 +1,173 @@
+import { GlassCard } from '../ui/GlassCard';
+import { Button } from '../ui/Button';
+import { ColorPicker } from '../ui/inputs/ColorPicker';
+import { Slider } from '../ui/inputs/Slider';
+import {
+    AlignLeft, AlignCenter, AlignRight, AlignStartVertical, AlignEndVertical,
+    ArrowUp, ArrowDown, ArrowUpToLine, ArrowDownToLine, Trash2, Copy, Type,
+    Bold, Italic, Underline
+} from 'lucide-react';
+
+interface PropertyPanelProps {
+    selectedObject: fabric.Object | null;
+    onUpdateProperty: (key: string, value: any) => void;
+    onDelete: () => void;
+    onDuplicate: () => void;
+    onReorder: (action: 'front' | 'back' | 'forward' | 'backward') => void;
+    onAlign: (action: 'left' | 'center' | 'right' | 'top' | 'middle' | 'bottom') => void;
+}
+
+export function PropertyPanel({
+    selectedObject,
+    onUpdateProperty,
+    onDelete,
+    onDuplicate,
+    onReorder,
+    onAlign
+}: PropertyPanelProps) {
+    if (!selectedObject) {
+        return (
+            <GlassCard className="w-72 p-6 flex items-center justify-center text-center text-text-muted">
+                <p>Select an element on the canvas to edit its properties.</p>
+            </GlassCard>
+        );
+    }
+
+    const isText = selectedObject.type === 'i-text' || selectedObject.type === 'text';
+
+    return (
+        <GlassCard className="w-80 flex flex-col h-full border-l border-white/5 rounded-none rounded-l-3xl p-6 overflow-y-auto custom-scrollbar space-y-6">
+            <div className="flex items-center justify-between">
+                <h3 className="font-bold text-lg text-text-main">Properties</h3>
+                <div className="flex gap-1">
+                    <Button variant="ghost" size="sm" onClick={onDuplicate} title="Duplicate">
+                        <Copy size={16} />
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={onDelete} className="text-red-400 hover:text-red-500 hover:bg-red-500/10" title="Delete">
+                        <Trash2 size={16} />
+                    </Button>
+                </div>
+            </div>
+
+            {/* Alignment */}
+            <div className="space-y-3">
+                <label className="text-xs font-semibold text-text-muted uppercase tracking-wider">Alignment</label>
+                <div className="grid grid-cols-6 gap-1">
+                    <Button variant="ghost" size="sm" className="px-0 h-8" onClick={() => onAlign('left')} title="Align Left">
+                        <AlignLeft size={16} />
+                    </Button>
+                    <Button variant="ghost" size="sm" className="px-0 h-8" onClick={() => onAlign('center')} title="Align Center">
+                        <AlignCenter size={16} />
+                    </Button>
+                    <Button variant="ghost" size="sm" className="px-0 h-8" onClick={() => onAlign('right')} title="Align Right">
+                        <AlignRight size={16} />
+                    </Button>
+                    <Button variant="ghost" size="sm" className="px-0 h-8" onClick={() => onAlign('top')} title="Align Top">
+                        <AlignStartVertical size={16} />
+                    </Button>
+                    <Button variant="ghost" size="sm" className="px-0 h-8" onClick={() => onAlign('middle')} title="Align Middle">
+                        <AlignCenter size={16} className="rotate-90" />
+                    </Button>
+                    <Button variant="ghost" size="sm" className="px-0 h-8" onClick={() => onAlign('bottom')} title="Align Bottom">
+                        <AlignEndVertical size={16} />
+                    </Button>
+                </div>
+            </div>
+
+            {/* Layering */}
+            <div className="space-y-3">
+                <label className="text-xs font-semibold text-text-muted uppercase tracking-wider">Layer Order</label>
+                <div className="grid grid-cols-4 gap-2">
+                    <Button variant="ghost" size="sm" className="h-9" onClick={() => onReorder('front')} title="Bring to Front">
+                        <ArrowUpToLine size={16} />
+                    </Button>
+                    <Button variant="ghost" size="sm" className="h-9" onClick={() => onReorder('forward')} title="Bring Forward">
+                        <ArrowUp size={16} />
+                    </Button>
+                    <Button variant="ghost" size="sm" className="h-9" onClick={() => onReorder('backward')} title="Send Backward">
+                        <ArrowDown size={16} />
+                    </Button>
+                    <Button variant="ghost" size="sm" className="h-9" onClick={() => onReorder('back')} title="Send to Back">
+                        <ArrowDownToLine size={16} />
+                    </Button>
+                </div>
+            </div>
+
+            {/* Appearance */}
+            <div className="space-y-4">
+                <label className="text-xs font-semibold text-text-muted uppercase tracking-wider">Appearance</label>
+
+                <div className="space-y-2">
+                    <div className="flex justify-between text-xs text-text-muted">
+                        <span>Fill Color</span>
+                        <span>{selectedObject.fill?.toString()}</span>
+                    </div>
+                    <ColorPicker
+                        value={selectedObject.fill as string || '#000000'}
+                        onChange={(val) => onUpdateProperty('fill', val)}
+                    />
+                </div>
+
+                <div className="space-y-2">
+                    <div className="flex justify-between text-xs text-text-muted">
+                        <span>Opacity</span>
+                        <span>{Math.round((selectedObject.opacity || 1) * 100)}%</span>
+                    </div>
+                    <Slider
+                        min={0} max={1} step={0.01}
+                        value={selectedObject.opacity || 1}
+                        onChange={(e) => onUpdateProperty('opacity', e.target.value)}
+                    />
+                </div>
+            </div>
+
+            {/* Typography (Conditional) */}
+            {isText && (
+                <div className="space-y-4 pt-4 border-t border-white/5">
+                    <label className="text-xs font-semibold text-text-muted uppercase tracking-wider flex items-center gap-2">
+                        <Type size={12} /> Typography
+                    </label>
+
+                    <div className="space-y-2">
+                        <div className="flex justify-between text-xs text-text-muted">
+                            <span>Font Size</span>
+                            <span>{(selectedObject as any).fontSize}px</span>
+                        </div>
+                        <Slider
+                            min={8} max={200} step={1}
+                            value={(selectedObject as any).fontSize || 40}
+                            onChange={(e) => onUpdateProperty('fontSize', e.target.value)}
+                        />
+                    </div>
+
+                    <div className="flex gap-2 bg-surface/30 p-1 rounded-lg">
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className={`flex-1 ${(selectedObject as any).fontWeight === 'bold' ? 'bg-accent text-white' : ''}`}
+                            onClick={() => onUpdateProperty('fontWeight', (selectedObject as any).fontWeight === 'bold' ? 'normal' : 'bold')}
+                        >
+                            <Bold size={16} />
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className={`flex-1 ${(selectedObject as any).fontStyle === 'italic' ? 'bg-accent text-white' : ''}`}
+                            onClick={() => onUpdateProperty('fontStyle', (selectedObject as any).fontStyle === 'italic' ? 'normal' : 'italic')}
+                        >
+                            <Italic size={16} />
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className={`flex-1 ${(selectedObject as any).underline ? 'bg-accent text-white' : ''}`}
+                            onClick={() => onUpdateProperty('underline', !(selectedObject as any).underline)}
+                        >
+                            <Underline size={16} />
+                        </Button>
+                    </div>
+                </div>
+            )}
+        </GlassCard>
+    );
+}

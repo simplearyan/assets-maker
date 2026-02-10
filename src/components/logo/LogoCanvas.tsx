@@ -3,6 +3,7 @@ import { fabric } from 'fabric';
 
 interface LogoCanvasProps {
     onSelectionChange: (obj: fabric.Object | null) => void;
+    snapToGrid?: boolean;
 }
 
 export interface LogoCanvasRef {
@@ -20,7 +21,7 @@ export interface LogoCanvasRef {
     canvas: fabric.Canvas | null;
 }
 
-export const LogoCanvas = forwardRef<LogoCanvasRef, LogoCanvasProps>(({ onSelectionChange }, ref) => {
+export const LogoCanvas = forwardRef<LogoCanvasRef, LogoCanvasProps>(({ onSelectionChange, snapToGrid = true }, ref) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const fabricCanvasRef = useRef<fabric.Canvas | null>(null);
 
@@ -99,17 +100,10 @@ export const LogoCanvas = forwardRef<LogoCanvasRef, LogoCanvasProps>(({ onSelect
             if (active) {
                 // Handle special cases
                 if (key === 'fill' && active.type === 'group') {
-                    // For groups (icons), we might want to update all paths? 
-                    // Or just set fill on group? Group fill acts as overlay sometimes.
                     // Recursive update for SVG groups:
                     (active as fabric.Group).getObjects().forEach(obj => obj.set('fill', value));
                 } else {
                     active.set(key as any, value);
-                }
-
-                // If direct property set didn't work for group, try setting it on the group itself too
-                if (active.type === 'group' && key === 'fill') {
-                    // active.set('fill', value); // Usually not needed if children updated
                 }
 
                 fabricCanvasRef.current?.requestRenderAll();
@@ -375,27 +369,32 @@ export const LogoCanvas = forwardRef<LogoCanvasRef, LogoCanvasProps>(({ onSelect
 
             const snapDist = 10; // Distance to snap to center
 
-            // Initial snap to grid
-            target.set({
-                left: Math.round(target.left! / gridSize) * gridSize,
-                top: Math.round(target.top! / gridSize) * gridSize
-            });
+            // Snap to Grid (Conditional)
+            if (snapToGrid) {
+                target.set({
+                    left: Math.round(target.left! / gridSize) * gridSize,
+                    top: Math.round(target.top! / gridSize) * gridSize
+                });
 
-            // Smart Guide: Vertical Center
-            if (Math.abs(targetCenterX - centerX) < snapDist) {
-                target.set({ left: centerX - (target.width! * target.scaleX! / 2) });
-                verticalLine.set('opacity', 1);
-                verticalLine.bringToFront();
+                // Smart Guide: Vertical Center
+                if (Math.abs(targetCenterX - centerX) < snapDist) {
+                    target.set({ left: centerX - (target.width! * target.scaleX! / 2) });
+                    verticalLine.set('opacity', 1);
+                    verticalLine.bringToFront();
+                } else {
+                    verticalLine.set('opacity', 0);
+                }
+
+                // Smart Guide: Horizontal Center
+                if (Math.abs(targetCenterY - centerY) < snapDist) {
+                    target.set({ top: centerY - (target.height! * target.scaleY! / 2) });
+                    horizontalLine.set('opacity', 1);
+                    horizontalLine.bringToFront();
+                } else {
+                    horizontalLine.set('opacity', 0);
+                }
             } else {
                 verticalLine.set('opacity', 0);
-            }
-
-            // Smart Guide: Horizontal Center
-            if (Math.abs(targetCenterY - centerY) < snapDist) {
-                target.set({ top: centerY - (target.height! * target.scaleY! / 2) });
-                horizontalLine.set('opacity', 1);
-                horizontalLine.bringToFront();
-            } else {
                 horizontalLine.set('opacity', 0);
             }
         });
@@ -411,10 +410,11 @@ export const LogoCanvas = forwardRef<LogoCanvasRef, LogoCanvasProps>(({ onSelect
         canvas.on('selection:cleared', () => onSelectionChange(null));
 
         return () => {
+            canvas.off('object:moving');
             canvas.dispose();
             fabricCanvasRef.current = null;
         };
-    }, [onSelectionChange]);
+    }, [onSelectionChange, snapToGrid]); // Re-run effect when snapToGrid changes
 
     return (
         <div className="flex-1 bg-surface/30 rounded-3xl border border-border flex items-center justify-center overflow-hidden relative">

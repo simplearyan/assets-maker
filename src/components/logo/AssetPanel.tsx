@@ -52,7 +52,7 @@ export function AssetPanel({ onAddShape, onAddText, onAddIcon }: AssetPanelProps
     };
 
     return (
-        <GlassCard className="w-80 flex flex-col">
+        <GlassCard className="w-80 flex flex-col h-full border-r border-white/5 rounded-none rounded-r-3xl">
             <div className="flex gap-1 p-1 bg-surface/50 rounded-xl mb-6">
                 <button
                     onClick={() => setActiveTab('shapes')}

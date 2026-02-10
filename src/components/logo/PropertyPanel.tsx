@@ -16,6 +16,9 @@ interface PropertyPanelProps {
     onDuplicate: () => void;
     onReorder: (action: 'front' | 'back' | 'forward' | 'backward') => void;
     onAlign: (action: 'left' | 'center' | 'right' | 'top' | 'middle' | 'bottom') => void;
+    version?: number;
+    snapToGrid?: boolean;
+    onToggleGrid?: () => void;
 }
 
 export function PropertyPanel({
@@ -24,12 +27,37 @@ export function PropertyPanel({
     onDelete,
     onDuplicate,
     onReorder,
-    onAlign
+    onAlign,
+    version = 0,
+    snapToGrid = true,
+    onToggleGrid
 }: PropertyPanelProps) {
     if (!selectedObject) {
         return (
-            <GlassCard className="w-72 p-6 flex items-center justify-center text-center text-text-muted">
-                <p>Select an element on the canvas to edit its properties.</p>
+            <GlassCard className="w-80 flex flex-col h-full border-l border-white/5 rounded-none rounded-l-3xl p-6 space-y-6">
+                <div className="flex items-center justify-between">
+                    <h3 className="font-bold text-lg text-text-main">Canvas</h3>
+                </div>
+
+                <div className="space-y-4">
+                    <label className="text-xs font-semibold text-text-muted uppercase tracking-wider">Settings</label>
+
+                    <div className="flex items-center justify-between p-3 bg-surface/30 rounded-xl border border-white/5">
+                        <span className="text-sm text-text-main">Snap to Grid</span>
+                        <button
+                            onClick={onToggleGrid}
+                            className={`w-10 h-5 rounded-full transition-colors relative ${snapToGrid ? 'bg-accent' : 'bg-white/10'}`}
+                        >
+                            <div className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform ${snapToGrid ? 'translate-x-5' : ''}`} />
+                        </button>
+                    </div>
+                </div>
+
+                <div className="pt-4 border-t border-white/5">
+                    <p className="text-xs text-text-muted text-center">
+                        Select an element on the canvas to edit its properties.
+                    </p>
+                </div>
             </GlassCard>
         );
     }
@@ -155,9 +183,10 @@ export function PropertyPanel({
                         <span>{Math.round((selectedObject.opacity || 1) * 100)}%</span>
                     </div>
                     <Slider
+                        key={`opacity-${version}`} // Force re-render on version change
                         min={0} max={1} step={0.01}
                         value={selectedObject.opacity || 1}
-                        onChange={(e) => onUpdateProperty('opacity', e.target.value)}
+                        onChange={(e) => onUpdateProperty('opacity', parseFloat(e.target.value as any))}
                     />
                 </div>
             </div>
@@ -175,9 +204,10 @@ export function PropertyPanel({
                             <span>{(selectedObject as any).fontSize}px</span>
                         </div>
                         <Slider
+                            key={`fontsize-${version}`}
                             min={8} max={200} step={1}
                             value={(selectedObject as any).fontSize || 40}
-                            onChange={(e) => onUpdateProperty('fontSize', e.target.value)}
+                            onChange={(e) => onUpdateProperty('fontSize', parseInt(e.target.value as any))}
                         />
                     </div>
 

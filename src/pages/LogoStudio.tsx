@@ -41,7 +41,7 @@ export function LogoStudio() {
     };
 
     return (
-        <div className="h-[calc(100vh-6rem)] w-full flex bg-bg overflow-hidden relative">
+        <div className="h-[calc(100vh-6rem)] w-full flex bg-bg overflow-hidden relative md:p-4 md:gap-4">
 
             {/* Left: Ingredients (Desktop) */}
             <div className="hidden md:block h-full z-10">

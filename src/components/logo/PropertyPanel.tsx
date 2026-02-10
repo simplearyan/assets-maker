@@ -54,7 +54,7 @@ export function PropertyPanel({
 }: PropertyPanelProps) {
     if (!selectedObject) {
         return (
-            <GlassCard className="w-80 flex flex-col h-full border-l border-white/5 rounded-none rounded-l-3xl p-5 space-y-6 bg-surface/30 backdrop-blur-xl">
+            <GlassCard className="w-80 flex flex-col h-full bg-surface/30 backdrop-blur-xl rounded-3xl overflow-hidden border border-white/5 p-5 space-y-6">
                 <div className="flex items-center justify-between pb-4 border-b border-white/5">
                     <h3 className="font-bold text-lg text-text-main">Canvas</h3>
                 </div>
@@ -176,7 +176,7 @@ export function PropertyPanel({
     }, [version]);
 
     return (
-        <GlassCard className="w-80 flex flex-col h-full border-l border-white/5 rounded-none rounded-l-3xl p-5 overflow-y-auto custom-scrollbar space-y-6 bg-surface/30 backdrop-blur-xl">
+        <GlassCard className="w-80 flex flex-col h-full bg-surface/30 backdrop-blur-xl rounded-3xl overflow-hidden border border-white/5 p-5 overflow-y-auto custom-scrollbar space-y-6">
             <div className="flex items-center justify-between pb-4 border-b border-white/5">
                 <h3 className="font-bold text-lg text-text-main">Properties</h3>
                 <div className="flex gap-1 bg-white/5 p-1 rounded-lg">

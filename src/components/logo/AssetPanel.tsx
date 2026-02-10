@@ -53,7 +53,7 @@ export function AssetPanel({ onAddShape, onAddText, onAddIcon, onAddImage }: Ass
     };
 
     return (
-        <GlassCard className="w-80 flex flex-col h-full border-r border-white/5 rounded-none rounded-r-3xl bg-surface/30 backdrop-blur-xl">
+        <GlassCard className="w-80 flex flex-col h-full bg-surface/30 backdrop-blur-xl rounded-3xl overflow-hidden border border-white/5">
             <div className="p-4 pb-0">
                 <div className="flex p-1 bg-surface/50 rounded-xl mb-6 border border-white/5">
                     <button

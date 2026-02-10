@@ -6,6 +6,13 @@ import { MobileDeck } from '../components/logo/MobileDeck';
 import { fabric } from 'fabric';
 import { useLocation } from 'react-router-dom';
 
+const GOOGLE_FONTS = [
+    'Inter', 'Roboto', 'Playfair Display', 'Montserrat', 'Lora',
+    'Open Sans', 'Bebas Neue', 'Pacifico', 'Caveat', 'Oswald',
+    'Raleway', 'Merriweather', 'Quicksand', 'Dancing Script',
+    'Abril Fatface', 'Righteous', 'Cinzel', 'Orbitron', 'Satisfy', 'Bangers'
+];
+
 export function LogoStudio() {
     const canvasRef = useRef<LogoCanvasRef>(null);
     const [selectedObject, setSelectedObject] = useState<fabric.Object | null>(null);
@@ -15,6 +22,19 @@ export function LogoStudio() {
     const [isTransparent, setIsTransparent] = useState(false);
     const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
     const location = useLocation();
+
+    // Dynamically load Google Fonts
+    const loadFont = (fontFamily: string) => {
+        if (!GOOGLE_FONTS.includes(fontFamily)) return;
+        const fontId = `font-${fontFamily.replace(/\s+/g, '-').toLowerCase()}`;
+        if (document.getElementById(fontId)) return;
+
+        const link = document.createElement('link');
+        link.id = fontId;
+        link.rel = 'stylesheet';
+        link.href = `https://fonts.googleapis.com/css2?family=${fontFamily.replace(/\s+/g, '+')}:wght@400;700&display=swap`;
+        document.head.appendChild(link);
+    };
 
     // Handle Vectorizer Import
     useEffect(() => {
@@ -94,6 +114,8 @@ export function LogoStudio() {
                         setDimensions({ width: w, height: h });
                         canvasRef.current?.setDimensions(w, h);
                     }}
+                    fonts={GOOGLE_FONTS}
+                    onLoadFont={loadFont}
                 />
             </div>
 

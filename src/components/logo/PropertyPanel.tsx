@@ -6,7 +6,8 @@ import { Slider } from '../ui/inputs/Slider';
 import {
     AlignLeft, AlignCenter, AlignRight, AlignStartVertical, AlignEndVertical,
     ArrowUp, ArrowDown, ArrowUpToLine, ArrowDownToLine, Trash2, Copy, Type,
-    Bold, Italic, Underline, Edit3, Image, FileCode, Monitor
+    Bold, Italic, Underline, Edit3, Image, FileCode, Monitor,
+    Sparkles, Focus
 } from 'lucide-react';
 import { fabric } from 'fabric';
 
@@ -30,6 +31,8 @@ interface PropertyPanelProps {
     onUpdateCanvasBg?: (color: string) => void;
     onUpdateCanvasTransparency?: (transparent: boolean) => void;
     onUpdateCanvasDimensions?: (w: number, h: number) => void;
+    fonts?: string[];
+    onLoadFont?: (font: string) => void;
 }
 
 export function PropertyPanel({
@@ -51,6 +54,8 @@ export function PropertyPanel({
     onUpdateCanvasBg,
     onUpdateCanvasTransparency,
     onUpdateCanvasDimensions,
+    fonts = [],
+    onLoadFont,
 }: PropertyPanelProps) {
     if (!selectedObject) {
         return (
@@ -336,6 +341,29 @@ export function PropertyPanel({
                         <Type size={14} className="text-accent" /> Typography
                     </label>
 
+                    {/* Font Family Selector */}
+                    <div className="space-y-2">
+                        <span className="text-[10px] text-text-muted ml-1 uppercase font-bold">Font Family</span>
+                        <div className="grid grid-cols-1 gap-2">
+                            <select
+                                className="w-full bg-white/5 border border-white/5 rounded-lg px-2 py-2 text-xs text-text-main focus:border-accent/50 outline-none transition-colors appearance-none cursor-pointer"
+                                value={(selectedObject as any).fontFamily}
+                                onChange={(e) => {
+                                    const font = e.target.value;
+                                    onLoadFont?.(font);
+                                    onUpdateProperty('fontFamily', font);
+                                }}
+                            >
+                                <option value="Inter" className="bg-surface text-text-main">Inter (Default)</option>
+                                {fonts.filter(f => f !== 'Inter').map(font => (
+                                    <option key={font} value={font} className="bg-surface text-text-main" style={{ fontFamily: font }}>
+                                        {font}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+
                     <div className="space-y-2">
                         <div className="flex justify-between text-xs text-text-muted px-1">
                             <span>Font Size</span>
@@ -345,6 +373,18 @@ export function PropertyPanel({
                             min={8} max={200} step={1}
                             value={(selectedObject as any).fontSize || 40}
                             onChange={(e) => onUpdateProperty('fontSize', parseInt(e.target.value as any))}
+                        />
+                    </div>
+
+                    <div className="space-y-2">
+                        <div className="flex justify-between text-xs text-text-muted px-1">
+                            <span>Letter Spacing</span>
+                            <span>{(selectedObject as any).charSpacing / 10 || 0}</span>
+                        </div>
+                        <Slider
+                            min={-100} max={500} step={10}
+                            value={(selectedObject as any).charSpacing || 0}
+                            onChange={(e) => onUpdateProperty('charSpacing', parseInt(e.target.value as any))}
                         />
                     </div>
 
@@ -373,6 +413,106 @@ export function PropertyPanel({
                         >
                             <Underline size={16} />
                         </Button>
+                    </div>
+                </div>
+            )}
+
+            {/* Effects */}
+            {selectedObject && (
+                <div className="space-y-4 pt-4 border-t border-white/5">
+                    <label className="text-xs font-bold text-text-muted uppercase tracking-wider flex items-center gap-2 px-1">
+                        <Sparkles size={14} className="text-accent" /> Effects
+                    </label>
+
+                    <div className="p-3 bg-white/5 rounded-xl border border-white/5 space-y-4">
+                        <div className="flex items-center justify-between">
+                            <span className="text-xs font-medium text-text-main">Drop Shadow</span>
+                            <button
+                                onClick={() => {
+                                    const hasShadow = !!selectedObject.shadow;
+                                    if (hasShadow) {
+                                        onUpdateProperty('shadow', null);
+                                    } else {
+                                        onUpdateProperty('shadow', {
+                                            color: 'rgba(0,0,0,0.5)',
+                                            blur: 10,
+                                            offsetX: 5,
+                                            offsetY: 5
+                                        });
+                                    }
+                                }}
+                                className={`w-9 h-5 rounded-full transition-all relative ${selectedObject.shadow ? 'bg-accent' : 'bg-white/10'}`}
+                            >
+                                <div className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full shadow-sm transition-transform ${selectedObject.shadow ? 'translate-x-4' : ''}`} />
+                            </button>
+                        </div>
+
+                        {selectedObject.shadow && (
+                            <div className="space-y-3 pt-2 border-t border-white/5 animate-in fade-in slide-in-from-top-1">
+                                <div className="space-y-2">
+                                    <span className="text-[10px] text-text-muted uppercase font-bold px-1">Shadow Color</span>
+                                    <ColorPicker
+                                        value={(selectedObject.shadow as any).color || '#000000'}
+                                        onChange={(val) => {
+                                            const s = selectedObject.shadow as any;
+                                            onUpdateProperty('shadow', { ...s, color: val });
+                                        }}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <div className="flex justify-between text-[10px] text-text-muted px-1 font-bold">
+                                        <span>BLUR</span>
+                                        <span>{(selectedObject.shadow as any).blur}</span>
+                                    </div>
+                                    <Slider
+                                        min={0} max={50} step={1}
+                                        value={(selectedObject.shadow as any).blur || 10}
+                                        onChange={(e) => {
+                                            const s = selectedObject.shadow as any;
+                                            onUpdateProperty('shadow', { ...s, blur: parseInt(e.target.value as any) });
+                                        }}
+                                    />
+                                </div>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div className="space-y-1">
+                                        <span className="text-[10px] text-text-muted px-1">Offset X</span>
+                                        <input
+                                            type="number"
+                                            className="w-full bg-white/5 border border-white/5 rounded-lg px-2 py-1 text-xs text-text-main outline-none focus:border-accent/50"
+                                            value={(selectedObject.shadow as any).offsetX}
+                                            onChange={(e) => {
+                                                const s = selectedObject.shadow as any;
+                                                onUpdateProperty('shadow', { ...s, offsetX: parseInt(e.target.value as any) });
+                                            }}
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <span className="text-[10px] text-text-muted px-1">Offset Y</span>
+                                        <input
+                                            type="number"
+                                            className="w-full bg-white/5 border border-white/5 rounded-lg px-2 py-1 text-xs text-text-main outline-none focus:border-accent/50"
+                                            value={(selectedObject.shadow as any).offsetY}
+                                            onChange={(e) => {
+                                                const s = selectedObject.shadow as any;
+                                                onUpdateProperty('shadow', { ...s, offsetY: parseInt(e.target.value as any) });
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="space-y-2 px-1">
+                        <div className="flex justify-between text-xs text-text-muted">
+                            <span className="flex items-center gap-1 font-medium"><Focus size={12} /> Global Blur</span>
+                            <span>{Math.round((selectedObject as any).blur || 0)}px</span>
+                        </div>
+                        <Slider
+                            min={0} max={50} step={1}
+                            value={(selectedObject as any).blur || 0}
+                            onChange={(e) => onUpdateProperty('blur', parseInt(e.target.value as any))}
+                        />
                     </div>
                 </div>
             )}

@@ -220,6 +220,30 @@ export const LogoCanvas = forwardRef<LogoCanvasRef, LogoCanvasProps>(({
                 if (key === 'fill' && active.type === 'group') {
                     // Recursive update for SVG groups:
                     (active as fabric.Group).getObjects().forEach(obj => obj.set('fill', value));
+                } else if (key === 'shadow') {
+                    active.set('shadow', (value ? new fabric.Shadow(value) : null) as any);
+                } else if (key === 'blur') {
+                    // Filters are typically for images, for vector objects we use cache
+                    active.set({
+                        // Store the numeric value for PropertyPanel
+                        blur: value
+                    } as any);
+
+                    // Apply filter logic
+                    // Note: In Fabric, filters are usually Image objects. 
+                    // For ITxt/Shapes, we sometimes need to convert to an image-like cache or 
+                    // use shadow trick for performance. 
+                    // Let's use the shadow trick if it's text/shape for better cross-compatibility.
+                    if (value > 0 && active.type !== 'image') {
+                        // Shadow-based blur trick for vector objects
+                        // This avoids the complexity of WebGL filters on text
+                        active.set('shadow', new fabric.Shadow({
+                            color: 'rgba(0,0,0,0.5)',
+                            blur: value,
+                            offsetX: 0,
+                            offsetY: 0
+                        }));
+                    }
                 } else {
                     active.set(key as any, value);
                 }

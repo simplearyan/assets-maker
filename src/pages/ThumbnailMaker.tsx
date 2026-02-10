@@ -243,7 +243,7 @@ export function ThumbnailMaker() {
                             >
                                 <div className="pointer-events-auto">
                                     <MobileCanvasBar
-                                        canvasSettings={{ width: canvasWidth, height: canvasHeight, background, isTransparent }}
+                                        canvasSettings={{ width: canvasWidth, height: canvasHeight, background, isTransparent, clipContent }}
                                         activeTab={activeCanvasTab}
                                         onTabChange={setActiveCanvasTab}
                                         onClose={() => setIsEditingCanvas(false)}
@@ -252,6 +252,7 @@ export function ThumbnailMaker() {
                                             if (settings.height) setCanvasHeight(settings.height);
                                             if (settings.background) setBackground(settings.background);
                                             if (settings.isTransparent !== undefined) setIsTransparent(settings.isTransparent);
+                                            if (settings.clipContent !== undefined) setClipContent(settings.clipContent);
                                         }}
                                     />
                                 </div>

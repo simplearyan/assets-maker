@@ -14,6 +14,7 @@ interface CanvasSettings {
     height?: number;
     background?: string;
     isTransparent?: boolean;
+    clipContent?: boolean;
 }
 
 interface MobileCanvasBarProps {
@@ -39,47 +40,61 @@ export function MobileCanvasBar({
     ];
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 bg-surface backdrop-blur-2xl backdrop-saturate-150 shadow-2xl border-t border-border z-[60] flex flex-col pb-[env(safe-area-inset-bottom)]">
+        <div className="fixed bottom-0 left-0 right-0 bg-surface backdrop-blur-md backdrop-saturate-150 shadow-2xl border-t border-border z-[60] flex flex-col pb-[env(safe-area-inset-bottom)]">
 
             {/* Expanded Content Area (Size/Color Pickers) */}
             {activeTab && (
                 <div className="p-4 border-b border-border/50 animate-in slide-in-from-bottom-2 fade-in duration-200">
                     {activeTab === 'size' && (
-                        <div className="space-y-3">
-                            <span className="text-xs font-semibold text-text-muted uppercase tracking-wider">Aspect Ratio</span>
-                            <div className="grid grid-cols-4 gap-2">
-                                <Button
-                                    variant={canvasSettings?.width === 1280 && canvasSettings?.height === 720 ? "primary" : "glass"}
-                                    size="sm"
-                                    onClick={() => onUpdateCanvas({ width: 1280, height: 720 })}
-                                    className="text-[10px] h-8"
-                                >
-                                    16:9
-                                </Button>
-                                <Button
-                                    variant={canvasSettings?.width === 720 && canvasSettings?.height === 1280 ? "primary" : "glass"}
-                                    size="sm"
-                                    onClick={() => onUpdateCanvas({ width: 720, height: 1280 })}
-                                    className="text-[10px] h-8"
-                                >
-                                    9:16
-                                </Button>
-                                <Button
-                                    variant={canvasSettings?.width === 1080 && canvasSettings?.height === 1080 ? "primary" : "glass"}
-                                    size="sm"
-                                    onClick={() => onUpdateCanvas({ width: 1080, height: 1080 })}
-                                    className="text-[10px] h-8"
-                                >
-                                    1:1
-                                </Button>
-                                <Button
-                                    variant={canvasSettings?.width === 1280 && canvasSettings?.height === 960 ? "primary" : "glass"}
-                                    size="sm"
-                                    onClick={() => onUpdateCanvas({ width: 1280, height: 960 })}
-                                    className="text-[10px] h-8"
-                                >
-                                    4:3
-                                </Button>
+                        <div className="space-y-4">
+                            <div className="space-y-3">
+                                <span className="text-xs font-semibold text-text-muted uppercase tracking-wider">Aspect Ratio</span>
+                                <div className="grid grid-cols-4 gap-2">
+                                    <Button
+                                        variant={canvasSettings?.width === 1280 && canvasSettings?.height === 720 ? "primary" : "glass"}
+                                        size="sm"
+                                        onClick={() => onUpdateCanvas({ width: 1280, height: 720 })}
+                                        className="text-[10px] h-8"
+                                    >
+                                        16:9
+                                    </Button>
+                                    <Button
+                                        variant={canvasSettings?.width === 720 && canvasSettings?.height === 1280 ? "primary" : "glass"}
+                                        size="sm"
+                                        onClick={() => onUpdateCanvas({ width: 720, height: 1280 })}
+                                        className="text-[10px] h-8"
+                                    >
+                                        9:16
+                                    </Button>
+                                    <Button
+                                        variant={canvasSettings?.width === 1080 && canvasSettings?.height === 1080 ? "primary" : "glass"}
+                                        size="sm"
+                                        onClick={() => onUpdateCanvas({ width: 1080, height: 1080 })}
+                                        className="text-[10px] h-8"
+                                    >
+                                        1:1
+                                    </Button>
+                                    <Button
+                                        variant={canvasSettings?.width === 1280 && canvasSettings?.height === 960 ? "primary" : "glass"}
+                                        size="sm"
+                                        onClick={() => onUpdateCanvas({ width: 1280, height: 960 })}
+                                        className="text-[10px] h-8"
+                                    >
+                                        4:3
+                                    </Button>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-2 pt-2 border-t border-border/50">
+                                <label className="flex items-center gap-2 text-xs cursor-pointer select-none text-text-muted hover:text-text-main transition-colors">
+                                    <input
+                                        type="checkbox"
+                                        checked={canvasSettings?.clipContent}
+                                        onChange={(e) => onUpdateCanvas({ clipContent: e.target.checked })}
+                                        className="rounded border-border bg-surface-card text-accent focus:ring-accent w-4 h-4"
+                                    />
+                                    Clip Content
+                                </label>
                             </div>
                         </div>
                     )}

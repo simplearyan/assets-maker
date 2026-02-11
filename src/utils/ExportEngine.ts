@@ -93,24 +93,7 @@ export class ExportEngine {
                     }
                 });
 
-                // 5. Temporary Resizing setup
-                // We must force the element to target resolution for html2canvas
-                const originalStyle = {
-                    width: element.style.width,
-                    height: element.style.height,
-                    transform: element.style.transform,
-                    position: element.style.position,
-                    zIndex: element.style.zIndex
-                };
-
-                // Resize for capture
-                element.style.width = `${width}px`;
-                element.style.height = `${height}px`;
-                element.style.transform = 'none';
-                element.style.position = 'fixed';
-                element.style.zIndex = '-9999'; // Hide but keep in DOM for capture
-
-                // 6. Render Loop
+                // 5. Render Loop (elements are now pre-configured in the caller)
                 const totalFrames = Math.ceil((duration / 1000) * fps);
                 const dt = 1000 / fps;
                 const frameDurationUs = 1000000 / fps;
@@ -133,14 +116,14 @@ export class ExportEngine {
 
                         // Wait for a frame to render (DOM sync + ECharts buffer)
                         await new Promise(r => requestAnimationFrame(r));
-                        await new Promise(r => setTimeout(r, 150)); // Increased buffer for stability
+                        await new Promise(r => setTimeout(r, 120)); // Buffer for stability
 
                         // Capture Frame
                         const canvas = await html2canvas(element, {
                             width,
                             height,
                             scale: 1,
-                            backgroundColor: null,
+                            backgroundColor: '#1a1a1a',
                             logging: false,
                             useCORS: true
                         });
@@ -161,7 +144,7 @@ export class ExportEngine {
                         if (i % 5 === 0) onProgress((i / totalFrames) * 100);
                     }
 
-                    // 7. Finalize
+                    // 6. Finalize
                     worker.postMessage({ type: 'FINALIZE' });
 
                     worker.addEventListener('message', (e) => {
@@ -176,12 +159,7 @@ export class ExportEngine {
                     });
 
                 } finally {
-                    // Restore original styles
-                    element.style.width = originalStyle.width;
-                    element.style.height = originalStyle.height;
-                    element.style.transform = originalStyle.transform;
-                    element.style.position = originalStyle.position;
-                    element.style.zIndex = originalStyle.zIndex;
+                    // No cleanup needed as we are passive
                 }
 
             } catch (err) {

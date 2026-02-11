@@ -8,6 +8,7 @@ import { useUIStore } from '../store/uiStore';
 import { cn } from '../lib/utils';
 import { useChartPlayback } from '../hooks/useChartPlayback';
 import { Settings, Download } from 'lucide-react';
+import { Artboard } from '../components/data-viz/Artboard';
 import { ExportEngine } from '../utils/ExportEngine';
 import html2canvas from 'html2canvas';
 
@@ -42,6 +43,8 @@ export function DataVisualizer() {
     const [isExporting, setIsExporting] = useState(false);
     const [exportProgress, setExportProgress] = useState(0);
     const stageRef = useRef<HTMLDivElement>(null);
+    const captureStageRef = useRef<HTMLDivElement>(null);
+    const [exportResolution, setExportResolution] = useState({ width: 1920, height: 1080 });
 
     // Playback Controller
     const playback = useChartPlayback(5000); // 5s default animation
@@ -61,14 +64,15 @@ export function DataVisualizer() {
     });
 
     const handleExportVideo = async (config: ExportConfig) => {
-        if (!stageRef.current) return;
+        if (!captureStageRef.current) return;
 
         setIsExporting(true);
         setExportProgress(0);
+        setExportResolution({ width: config.resolution.width, height: config.resolution.height });
 
         try {
             const blob = await ExportEngine.exportVideo({
-                element: stageRef.current,
+                element: captureStageRef.current,
                 duration: playback.duration,
                 fps: config.fps,
                 width: config.resolution.width,
@@ -120,27 +124,25 @@ export function DataVisualizer() {
             {/* Center Panel: Stage */}
             <div className="flex-1 h-full min-w-0 flex flex-col relative bg-[#0a0a0a]/50 rounded-3xl border border-white/5 overflow-hidden shadow-2xl">
                 {/* Viewport */}
-                <div className="flex-1 overflow-auto flex items-center justify-center p-8 custom-scrollbar">
-                    <div
-                        ref={stageRef}
-                        className="bg-surface shadow-[0_0_50px_rgba(0,0,0,0.5)] relative overflow-hidden transition-all duration-200 ease-out border border-white/5"
-                        style={{
-                            width: canvasConfig.width,
-                            height: canvasConfig.height,
-                            transform: `scale(${canvasConfig.zoom})`,
-                            transformOrigin: 'center center',
-                            flexShrink: 0
-                        }}
+                <div className="flex-1 overflow-auto custom-scrollbar">
+                    <Artboard
+                        width={canvasConfig.width}
+                        height={canvasConfig.height}
+                        zoom={canvasConfig.zoom * 100}
+                        isExporting={isExporting}
+                        exportProgress={exportProgress}
                     >
-                        <ChartStage
-                            type={activeChartType}
-                            data={chartData}
-                            config={chartConfig}
-                            padding={canvasConfig.padding}
-                            currentTime={playback.currentTime}
-                            duration={playback.duration}
-                        />
-                    </div>
+                        <div ref={stageRef} className="w-full h-full relative overflow-hidden">
+                            <ChartStage
+                                type={activeChartType}
+                                data={chartData}
+                                config={chartConfig}
+                                padding={canvasConfig.padding}
+                                currentTime={playback.currentTime}
+                                duration={playback.duration}
+                            />
+                        </div>
+                    </Artboard>
                 </div>
 
                 {/* Floating Bottom Bar (Internal to center stage) */}
@@ -211,6 +213,39 @@ export function DataVisualizer() {
                             progress={exportProgress}
                         />
                     )}
+                </div>
+            </div>
+
+            {/* Hidden Capture Buffer Stage (Off-screen, 1:1 Scale) */}
+            <div
+                style={{
+                    position: 'fixed',
+                    left: '-10000px',
+                    top: '-10000px',
+                    pointerEvents: 'none',
+                    zIndex: -1
+                }}
+            >
+                <div
+                    ref={captureStageRef}
+                    style={{
+                        width: isExporting ? exportResolution.width : 1920,
+                        height: isExporting ? exportResolution.height : 1080,
+                        backgroundColor: '#1a1a1a',
+                        overflow: 'hidden',
+                        position: 'relative'
+                    }}
+                >
+                    {/* Resolution sync note: We should ideally use the resolution from the export config here */}
+                    {/* For now, let's just make sure it's rendered when isExporting or for safety always */}
+                    <ChartStage
+                        type={activeChartType}
+                        data={chartData}
+                        config={chartConfig}
+                        padding={canvasConfig.padding}
+                        currentTime={playback.currentTime}
+                        duration={playback.duration}
+                    />
                 </div>
             </div>
         </div>

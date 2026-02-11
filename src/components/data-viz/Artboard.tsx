@@ -7,6 +7,7 @@ interface ArtboardProps {
     zoom: number;
     isExporting?: boolean;
     exportProgress?: number;
+    backgroundColor?: string;
 }
 
 export function Artboard({
@@ -15,7 +16,8 @@ export function Artboard({
     height,
     zoom,
     isExporting = false,
-    exportProgress = 0
+    exportProgress = 0,
+    backgroundColor = '#1a1a1a'
 }: ArtboardProps) {
     // Stage container fills the available space
     const stageStyle: React.CSSProperties = {
@@ -42,7 +44,7 @@ export function Artboard({
     const artboardStyle: React.CSSProperties = {
         width: `${width}px`,
         height: `${height}px`,
-        backgroundColor: '#1a1a1a',
+        backgroundColor: backgroundColor,
         boxShadow: '0 20px 50px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05)',
         transformOrigin: 'center center',
         transform: `scale(${zoom / 100})`,

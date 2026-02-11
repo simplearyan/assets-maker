@@ -66,6 +66,15 @@ export function DataEditorPanel({ chartData, chartConfig, canvasConfig, onUpdate
                                 <option value="1600x1200">4:3 (1600x1200)</option>
                             </select>
                         </div>
+                        <div className="flex flex-col gap-1">
+                            <label className="text-[10px] text-text-muted">Canvas Background</label>
+                            <input
+                                type="color"
+                                className="w-full h-8 bg-transparent border border-white/10 rounded cursor-pointer"
+                                value={canvasConfig.backgroundColor || '#1a1a1a'}
+                                onChange={(e) => onUpdateCanvasConfig({ ...canvasConfig, backgroundColor: e.target.value })}
+                            />
+                        </div>
                         <div className="text-[10px] text-text-muted text-right">
                             {canvasConfig.width} x {canvasConfig.height} px
                         </div>

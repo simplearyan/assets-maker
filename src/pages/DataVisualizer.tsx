@@ -54,6 +54,7 @@ export function DataVisualizer() {
         width: 1920,
         height: 1080,
         zoom: 0.5,
+        backgroundColor: '#1a1a1a',
         padding: { top: 40, right: 40, bottom: 40, left: 40 }
     });
 
@@ -132,6 +133,7 @@ export function DataVisualizer() {
                         width={canvasConfig.width}
                         height={canvasConfig.height}
                         zoom={canvasConfig.zoom * 100}
+                        backgroundColor={canvasConfig.backgroundColor}
                         isExporting={isExporting}
                         exportProgress={exportProgress}
                     >
@@ -209,7 +211,7 @@ export function DataVisualizer() {
                                 if (format === 'png') {
                                     try {
                                         const canvas = await html2canvas(captureStageRef.current, {
-                                            backgroundColor: '#1a1a1a', // Matching video background for consistency
+                                            backgroundColor: canvasConfig.backgroundColor, // Matching canvas background
                                             useCORS: true,
                                             width: config.resolution.width,
                                             height: config.resolution.height,
@@ -255,7 +257,7 @@ export function DataVisualizer() {
                     style={{
                         width: isExporting ? exportResolution.width : 1920,
                         height: isExporting ? exportResolution.height : 1080,
-                        backgroundColor: '#1a1a1a',
+                        backgroundColor: canvasConfig.backgroundColor,
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',

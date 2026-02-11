@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef } from 'react';
 import ReactECharts from 'echarts-for-react';
 import { ParliamentChart } from './custom-charts/ParliamentChart';
 
@@ -7,28 +7,41 @@ interface ChartStageProps {
     data: any;
     config: any;
     padding?: { top: number; right: number; bottom: number; left: number };
+    currentTime?: number;
+    duration?: number;
 }
 
-export function ChartStage({ type, data, config, padding }: ChartStageProps) {
+export function ChartStage({ type, data, config, padding, currentTime = 0, duration = 5000 }: ChartStageProps) {
     const echartRef = useRef<any>(null);
-    const [raceData, setRaceData] = useState<any>(null);
 
-    // --- ANIMATION LOGIC (Race Charts) ---
-    useEffect(() => {
-        if (type !== 'race-bar') {
-            setRaceData(null);
-            return;
-        }
+    // --- RENDER ---
+    const containerStyle = {
+        width: '100%',
+        height: '100%',
+        paddingTop: padding?.top || 0,
+        paddingRight: padding?.right || 0,
+        paddingBottom: padding?.bottom || 0,
+        paddingLeft: padding?.left || 0,
+        boxSizing: 'border-box' as const
+    };
 
-        // Mock Race Data Generator if not provided
-        let timer: any;
-        const categories = ['A', 'B', 'C', 'D', 'E'];
-        let currentValues = [10, 20, 30, 40, 50];
+    if (type === 'parliament') {
+        return (
+            <div style={containerStyle} className="flex items-center justify-center">
+                <ParliamentChart data={data} config={config} currentTime={currentTime} duration={duration} />
+            </div>
+        );
+    }
 
-        const updateRace = () => {
-            currentValues = currentValues.map(v => v + Math.random() * 10);
+    // Default ECharts Options
+    const getOption = () => {
+        if (type === 'race-bar') {
+            const categories = ['A', 'B', 'C', 'D', 'E'];
+            // Interpolate values based on currentTime
+            const progress = currentTime / duration;
+            const currentValues = [10, 20, 30, 40, 50].map(v => v + progress * 100);
 
-            setRaceData({
+            return {
                 xAxis: { max: 'dataMax' },
                 yAxis: {
                     type: 'category',
@@ -45,49 +58,14 @@ export function ChartStage({ type, data, config, padding }: ChartStageProps) {
                     label: { show: true, position: 'right', valueAnimation: true },
                     itemStyle: {
                         color: (param: any) => {
-                            // Assign color based on category index (consistent colors)
                             const colors = ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de'];
                             return colors[param.dataIndex % colors.length];
                         }
                     }
                 }],
-                animationDuration: 0,
-                animationDurationUpdate: 3000,
-                animationEasing: 'linear',
-                animationEasingUpdate: 'linear'
-            });
-        };
-
-        // Start Loop
-        timer = setInterval(updateRace, 3000); // Update every 3s
-        updateRace(); // Initial call
-
-        return () => clearInterval(timer);
-    }, [type]);
-
-
-    // --- RENDER ---
-    const containerStyle = {
-        width: '100%',
-        height: '100%',
-        paddingTop: padding?.top || 0,
-        paddingRight: padding?.right || 0,
-        paddingBottom: padding?.bottom || 0,
-        paddingLeft: padding?.left || 0,
-        boxSizing: 'border-box' as const
-    };
-
-    if (type === 'parliament') {
-        return (
-            <div style={containerStyle} className="flex items-center justify-center">
-                <ParliamentChart data={data} config={config} />
-            </div>
-        );
-    }
-
-    // Default ECharts Options
-    const getOption = () => {
-        if (type === 'race-bar' && raceData) return raceData;
+                animation: false // Disable e-charts internal animation to sync with our playback
+            };
+        }
 
         // Basic Charts
         return {
@@ -124,7 +102,7 @@ export function ChartStage({ type, data, config, padding }: ChartStageProps) {
                 option={getOption()}
                 style={{ width: '100%', height: '100%' }}
                 theme="dark" // Or custom
-                opts={{ renderer: 'svg' }}
+                opts={{ renderer: 'canvas' }} // Use canvas for easier video capture
             />
         </div>
     );

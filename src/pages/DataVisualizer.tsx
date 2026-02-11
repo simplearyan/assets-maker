@@ -1,10 +1,15 @@
-import { useState } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { ChartSidebar } from '../components/data-viz/ChartSidebar';
 import { ChartStage } from '../components/data-viz/ChartStage';
 import { DataEditorPanel } from '../components/data-viz/DataEditorPanel';
 import { DataVizBottomBar } from '../components/data-viz/DataVizBottomBar';
+import { ExportPanel, type ExportConfig } from '../components/data-viz/ExportPanel';
 import { useUIStore } from '../store/uiStore';
 import { cn } from '../lib/utils';
+import { useChartPlayback } from '../hooks/useChartPlayback';
+import { Settings, Download } from 'lucide-react';
+import { ExportEngine } from '../utils/ExportEngine';
+import html2canvas from 'html2canvas';
 
 // Default Data Sets
 const DEFAULT_DATA = {
@@ -33,6 +38,13 @@ export function DataVisualizer() {
     const [activeChartType, setActiveChartType] = useState('bar');
     const [chartData, setChartData] = useState<any>(DEFAULT_DATA.bar);
     const { isNavVisible } = useUIStore();
+    const [activeTab, setActiveTab] = useState<'editor' | 'export'>('editor');
+    const [isExporting, setIsExporting] = useState(false);
+    const [exportProgress, setExportProgress] = useState(0);
+    const stageRef = useRef<HTMLDivElement>(null);
+
+    // Playback Controller
+    const playback = useChartPlayback(5000); // 5s default animation
 
     // Canvas & Chart Config
     const [canvasConfig, setCanvasConfig] = useState({
@@ -43,11 +55,46 @@ export function DataVisualizer() {
     });
 
     const [chartConfig, setChartConfig] = useState<any>({
-        title: 'My Awesome Chart',
+        title: 'Sales Trends',
         titleColor: '#ffffff',
-        animationDuration: 1000,
         fillColor: '#3b82f6', // For single color charts
     });
+
+    const handleExportVideo = async (config: ExportConfig) => {
+        if (!stageRef.current) return;
+
+        setIsExporting(true);
+        setExportProgress(0);
+
+        try {
+            const blob = await ExportEngine.exportVideo({
+                element: stageRef.current,
+                duration: playback.duration,
+                fps: config.fps,
+                width: config.resolution.width,
+                height: config.resolution.height,
+                format: config.format,
+                onProgress: setExportProgress,
+                seek: playback.seek
+            });
+
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `kenichi-viz-${activeChartType}-${config.resolution.width}x${config.resolution.height}.mp4`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+        } catch (err) {
+            console.error("Export failed:", err);
+            alert("Export failed: " + (err as Error).message);
+        } finally {
+            setIsExporting(false);
+            setExportProgress(0);
+        }
+    };
 
     const handleChartTypeChange = (type: string) => {
         setActiveChartType(type);
@@ -75,6 +122,7 @@ export function DataVisualizer() {
                 {/* Viewport */}
                 <div className="flex-1 overflow-auto flex items-center justify-center p-8 custom-scrollbar">
                     <div
+                        ref={stageRef}
                         className="bg-surface shadow-[0_0_50px_rgba(0,0,0,0.5)] relative overflow-hidden transition-all duration-200 ease-out border border-white/5"
                         style={{
                             width: canvasConfig.width,
@@ -89,6 +137,8 @@ export function DataVisualizer() {
                             data={chartData}
                             config={chartConfig}
                             padding={canvasConfig.padding}
+                            currentTime={playback.currentTime}
+                            duration={playback.duration}
                         />
                     </div>
                 </div>
@@ -97,19 +147,71 @@ export function DataVisualizer() {
                 <DataVizBottomBar
                     zoom={canvasConfig.zoom}
                     onZoomChange={(z) => setCanvasConfig(prev => ({ ...prev, zoom: z }))}
+                    playback={playback}
+                    onExport={() => setActiveTab('export')}
                 />
             </div>
 
-            {/* Right Panel: Editor */}
+            {/* Right Panel: Editor / Export */}
             <div className="hidden md:flex flex-col h-full z-10 w-80 shrink-0 rounded-3xl bg-surface/30 backdrop-blur-xl border border-white/5 overflow-hidden">
-                <DataEditorPanel
-                    chartData={chartData}
-                    chartConfig={chartConfig}
-                    canvasConfig={canvasConfig}
-                    onUpdateData={setChartData}
-                    onUpdateConfig={setChartConfig}
-                    onUpdateCanvasConfig={setCanvasConfig}
-                />
+                {/* Tab Triggers */}
+                <div className="flex border-b border-white/5 bg-black/20 p-1 m-2 rounded-2xl">
+                    <button
+                        onClick={() => setActiveTab('editor')}
+                        className={cn(
+                            "flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-bold transition-all",
+                            activeTab === 'editor' ? "bg-white/10 text-white shadow-sm" : "text-text-muted hover:text-white"
+                        )}
+                    >
+                        <Settings size={14} />
+                        Editor
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('export')}
+                        className={cn(
+                            "flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-bold transition-all",
+                            activeTab === 'export' ? "bg-white/10 text-white shadow-sm" : "text-text-muted hover:text-white"
+                        )}
+                    >
+                        <Download size={14} />
+                        Export
+                    </button>
+                </div>
+
+                <div className="flex-1 overflow-hidden">
+                    {activeTab === 'editor' ? (
+                        <DataEditorPanel
+                            chartData={chartData}
+                            chartConfig={chartConfig}
+                            canvasConfig={canvasConfig}
+                            onUpdateData={setChartData}
+                            onUpdateConfig={setChartConfig}
+                            onUpdateCanvasConfig={setCanvasConfig}
+                        />
+                    ) : (
+                        <ExportPanel
+                            onExportVideo={handleExportVideo}
+                            onExportImage={async (format) => {
+                                if (!stageRef.current) return;
+                                if (format === 'png') {
+                                    const canvas = await html2canvas(stageRef.current, {
+                                        backgroundColor: null,
+                                        useCORS: true
+                                    });
+                                    const dataUrl = canvas.toDataURL('image/png');
+                                    const a = document.createElement('a');
+                                    a.href = dataUrl;
+                                    a.download = `kenichi-viz-${activeChartType}.png`;
+                                    a.click();
+                                } else {
+                                    alert("SVG export is not yet supported for custom DOM charts. Use PNG or Video Export.");
+                                }
+                            }}
+                            isExporting={isExporting}
+                            progress={exportProgress}
+                        />
+                    )}
+                </div>
             </div>
         </div>
     );

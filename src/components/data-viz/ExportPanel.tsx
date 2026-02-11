@@ -68,17 +68,17 @@ export function ExportPanel({ onExportVideo, onExportImage, isExporting, progres
                 <div className="grid grid-cols-1 gap-2">
                     {resolutions.map((res) => (
                         <button
-                            key={res.label}
+                            key={`${res.label}-${res.width}x${res.height}`}
                             onClick={() => setConfig({ ...config, resolution: { width: res.width, height: res.height } })}
                             className={cn(
                                 "w-full flex items-center justify-between px-3 py-2.5 rounded-xl border transition-all text-sm",
-                                config.resolution.width === res.width
+                                config.resolution.width === res.width && config.resolution.height === res.height
                                     ? "bg-accent/10 border-accent text-accent"
                                     : "bg-white/5 border-white/5 text-text-muted hover:bg-white/10"
                             )}
                         >
                             <span>{res.label}</span>
-                            {config.resolution.width === res.width && <Check size={14} />}
+                            {config.resolution.width === res.width && config.resolution.height === res.height && <Check size={14} />}
                         </button>
                     ))}
                 </div>

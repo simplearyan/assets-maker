@@ -70,6 +70,9 @@ export function DataVisualizer() {
         setExportProgress(0);
         setExportResolution({ width: config.resolution.width, height: config.resolution.height });
 
+        // Wait for DOM to sync resolution to capture buffer
+        await new Promise(r => setTimeout(r, 100));
+
         try {
             const blob = await ExportEngine.exportVideo({
                 element: captureStageRef.current,

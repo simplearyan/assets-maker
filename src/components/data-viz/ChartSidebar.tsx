@@ -15,7 +15,7 @@ const CHART_TYPES = [
 
 export function ChartSidebar({ activeChartType, onSelectChart }: ChartSidebarProps) {
     return (
-        <div className="w-64 bg-surface/30 backdrop-blur-xl border-r border-white/5 flex flex-col">
+        <div className="w-full h-full flex flex-col">
             <div className="p-4 border-b border-white/5">
                 <h2 className="font-bold text-lg text-text-main">Charts</h2>
             </div>
@@ -25,8 +25,8 @@ export function ChartSidebar({ activeChartType, onSelectChart }: ChartSidebarPro
                         key={chart.id}
                         onClick={() => onSelectChart(chart.id)}
                         className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all ${activeChartType === chart.id
-                                ? 'bg-accent text-white shadow-lg shadow-accent/20'
-                                : 'text-text-muted hover:text-text-main hover:bg-white/5'
+                            ? 'bg-accent text-white shadow-lg shadow-accent/20'
+                            : 'text-text-muted hover:text-text-main hover:bg-white/5'
                             }`}
                     >
                         <chart.icon size={18} />

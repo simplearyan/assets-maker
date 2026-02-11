@@ -8,7 +8,7 @@ export function Layout() {
     const { isNavVisible } = useUIStore();
     const isHomePage = location.pathname === '/' || location.pathname === '/assets-maker' || location.pathname === '/assets-maker/';
     const shouldShowNav = isNavVisible || isHomePage;
-    const isFullWidth = ['/thumbnail-maker', '/logo-studio', '/editor'].some(path => location.pathname.endsWith(path));
+    const isFullWidth = ['/thumbnail-maker', '/logo-studio', '/editor', '/data-visualizer'].some(path => location.pathname.endsWith(path));
 
     return (
         <div className="min-h-screen relative font-sans text-text-main selection:bg-accent/30 selection:text-zinc-900 dark:selection:text-white overflow-hidden">
@@ -29,7 +29,7 @@ export function Layout() {
                 className={cn(
                     "relative z-10 min-h-screen flex flex-col transition-all duration-300",
                     shouldShowNav ? "pt-24" : "pt-0",
-                    isFullWidth ? "px-0 md:px-4" : "pb-12 px-4 md:px-8 max-w-7xl mx-auto"
+                    isFullWidth ? "px-0" : "pb-12 px-4 md:px-8 max-w-7xl mx-auto"
                 )}
             >
                 <Outlet />

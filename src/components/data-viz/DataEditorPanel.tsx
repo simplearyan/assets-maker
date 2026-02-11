@@ -38,7 +38,7 @@ export function DataEditorPanel({ chartData, chartConfig, canvasConfig, onUpdate
     };
 
     return (
-        <div className="w-80 bg-surface/30 backdrop-blur-xl border-l border-white/5 flex flex-col h-full">
+        <div className="w-full h-full bg-surface/30 backdrop-blur-xl border-l border-white/5 flex flex-col">
             <div className="p-4 border-b border-white/5">
                 <h3 className="font-bold text-lg text-text-main">Data Editor</h3>
             </div>

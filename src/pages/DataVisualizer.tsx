@@ -220,32 +220,52 @@ export function DataVisualizer() {
             <div
                 style={{
                     position: 'fixed',
-                    left: '-10000px',
-                    top: '-10000px',
+                    left: 0,
+                    top: '100vh', // Just below the viewport
+                    width: '100vw',
+                    height: '100vh',
                     pointerEvents: 'none',
-                    zIndex: -1
+                    zIndex: -100,
+                    overflow: 'hidden'
                 }}
             >
+                {/* Outer frame matching EXPORT resolution */}
                 <div
                     ref={captureStageRef}
                     style={{
                         width: isExporting ? exportResolution.width : 1920,
                         height: isExporting ? exportResolution.height : 1080,
                         backgroundColor: '#1a1a1a',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
                         overflow: 'hidden',
                         position: 'relative'
                     }}
                 >
-                    {/* Resolution sync note: We should ideally use the resolution from the export config here */}
-                    {/* For now, let's just make sure it's rendered when isExporting or for safety always */}
-                    <ChartStage
-                        type={activeChartType}
-                        data={chartData}
-                        config={chartConfig}
-                        padding={canvasConfig.padding}
-                        currentTime={playback.currentTime}
-                        duration={playback.duration}
-                    />
+                    {/* Inner workspace matching CANVAS resolution, with Scale-to-Fit */}
+                    <div
+                        style={{
+                            width: canvasConfig.width,
+                            height: canvasConfig.height,
+                            flexShrink: 0,
+                            position: 'relative',
+                            transform: `scale(${Math.min(
+                                (isExporting ? exportResolution.width : 1920) / canvasConfig.width,
+                                (isExporting ? exportResolution.height : 1080) / canvasConfig.height
+                            )})`,
+                            transformOrigin: 'center center'
+                        }}
+                    >
+                        <ChartStage
+                            type={activeChartType}
+                            data={chartData}
+                            config={chartConfig}
+                            padding={canvasConfig.padding}
+                            currentTime={playback.currentTime}
+                            duration={playback.duration}
+                        />
+                    </div>
                 </div>
             </div>
         </div>

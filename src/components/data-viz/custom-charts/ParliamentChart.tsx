@@ -18,8 +18,8 @@ export function ParliamentChart({ data, config: _config, currentTime = 0, durati
         const rows = 8;
         const radiusStep = 30; // px
         const baseRadius = 100; // px
-        const centerX = 300; // px
-        const centerY = 350; // px (bottom center of arch)
+        const centerX = 400; // px (centered in 800)
+        const centerY = 500; // px (bottom center of arch)
 
         // Flatten data into a list of colors (sorted by group)
         const seatColors: string[] = [];
@@ -70,8 +70,8 @@ export function ParliamentChart({ data, config: _config, currentTime = 0, durati
     const seats = generateSeats();
 
     return (
-        <div className="w-[600px] h-[400px] relative flex items-center justify-center">
-            <svg width="600" height="400" className="overflow-visible">
+        <div className="w-[800px] h-[600px] relative flex items-center justify-center">
+            <svg width="800" height="600" className="overflow-visible">
                 {seats.map((seat) => (
                     <circle
                         key={seat.id}

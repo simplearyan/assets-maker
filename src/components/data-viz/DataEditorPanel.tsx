@@ -44,6 +44,34 @@ export function DataEditorPanel({ chartData, chartConfig, canvasConfig, onUpdate
             </div>
 
             <div className="flex-1 p-4 overflow-y-auto custom-scrollbar space-y-4">
+                {/* Canvas Settings */}
+                <div className="space-y-2">
+                    <label className="text-xs font-semibold text-text-muted uppercase tracking-wider">
+                        Canvas Settings
+                    </label>
+                    <div className="flex flex-col gap-2">
+                        <div className="flex flex-col gap-1">
+                            <label className="text-[10px] text-text-muted">Aspect Ratio</label>
+                            <select
+                                className="w-full bg-black/40 border border-white/10 rounded px-2 py-1.5 text-xs text-text-main focus:border-accent outline-none"
+                                onChange={(e) => {
+                                    const [w, h] = e.target.value.split('x').map(Number);
+                                    onUpdateCanvasConfig({ ...canvasConfig, width: w, height: h });
+                                }}
+                                value={`${canvasConfig.width}x${canvasConfig.height}`}
+                            >
+                                <option value="1920x1080">16:9 (1920x1080)</option>
+                                <option value="1080x1920">9:16 (1080x1920)</option>
+                                <option value="1080x1080">1:1 (1080x1080)</option>
+                                <option value="1600x1200">4:3 (1600x1200)</option>
+                            </select>
+                        </div>
+                        <div className="text-[10px] text-text-muted text-right">
+                            {canvasConfig.width} x {canvasConfig.height} px
+                        </div>
+                    </div>
+                </div>
+
                 {/* Basic Config */}
                 <div className="space-y-2">
                     <label className="text-xs font-semibold text-text-muted uppercase tracking-wider">

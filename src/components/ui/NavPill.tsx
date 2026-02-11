@@ -14,7 +14,6 @@ export function NavPill() {
         { to: '/', icon: Home, label: 'Home' },
         { to: '/logo-studio', icon: Palette, label: 'Logo Studio' },
         { to: '/editor', icon: Image, label: 'Editor' },
-        { to: '/editor', icon: Image, label: 'Editor' },
         { to: '/thumbnail-maker', icon: Layout, label: 'Thumbnail' },
         { to: '/data-visualizer', icon: BarChart3, label: 'Data Viz' },
     ];

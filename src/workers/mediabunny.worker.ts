@@ -8,6 +8,8 @@ import {
     VideoSample
 } from 'mediabunny';
 
+console.log("[MediaBunny Worker] Script Loaded and Initializing...");
+
 let output: Output | null = null;
 let target: BufferTarget | null = null;
 let source: VideoSampleSource | null = null;
@@ -89,7 +91,8 @@ self.onmessage = async (e) => {
     try {
         if (type === 'CONFIG') {
             const config = data;
-            console.log(`[MediaBunny Worker] Received Config: ${config.width}x${config.height} @ ${config.fps}fps, Format: ${config.format}`);
+            console.log(`[MediaBunny Worker] RECEIVED CONFIG:`, config);
+            self.postMessage({ type: 'LOG', message: "Configuring MediaBunny pipeline..." });
 
             target = new BufferTarget();
 
@@ -99,11 +102,12 @@ self.onmessage = async (e) => {
             else format = new Mp4OutputFormat();
 
             output = new Output({
-                target,
+                target: target as any,
                 format
             });
 
             // Select codec based on format
+            // @ts-ignore
             const codec = config.format === 'webm' ? 'vp9' : 'avc';
 
             // @ts-ignore
@@ -136,6 +140,7 @@ self.onmessage = async (e) => {
             await drainQueue();
 
             try {
+                self.postMessage({ type: 'LOG', message: "Finalizing: Closing video source..." });
                 if (source) {
                     // @ts-ignore
                     if (source.close) {
@@ -143,18 +148,22 @@ self.onmessage = async (e) => {
                     }
                 }
 
+                self.postMessage({ type: 'LOG', message: "Finalizing: Writing file container..." });
                 if (output) {
                     await output.finalize();
                 }
 
                 // Wait for buffer
                 let attempts = 0;
+                self.postMessage({ type: 'LOG', message: "Finalizing: Polling for target buffer..." });
+
                 while (!target?.buffer && attempts < 100) {
                     await new Promise(r => setTimeout(r, 100));
                     attempts++;
                 }
 
                 if (target && target.buffer) {
+                    self.postMessage({ type: 'LOG', message: `Export complete! File size: ${target.buffer.byteLength} bytes.` });
                     (self as any).postMessage({ type: 'COMPLETE', data: target.buffer }, [target.buffer]);
                 } else {
                     throw new Error("Export failed: Buffer empty after finalize.");

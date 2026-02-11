@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Settings, Video, Image as ImageIcon, Check, Loader2 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
@@ -7,6 +7,7 @@ interface ExportPanelProps {
     onExportImage: (format: 'png' | 'svg', config: ExportConfig) => void;
     isExporting: boolean;
     progress: number;
+    canvasConfig: { width: number; height: number };
 }
 
 export interface ExportConfig {
@@ -15,17 +16,40 @@ export interface ExportConfig {
     format: 'webm' | 'mp4';
 }
 
-export function ExportPanel({ onExportVideo, onExportImage, isExporting, progress }: ExportPanelProps) {
+export function ExportPanel({ onExportVideo, onExportImage, isExporting, progress, canvasConfig }: ExportPanelProps) {
     const [config, setConfig] = useState<ExportConfig>({
-        resolution: { width: 1920, height: 1080 },
+        resolution: { width: canvasConfig.width, height: canvasConfig.height },
         fps: 30,
         format: 'webm'
     });
 
+    // Reset resolution to match canvas if canvas dimensions change
+    useEffect(() => {
+        setConfig(prev => ({
+            ...prev,
+            resolution: { width: canvasConfig.width, height: canvasConfig.height }
+        }));
+    }, [canvasConfig.width, canvasConfig.height]);
+
+    const isVertical = canvasConfig.height > canvasConfig.width;
+
     const resolutions = [
-        { label: '720p (HD)', width: 1280, height: 720 },
-        { label: '1080p (Full HD)', width: 1920, height: 1080 },
-        { label: '4K (Ultra HD)', width: 3840, height: 2160 },
+        { label: 'Original (Match Canvas)', width: canvasConfig.width, height: canvasConfig.height },
+        {
+            label: isVertical ? '720p (Vertical)' : '720p (HD)',
+            width: isVertical ? 720 : 1280,
+            height: isVertical ? 1280 : 720
+        },
+        {
+            label: isVertical ? '1080p (Vertical)' : '1080p (Full HD)',
+            width: isVertical ? 1080 : 1920,
+            height: isVertical ? 1920 : 1080
+        },
+        {
+            label: isVertical ? '4K (Vertical)' : '4K (Ultra HD)',
+            width: isVertical ? 2160 : 3840,
+            height: isVertical ? 3840 : 2160
+        },
         { label: 'Square (1080x1080)', width: 1080, height: 1080 },
     ];
 

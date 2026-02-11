@@ -192,6 +192,7 @@ export function DataVisualizer() {
                         />
                     ) : (
                         <ExportPanel
+                            canvasConfig={canvasConfig}
                             onExportVideo={handleExportVideo}
                             onExportImage={async (format, config) => {
                                 if (!captureStageRef.current) return;

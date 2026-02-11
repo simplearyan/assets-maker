@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Home, Palette, Wand2, RefreshCcw, Image, Sun, Moon, Layout, ChevronDown, LayoutGrid } from 'lucide-react';
+import { Home, Palette, Wand2, RefreshCcw, Image, Sun, Moon, Layout, ChevronDown, LayoutGrid, BarChart3 } from 'lucide-react';
 import { useTheme } from '../../hooks/useTheme';
 import { cn } from '../../lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -14,7 +14,9 @@ export function NavPill() {
         { to: '/', icon: Home, label: 'Home' },
         { to: '/logo-studio', icon: Palette, label: 'Logo Studio' },
         { to: '/editor', icon: Image, label: 'Editor' },
+        { to: '/editor', icon: Image, label: 'Editor' },
         { to: '/thumbnail-maker', icon: Layout, label: 'Thumbnail' },
+        { to: '/data-visualizer', icon: BarChart3, label: 'Data Viz' },
     ];
 
     const secondaryLinks = [

@@ -6,9 +6,10 @@ interface ChartStageProps {
     type: string;
     data: any;
     config: any;
+    padding?: { top: number; right: number; bottom: number; left: number };
 }
 
-export function ChartStage({ type, data, config }: ChartStageProps) {
+export function ChartStage({ type, data, config, padding }: ChartStageProps) {
     const echartRef = useRef<any>(null);
     const [raceData, setRaceData] = useState<any>(null);
 
@@ -66,10 +67,19 @@ export function ChartStage({ type, data, config }: ChartStageProps) {
 
 
     // --- RENDER ---
+    const containerStyle = {
+        width: '100%',
+        height: '100%',
+        paddingTop: padding?.top || 0,
+        paddingRight: padding?.right || 0,
+        paddingBottom: padding?.bottom || 0,
+        paddingLeft: padding?.left || 0,
+        boxSizing: 'border-box' as const
+    };
 
     if (type === 'parliament') {
         return (
-            <div className="w-full h-full flex items-center justify-center">
+            <div style={containerStyle} className="flex items-center justify-center">
                 <ParliamentChart data={data} config={config} />
             </div>
         );
@@ -83,10 +93,11 @@ export function ChartStage({ type, data, config }: ChartStageProps) {
         return {
             title: {
                 text: config.title,
-                textStyle: { color: config.titleColor }
+                textStyle: { color: config.titleColor },
+                left: 'center'
             },
             tooltip: { trigger: 'axis' },
-            legend: { textStyle: { color: '#ccc' } },
+            legend: { textStyle: { color: '#ccc' }, top: 30 },
             grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
             xAxis: type === 'bar' || type === 'line' ? {
                 type: 'category',
@@ -100,18 +111,21 @@ export function ChartStage({ type, data, config }: ChartStageProps) {
             series: data.series ? data.series.map((s: any) => ({
                 ...s,
                 type: type, // Force type from prop
-                smooth: true
+                smooth: true,
+                itemStyle: { color: config.fillColor || undefined }
             })) : []
         };
     };
 
     return (
-        <ReactECharts
-            ref={echartRef}
-            option={getOption()}
-            style={{ width: '100%', height: '100%' }}
-            theme="dark" // Or custom
-            opts={{ renderer: 'svg' }}
-        />
+        <div style={containerStyle}>
+            <ReactECharts
+                ref={echartRef}
+                option={getOption()}
+                style={{ width: '100%', height: '100%' }}
+                theme="dark" // Or custom
+                opts={{ renderer: 'svg' }}
+            />
+        </div>
     );
 }

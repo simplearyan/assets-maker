@@ -4,11 +4,13 @@ import { useState, useEffect } from 'react';
 interface DataEditorPanelProps {
     chartData: any;
     chartConfig: any;
+    canvasConfig: any;
     onUpdateData: (data: any) => void;
     onUpdateConfig: (config: any) => void;
+    onUpdateCanvasConfig: (config: any) => void;
 }
 
-export function DataEditorPanel({ chartData, chartConfig, onUpdateData, onUpdateConfig }: DataEditorPanelProps) {
+export function DataEditorPanel({ chartData, chartConfig, canvasConfig, onUpdateData, onUpdateConfig, onUpdateCanvasConfig }: DataEditorPanelProps) {
     const [jsonText, setJsonText] = useState('');
     const [error, setError] = useState<string | null>(null);
 
@@ -28,6 +30,13 @@ export function DataEditorPanel({ chartData, chartConfig, onUpdateData, onUpdate
         }
     };
 
+    const handlePaddingChange = (key: string, value: number) => {
+        onUpdateCanvasConfig({
+            ...canvasConfig,
+            padding: { ...canvasConfig.padding, [key]: value }
+        });
+    };
+
     return (
         <div className="w-80 bg-surface/30 backdrop-blur-xl border-l border-white/5 flex flex-col h-full">
             <div className="p-4 border-b border-white/5">
@@ -35,6 +44,53 @@ export function DataEditorPanel({ chartData, chartConfig, onUpdateData, onUpdate
             </div>
 
             <div className="flex-1 p-4 overflow-y-auto custom-scrollbar space-y-4">
+                {/* Basic Config */}
+                <div className="space-y-2">
+                    <label className="text-xs font-semibold text-text-muted uppercase tracking-wider">
+                        Chart Styling
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                        <div className="flex flex-col gap-1">
+                            <label className="text-[10px] text-text-muted">Title Color</label>
+                            <input
+                                type="color"
+                                className="w-full h-8 bg-transparent border border-white/10 rounded cursor-pointer"
+                                value={chartConfig.titleColor || '#ffffff'}
+                                onChange={(e) => onUpdateConfig({ ...chartConfig, titleColor: e.target.value })}
+                            />
+                        </div>
+                        <div className="flex flex-col gap-1">
+                            <label className="text-[10px] text-text-muted">Fill Color</label>
+                            <input
+                                type="color"
+                                className="w-full h-8 bg-transparent border border-white/10 rounded cursor-pointer"
+                                value={chartConfig.fillColor || '#3b82f6'}
+                                onChange={(e) => onUpdateConfig({ ...chartConfig, fillColor: e.target.value })}
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Padding / Sizing */}
+                <div className="space-y-2">
+                    <label className="text-xs font-semibold text-text-muted uppercase tracking-wider">
+                        Chart Margins (Resize)
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                        {['top', 'right', 'bottom', 'left'].map(side => (
+                            <div key={side} className="flex flex-col gap-1">
+                                <label className="text-[10px] text-text-muted capitalize">{side}</label>
+                                <input
+                                    type="number"
+                                    className="w-full bg-black/40 border border-white/10 rounded px-2 py-1 text-xs text-text-main focus:border-accent outline-none"
+                                    value={canvasConfig.padding?.[side] || 0}
+                                    onChange={(e) => handlePaddingChange(side, parseInt(e.target.value) || 0)}
+                                />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
                 {/* JSON Data Editor */}
                 <div className="space-y-2">
                     <label className="text-xs font-semibold text-text-muted uppercase tracking-wider">
@@ -48,23 +104,6 @@ export function DataEditorPanel({ chartData, chartConfig, onUpdateData, onUpdate
                     {error && <p className="text-xs text-red-500">{error}</p>}
                 </div>
 
-                {/* Basic Config (Example) */}
-                <div className="space-y-2">
-                    <label className="text-xs font-semibold text-text-muted uppercase tracking-wider">
-                        Quick Config
-                    </label>
-                    <div className="grid grid-cols-2 gap-2">
-                        <div className="flex flex-col gap-1">
-                            <label className="text-[10px] text-text-muted">Title Color</label>
-                            <input
-                                type="color"
-                                className="w-full h-8 bg-transparent border border-white/10 rounded cursor-pointer"
-                                value={chartConfig.titleColor || '#ffffff'}
-                                onChange={(e) => onUpdateConfig({ ...chartConfig, titleColor: e.target.value })}
-                            />
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     );

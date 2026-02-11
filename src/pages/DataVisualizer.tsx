@@ -193,21 +193,37 @@ export function DataVisualizer() {
                     ) : (
                         <ExportPanel
                             onExportVideo={handleExportVideo}
-                            onExportImage={async (format) => {
-                                if (!stageRef.current) return;
+                            onExportImage={async (format, config) => {
+                                if (!captureStageRef.current) return;
+
+                                setIsExporting(true);
+                                setExportResolution({ width: config.resolution.width, height: config.resolution.height });
+
+                                // Brief delay for React to sync resolution to the capture buffer's container
+                                await new Promise(r => setTimeout(r, 100));
+
                                 if (format === 'png') {
-                                    const canvas = await html2canvas(stageRef.current, {
-                                        backgroundColor: null,
-                                        useCORS: true
-                                    });
-                                    const dataUrl = canvas.toDataURL('image/png');
-                                    const a = document.createElement('a');
-                                    a.href = dataUrl;
-                                    a.download = `kenichi-viz-${activeChartType}.png`;
-                                    a.click();
+                                    try {
+                                        const canvas = await html2canvas(captureStageRef.current, {
+                                            backgroundColor: '#1a1a1a', // Matching video background for consistency
+                                            useCORS: true,
+                                            width: config.resolution.width,
+                                            height: config.resolution.height,
+                                            scale: 1
+                                        });
+                                        const dataUrl = canvas.toDataURL('image/png');
+                                        const a = document.createElement('a');
+                                        a.href = dataUrl;
+                                        a.download = `kenichi-viz-${activeChartType}-${config.resolution.width}x${config.resolution.height}.png`;
+                                        a.click();
+                                    } catch (err) {
+                                        console.error("Image export failed:", err);
+                                    }
                                 } else {
                                     alert("SVG export is not yet supported for custom DOM charts. Use PNG or Video Export.");
                                 }
+
+                                setIsExporting(false);
                             }}
                             isExporting={isExporting}
                             progress={exportProgress}

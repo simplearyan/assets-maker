@@ -4,7 +4,7 @@ import { cn } from '../../lib/utils';
 
 interface ExportPanelProps {
     onExportVideo: (config: ExportConfig) => void;
-    onExportImage: (format: 'png' | 'svg') => void;
+    onExportImage: (format: 'png' | 'svg', config: ExportConfig) => void;
     isExporting: boolean;
     progress: number;
 }
@@ -120,14 +120,14 @@ export function ExportPanel({ onExportVideo, onExportImage, isExporting, progres
 
                         <div className="grid grid-cols-2 gap-2">
                             <button
-                                onClick={() => onExportImage('png')}
+                                onClick={() => onExportImage('png', config)}
                                 className="py-2.5 bg-white/5 hover:bg-white/10 text-white rounded-xl text-xs font-medium transition-all flex items-center justify-center gap-2 border border-white/5"
                             >
                                 <ImageIcon size={14} />
                                 Export PNG
                             </button>
                             <button
-                                onClick={() => onExportImage('svg')}
+                                onClick={() => onExportImage('svg', config)}
                                 className="py-2.5 bg-white/5 hover:bg-white/10 text-white rounded-xl text-xs font-medium transition-all flex items-center justify-center gap-2 border border-white/5"
                             >
                                 <ImageIcon size={14} />

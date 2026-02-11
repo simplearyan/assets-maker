@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { ChartSidebar } from '../components/data-viz/ChartSidebar';
 import { ChartStage } from '../components/data-viz/ChartStage';
 import { DataEditorPanel } from '../components/data-viz/DataEditorPanel';

@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { GlassCard } from '../components/ui/GlassCard';
 import { Button } from '../components/ui/Button';
-import { ArrowRight, Palette, Wand2, RefreshCcw, Image } from 'lucide-react';
+import { ArrowRight, Palette, Wand2, RefreshCcw, Image, BarChart3 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const features = [
@@ -32,6 +32,13 @@ const features = [
         icon: Image,
         path: '/editor',
         color: 'text-pink-400'
+    },
+    {
+        title: 'Data Visualizer',
+        desc: 'Create animated race charts and custom data visualizations.',
+        icon: BarChart3,
+        path: '/data-visualizer',
+        color: 'text-orange-400'
     }
 ];
 

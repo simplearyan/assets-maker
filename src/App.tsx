@@ -6,6 +6,7 @@ import { Vectorizer } from './pages/Vectorizer';
 import { Converter } from './pages/Converter';
 import { Editor } from './pages/Editor';
 import { ThumbnailMaker } from './pages/ThumbnailMaker';
+import { DataVisualizer } from './pages/DataVisualizer';
 
 function App() {
   return (
@@ -17,7 +18,9 @@ function App() {
           <Route path="vectorizer" element={<Vectorizer />} />
           <Route path="converter" element={<Converter />} />
           <Route path="editor" element={<Editor />} />
+          <Route path="editor" element={<Editor />} />
           <Route path="thumbnail-maker" element={<ThumbnailMaker />} />
+          <Route path="data-visualizer" element={<DataVisualizer />} />
         </Route>
       </Routes>
     </BrowserRouter>

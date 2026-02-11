@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Settings, Video, Image as ImageIcon, Check, Loader2 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
@@ -31,27 +31,41 @@ export function ExportPanel({ onExportVideo, onExportImage, isExporting, progres
         }));
     }, [canvasConfig.width, canvasConfig.height]);
 
-    const isVertical = canvasConfig.height > canvasConfig.width;
+    const resolutions = useMemo(() => {
+        const ratio = canvasConfig.width / canvasConfig.height;
+        const qualities = [
+            { label: '720p', base: 720 },
+            { label: '1080p', base: 1080 },
+            { label: '4K', base: 2160 },
+        ];
 
-    const resolutions = [
-        { label: 'Original (Match Canvas)', width: canvasConfig.width, height: canvasConfig.height },
-        {
-            label: isVertical ? '720p (Vertical)' : '720p (HD)',
-            width: isVertical ? 720 : 1280,
-            height: isVertical ? 1280 : 720
-        },
-        {
-            label: isVertical ? '1080p (Vertical)' : '1080p (Full HD)',
-            width: isVertical ? 1080 : 1920,
-            height: isVertical ? 1920 : 1080
-        },
-        {
-            label: isVertical ? '4K (Vertical)' : '4K (Ultra HD)',
-            width: isVertical ? 2160 : 3840,
-            height: isVertical ? 3840 : 2160
-        },
-        { label: 'Square (1080x1080)', width: 1080, height: 1080 },
-    ];
+        const calculated = qualities.map(q => {
+            let width, height;
+            if (ratio >= 1) { // Landscape or Square
+                height = q.base;
+                width = Math.round(height * ratio);
+            } else { // Vertical
+                width = q.base;
+                height = Math.round(width / ratio);
+            }
+
+            // Ensure even dimensions for H.264
+            width = Math.round(width / 2) * 2;
+            height = Math.round(height / 2) * 2;
+
+            return {
+                label: `${q.label} (${width}x${height})`,
+                width,
+                height
+            };
+        });
+
+        return [
+            { label: 'Original (Match Canvas)', width: canvasConfig.width, height: canvasConfig.height },
+            ...calculated,
+            { label: 'Square (1080x1080)', width: 1080, height: 1080 },
+        ];
+    }, [canvasConfig.width, canvasConfig.height]);
 
     return (
         <div className="w-full h-full flex flex-col p-4 space-y-6">
